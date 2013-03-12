@@ -14,7 +14,7 @@ lexer.o: lexer.c
 	$(CC) $(CCFLAGS) -c -lfl $< -o $@
 
 lexer.c: pzc.lex
-	flex -o $@ $< 
+	flex -s -o $@ $< 
 
 clean:
 	rm $(OBJ) lexer.c pzc
