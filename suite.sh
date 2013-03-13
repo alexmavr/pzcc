@@ -1,9 +1,16 @@
 #!/bin/bash
 
+components=('lexer')
+
 make
 
-for testcase in tests/*.pzc;
+for component in $components;
 do
-    echo "=== Testing $testcase ==="
-    ./pzc < $testcase
+    echo ""
+    echo "==========  Now testing $component ============"
+
+    for testcase in tests/$component/*.pzc;
+    do echo "========== $testcase ============"
+        ./pzc < $testcase
+    done
 done

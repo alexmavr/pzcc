@@ -46,6 +46,7 @@ W [ \t\r]
 
 %%
 
+
 "bool"       {return T_bool;}
 "and"        {return T_and;}
 "break"      {return T_break;}
@@ -81,10 +82,15 @@ W [ \t\r]
 "WRITESP"    {return T_wrsp;}
 "WRITESPLN"  {return T_wrspln;}
 
-W+           {/* ignore whitespace */}
-\n { /* empty rule for yylineno */ }
+"\/\/"[^\n]*   {/* one-line comment */}
 
-. {return 1; /* error */}
+[&;.\(\):,\[\]\{\}+\-*/%!] {return yytext[0];}
+
+
+W+           {/* ignore whitespace */}
+\n           { /* lines counted at yylineno */ }
+. {return 1; /* TODO: error */}
+
 %%
 
 int main()
