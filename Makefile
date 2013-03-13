@@ -16,5 +16,7 @@ pzc.lex.o: pzc.lex.c
 pzc.lex.c: pzc.lex
 	flex -s -o $@ $< 
 
+pzc.lex:;
+
 clean:
 	rm $(OBJ) pzc.lex.c pzc a.out
