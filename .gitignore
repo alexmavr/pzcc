@@ -1,4 +1,5 @@
 *.o
 *.swp
-lexer.c
+pzc.lex.c
 pzc
+a.out

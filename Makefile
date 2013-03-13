@@ -1,20 +1,20 @@
-.PHONY: all clean distclean
+.PHONY: all clean
 .DEFAULT: all
 
 CC = gcc
 CCFLAGS += -Wall -O0
 
-OBJ += lexer.o
+OBJ += pzc.lex.o
 DEPENDS += 
 
 pzc: $(OBJ) 
 	$(CC) $(LDFLAGS) $(OBJ) -o $@
 
-lexer.o: lexer.c
+pzc.lex.o: pzc.lex.c
 	$(CC) $(CCFLAGS) -c -lfl $< -o $@
 
-lexer.c: pzc.lex
+pzc.lex.c: pzc.lex
 	flex -s -o $@ $< 
 
 clean:
-	rm $(OBJ) lexer.c pzc
+	rm $(OBJ) pzc.lex.c pzc a.out

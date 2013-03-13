@@ -1,0 +1,40 @@
+PROC swap ( int &x, int &y)
+{
+    int t = x;
+    x = y; y = t;
+}
+
+PROC bsort (int n, int x[])
+{
+    bool changed = true;
+    while (changed) {
+        changed = false;
+        int i;
+        FOR (i, 0 TO n-2)
+            if (x[i] > x[i+1]) { swap(x[i], x[i+1]); changed = true; }
+    }
+}
+
+PROC print (char msg[], int n, int x[])
+{
+    WRITE(msg);
+    int i;
+    FOR (i, 0 TO n-1) {
+        if (i > 0) WRITE(", ");
+        WRITE(x[i]);
+    }
+    WRITELN();
+}
+
+PROGRAM bubbles ()
+{
+    int seed = 65;
+    int i, x[16];
+    FOR (i, 0 TO 15) {
+        seed = (seed * 137 + 221 +i) MOD 101;
+        x[i] = seed;
+    }
+    print("Initial array: ", 16, x);
+    bsort(16,x);
+    print("Sorted array: ", 16, x);
+}

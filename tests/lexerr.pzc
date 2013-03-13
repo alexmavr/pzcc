@@ -1,0 +1,6 @@
+PROGRAM lexerr ()
+{
+    WRITE #$%^& 45 NOTALEXEME; NOTANOTHER;
+    // Did it fail?
+    WRITELN("After lexer failure");
+}

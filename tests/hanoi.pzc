@@ -1,0 +1,17 @@
+PROC hanoi (char source[], char target[], char auxiliary[], int rings)
+{
+    if (rings > 0) {
+        hanoi(source, auxiliary, target, rings-1);
+        WRITESPLN("Move from", source, "to", target);
+        hanoi(auxiliary, target, source, rings-1);
+    }
+}
+
+PROGRAM solve ()
+{
+    WRITE("Please give the number of rings: ");
+    int numberOfRings = READ_INT();
+    
+    WRITELN("\nHere is the solution:\n");
+    hanoi("left", "right", "middle", numberOfRings);
+}

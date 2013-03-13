@@ -1,0 +1,12 @@
+PROGRAM comments() 
+{
+    // One line comment
+    WRITELN("legit command");
+    /* multi-line comment */
+    /* multi-line comment2
+    which goes on ** /
+    * WRITELN("in comment");
+            and on **/
+    
+    WRITELN("outside comment");
+}
