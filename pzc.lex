@@ -37,6 +37,7 @@
 #define T_wrln 287
 #define T_wrsp 288
 #define T_wrspln 289
+#define T_id 290
 %}
 
 %option noyywrap
@@ -81,6 +82,9 @@ W [ \t\r]
 "WRITELN"    {return T_wrln;}
 "WRITESP"    {return T_wrsp;}
 "WRITESPLN"  {return T_wrspln;}
+
+
+[a-zA-Z][0-9a-zA-Z_]* {return T_id;}
 
 "\/\/"[^\n]*   {/* one-line comment */}
 
