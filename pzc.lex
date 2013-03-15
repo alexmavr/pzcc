@@ -87,14 +87,14 @@ INT		0|[1-9[0-9]*
 
 
 [a-zA-Z][0-9a-zA-Z_]*	{return T_id;}
-INT						{return T_integer;}
+{INT}						{return T_integer;}
 
 "\/\/"[^\n]*			{/* one-line comment */}
 
 [&;.\(\):,\[\]\{\}+\-*/%!]	{return yytext[0];}
 
 
-W+						{/* ignore whitespace */}
+{W}+						{/* ignore whitespace */}
 \n						{ /* lines counted at yylineno */ }
 .						{return 1; /* TODO: error */}
 
