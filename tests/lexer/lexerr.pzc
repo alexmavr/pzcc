@@ -1,5 +1,5 @@
 PROGRAM lexerr ()
 {
-    $%^& #45 
+    '\' $%^& #45 
     WRITELN("After lexer failure");
 }

@@ -48,59 +48,61 @@
 %option yylineno
 
 W		[ \t\r]
-INT		0|[1-9[0-9]*
+INT		0|[1-9][0-9]*
+ESC_SEQ	\\[nrt0\'\"\\]
 
 %%
 
 
-"bool"					{return T_bool;}
-"and"					{return T_and;}
-"break"					{return T_break;}
-"case"					{return T_case;}
-"char"					{return T_char;}
-"const"					{return T_const;}
-"continue"				{return T_cont;}
-"default"				{return T_def;}
-"do"					{return T_do;}
-"DOWNTO"				{return T_downto;}
-"else"					{return T_else;}
-"false"					{return T_false;}
-"FOR"					{return T_for;}
-"FORM"					{return T_form;}
-"FUNC"					{return T_func;}
-"if"					{return T_if;}
-"int"					{return T_int;}
-"MOD"					{return T_mod;}
-"NEXT"					{return T_next;}
-"not"					{return T_not;}
-"or"					{return T_or;}
-"PROC"					{return T_proc;}
-"PROGRAM"				{return T_prog;}
-"REAL"					{return T_real;}
-"return"				{return T_ret;}
-"STEP"					{return T_step;}
-"switch"				{return T_switch;}
-"TO"					{return T_to;}
-"true"					{return T_true;}
-"while"					{return T_while;}
-"WRITE"					{return T_write;}
-"WRITELN"				{return T_wrln;}
-"WRITESP"				{return T_wrsp;}
-"WRITESPLN"				{return T_wrspln;}
+"bool"					{ return T_bool;	}
+"and"					{ return T_and;		}
+"break"					{ return T_break;	}
+"case"					{ return T_case;	}
+"char"					{ return T_char;	}
+"const"					{ return T_const;	}
+"continue"				{ return T_cont;	}
+"default"				{ return T_def;		}
+"do"					{ return T_do;		}
+"DOWNTO"				{ return T_downto;	}
+"else"					{ return T_else;	}
+"false"					{ return T_false;	}
+"FOR"					{ return T_for;		}
+"FORM"					{ return T_form;	}
+"FUNC"					{ return T_func;	}
+"if"					{ return T_if;		}
+"int"					{ return T_int;		}
+"MOD"					{ return T_mod;		}
+"NEXT"					{ return T_next;	}
+"not"					{ return T_not;		}
+"or"					{ return T_or;		}
+"PROC"					{ return T_proc;	}
+"PROGRAM"				{ return T_prog;	}
+"REAL"					{ return T_real;	}
+"return"				{ return T_ret;		}
+"STEP"					{ return T_step;	}
+"switch"				{ return T_switch;	}
+"TO"					{ return T_to;		}
+"true"					{ return T_true;	}
+"while"					{ return T_while;	}
+"WRITE"					{ return T_write;	}
+"WRITELN"				{ return T_wrln;	}
+"WRITESP"				{ return T_wrsp;	}
+"WRITESPLN"				{ return T_wrspln;	}
 
 
-[a-zA-Z][0-9a-zA-Z_]*			{return T_id;}
-{INT}							{return T_CONST_integer;}
-{INT}\.[0-9]+((e|E)[-+]?{INT})?	{return T_CONST_real;}
+[a-zA-Z][0-9a-zA-Z_]*			{ return T_id;				}
+{INT}							{ return T_CONST_integer;	}
+{INT}\.[0-9]+((e|E)[-+]?{INT})?	{ return T_CONST_real;		}
+'({ESC_SEQ}|[^\'\"\\])'			{ return T_CONST_char;		}
 
-"\/\/"[^\n]*			{/* one-line comment */}
+"\/\/"[^\n]*					{ /* one-line comment */	}
 
-[&;.\(\):,\[\]\{\}+\-*/%!]	{return yytext[0];}
+[&;.\(\):,\[\]\{\}+\-*/%!]		{ return yytext[0];			}
 
 
-{W}+						{/* ignore whitespace */}
-\n						{ /* lines counted at yylineno */ }
-.						{return 1; /* TODO: error */}
+{W}+							{ /* ignore whitespace */	}
+\n								{ /* line counting: yylineno */	}
+.								{ return 1; /* TODO: error */	}
 
 %%
 
