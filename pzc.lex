@@ -49,11 +49,11 @@
 %option noyywrap
 %option yylineno
 
-W		[ \t\r]
-INT		0|[1-9][0-9]*
-ESC_SEQ	\\[nrt0\'\"\\]
-CHAR	({ESC_SEQ}|[^\'\"\\\n])
-SEPAR	[&;.\(\):,\[\]\{\}+\-*/%!]
+W			[ \t\r]
+INT			0|[1-9][0-9]*
+ESC_SEQ		\\[nrt0\'\"\\]
+CHAR		({ESC_SEQ}|[^\'\"\\\n])
+SEPAR_n_OPS	[&;.\(\):,\[\]\{\}+\-*/%!]
 
 %%
 
@@ -103,7 +103,7 @@ SEPAR	[&;.\(\):,\[\]\{\}+\-*/%!]
 
 "\/\/"[^\n]*					{ /* one-line comment */	}
 
-{SEPAR}							{ return yytext[0];			}
+{SEPAR_n_OPS}					{ return yytext[0];			}
 
 
 {W}+							{ /* ignore whitespace */	}
