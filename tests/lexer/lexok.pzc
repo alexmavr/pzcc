@@ -13,6 +13,7 @@ PROGRAM lexer_test ()
 
 "string"
 "string\n!\t!\t!"
+"string\"morestring"
 
 '\n'
 '\t'
@@ -21,6 +22,9 @@ PROGRAM lexer_test ()
 '\''
 '\\'
 '\0'
+'0'
+'z'
+'^'
 
 42.0
 4.2e1
