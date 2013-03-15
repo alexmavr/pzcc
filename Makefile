@@ -18,5 +18,7 @@ pzc.lex.c: pzc.lex
 
 pzc.lex:;
 
+clena: clean
+celan: clean
 clean:
-	rm $(OBJ) pzc.lex.c pzc a.out
+	rm -f $(OBJ) pzc.lex.c pzc a.out
