@@ -42,6 +42,8 @@
 #define T_CONST_real	292
 #define T_CONST_char	293
 #define T_CONST_string	294
+//#define T_sep		295
+#define T_op		296
 %}
 
 %option noyywrap
@@ -51,6 +53,7 @@ W		[ \t\r]
 INT		0|[1-9][0-9]*
 ESC_SEQ	\\[nrt0\'\"\\]
 CHAR	({ESC_SEQ}|[^\'\"\\\n])
+SEPAR	[&;.\(\):,\[\]\{\}+\-*/%!]
 
 %%
 
@@ -94,12 +97,13 @@ CHAR	({ESC_SEQ}|[^\'\"\\\n])
 [a-zA-Z][0-9a-zA-Z_]*			{ return T_id;				}
 {INT}							{ return T_CONST_integer;	}
 {INT}\.[0-9]+((e|E)[-+]?{INT})?	{ return T_CONST_real;		}
-'{CHAR}'							{ return T_CONST_char;		}
+'{CHAR}'						{ return T_CONST_char;		}
 \"{CHAR}*\"						{ return T_CONST_string;	}
+
 
 "\/\/"[^\n]*					{ /* one-line comment */	}
 
-[&;.\(\):,\[\]\{\}+\-*/%!]		{ return yytext[0];			}
+{SEPAR}							{ return yytext[0];			}
 
 
 {W}+							{ /* ignore whitespace */	}
