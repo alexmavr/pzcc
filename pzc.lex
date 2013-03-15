@@ -38,7 +38,10 @@
 #define T_wrsp		288
 #define T_wrspln	289
 #define T_id		290
-#define T_integer	291
+#define T_CONST_integer	291
+#define T_CONST_real	292
+#define T_CONST_char	293
+#define T_CONST_string	294
 %}
 
 %option noyywrap
@@ -86,8 +89,9 @@ INT		0|[1-9[0-9]*
 "WRITESPLN"				{return T_wrspln;}
 
 
-[a-zA-Z][0-9a-zA-Z_]*	{return T_id;}
-{INT}						{return T_integer;}
+[a-zA-Z][0-9a-zA-Z_]*			{return T_id;}
+{INT}							{return T_CONST_integer;}
+{INT}\.[0-9]+((e|E)[-+]?{INT})?	{return T_CONST_real;}
 
 "\/\/"[^\n]*			{/* one-line comment */}
 
