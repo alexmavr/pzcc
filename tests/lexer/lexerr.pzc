@@ -1,5 +1,4 @@
-PROGRAM lexerr ()
-{
-    '\' $%^& #45 
-    WRITELN("After lexer failure");
-}
+"1: hi there. \' \"\\ This is a right string"
+"2: Hi there again. This\ is another string but wrong"
+"3: This string is wrong too because it extends
+	in multiple lines"

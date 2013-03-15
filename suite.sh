@@ -14,3 +14,5 @@ do
         ./pzc < $testcase
     done
 done
+
+make clean
