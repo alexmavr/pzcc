@@ -109,6 +109,7 @@ SEPAR_n_OPS	[&;.\(\):,\[\]\{\}+\-*/%!]
 {SEPAR_n_OPS}					{ return yytext[0];			}
 
 "\/\/"[^\n]*					{ /* one-line comment */	}
+\/\*([^*]|(\*[^\/]))*\*\/		{ /* multi-line comment: If yylineno is activated, this is OK. Else we go states. */	}
 
 {W}+							{ /* ignore whitespace */	}
 \n								{ /* line counting: yylineno */	}
@@ -120,7 +121,7 @@ int main (void)
 {
     int token;
 	
-	yylineno = 0;
+	yylineno = 1;
     do {
         token = yylex();
         printf("token=%d, line=%d, lexeme=\"%s\"\n", token, yylineno, yytext);
