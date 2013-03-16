@@ -44,6 +44,12 @@
 #define T_CONST_string	294
 //#define T_sep		295
 #define T_op		296
+
+void lex_error (const char *msg) {
+	fprintf(stderr, "Lexical error [%d @ %s ]: %s\n", yylineno, yytext, msg);
+	exit(EXIT_FAILURE);
+}
+
 %}
 
 %option noyywrap
@@ -100,26 +106,25 @@ SEPAR_n_OPS	[&;.\(\):,\[\]\{\}+\-*/%!]
 '{CHAR}'						{ return T_CONST_char;		}
 \"{CHAR}*\"						{ return T_CONST_string;	}
 
+{SEPAR_n_OPS}					{ return yytext[0];			}
 
 "\/\/"[^\n]*					{ /* one-line comment */	}
 
-{SEPAR_n_OPS}					{ return yytext[0];			}
-
-
 {W}+							{ /* ignore whitespace */	}
 \n								{ /* line counting: yylineno */	}
-.								{ return 1; /* TODO: error */	}
+.								{ lex_error("invalid token");	}
 
 %%
 
 int main (void)
 {
     int token;
-
+	
+	yylineno = 0;
     do {
         token = yylex();
         printf("token=%d, line=%d, lexeme=\"%s\"\n", token, yylineno, yytext);
     } while (token != T_eof);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
