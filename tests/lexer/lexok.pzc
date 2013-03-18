@@ -1,6 +1,10 @@
 PROGRAM lexer_test ()
 /* onemultiline */
 &;.():,{}[]+-* /%!
+
+/* multiline
+*/
+
 == > < !=  >= <= + - * / %
 ==><!=>=<=
 ! && || ++ -- 
