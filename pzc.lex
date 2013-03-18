@@ -70,8 +70,8 @@ INT			0|[1-9][0-9]*
 ESC_SEQ		\\[nrt0\'\"\\]
 CHAR		({ESC_SEQ}|[^\'\"\\\n])
 SEPAR_n_OPS	[&;.\(\):,\[\]\{\}+\-*/%!=><]
-WARN_SEQ	\\[^']
-WARN_CHAR	({WARN_SEQ}|[^\'\n])
+WARN_SEQ	\\[^\']
+WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 
 %%
 
