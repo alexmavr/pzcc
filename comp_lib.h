@@ -7,9 +7,11 @@
  * 
  */
 
+extern char *yytext;
+extern int yylineno;
 
+typedef enum { ERR_LV_WARN, ERR_LV_CRIT } error_lv;
 
-void lex_error (const char *msg) {
-	fprintf(stderr, "Lexical error [%d @ %s ]: %s\n", yylineno, yytext, msg);
-	exit(EXIT_FAILURE);
-}
+void lex_error (error_lv level, const char *msg);
+
+void crit_cleanup (void);

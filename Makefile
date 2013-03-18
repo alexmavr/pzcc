@@ -4,7 +4,7 @@
 CC = gcc
 CCFLAGS += -Wall -O0
 
-OBJ += pzc.lex.o
+OBJ += pzc.lex.o comp_lib.o
 DEPENDS += 
 
 pzc: $(OBJ) 
@@ -18,6 +18,6 @@ pzc.lex.c: pzc.lex
 
 pzc.lex:;
 
-clena celan lcean: clean
+clena celan lcean lcena: clean
 clean:
 	rm -f $(OBJ) pzc.lex.c pzc a.out
