@@ -3,6 +3,8 @@
 #include <stdarg.h> 
 #include "comp_lib.h"
 
+#define YY_NO_INPUT
+
 #define T_eof		0
 #define T_bool		256
 #define T_and		257
@@ -61,6 +63,7 @@
 
 %option noyywrap
 %option yylineno
+%option nounput
 
 W			[ \t\r]
 INT			0|[1-9][0-9]*
@@ -117,22 +120,24 @@ SEPAR_n_OPS	[&;.\(\):,\[\]\{\}+\-*/%!=><]
 ==                              { return T_eq;              }
 !=                              { return T_diff;            }
 >=                              { return T_greq;            }
-\<=                              { return T_leq;             }
-&&                              { return T_logand;             }
-\|\|                              { return T_logor;              }
-\+\+                              { return T_pp;              }
-\-\-                              { return T_mm;              }
-\+=                              { return T_inc;             }
-\-=                              { return T_dec;             }
-\*=                              { return T_mul;             }
-\/=                              { return T_div;             }
-\%=                              { return T_opmod;             }
+\<=                             { return T_leq;             }
+&&                              { return T_logand;          }
+\|\|                            { return T_logor;           }
+\+\+                            { return T_pp;              }
+\-\-                            { return T_mm;              }
+\+=                             { return T_inc;             }
+\-=                             { return T_dec;             }
+\*=                             { return T_mul;             }
+\/=                             { return T_div;             }
+\%=                             { return T_opmod;           }
 
 "\/\/"[^\n]*					{ /* one-line comment */	}
 \/\*([^*]|(\*[^\/]))*\*\/		{ /* multi-line comment: If yylineno is activated, this is OK. Else we go states. */	}
 
 {W}+							{ /* ignore whitespace */	}
 \n								{ /* line counting: yylineno */	}
+
+\"|\'						    { lex_error(ERR_LV_CRIT, "Unexpected token %s", yytext);	}
 .								{ lex_error(ERR_LV_CRIT, "Invalid token %s", yytext);	}
 
 %%
