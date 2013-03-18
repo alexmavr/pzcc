@@ -1,6 +1,7 @@
 %{
 #include <stdlib.h>
-#include <stdarg.h> #include "comp_lib.h"
+#include <stdarg.h> 
+#include "comp_lib.h"
 
 #define T_eof		0
 #define T_bool		256
