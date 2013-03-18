@@ -2,7 +2,7 @@
  * .: General library for brevity in lexer source file.
  * 
  * ?: Aristoteles Panaras "ale1ster"
- *    Alexandros Mavrogiannis "nalfemp"
+ *    Alexandros Mavrogiannis "afein"
  * @: Mon 18 Mar 2013 04:01:47 PM EET
  * 
  */

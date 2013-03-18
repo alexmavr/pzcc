@@ -1,4 +1,13 @@
 %{
+/* 
+ * .: >> pzc.lex
+ * 
+ * ?: Aristoteles Panaras "ale1ster"
+ *    Alexandros Mavrogiannis "afein"
+ * @: Mon 18 Mar 2013 04:10:23 PM EET
+ * 
+ */
+
 #include <stdlib.h>
 #include <stdarg.h> 
 #include "comp_lib.h"
@@ -115,9 +124,9 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 {INT}							{ return T_CONST_integer;	}
 {INT}\.[0-9]+((e|E)[-+]?{INT})?	{ return T_CONST_real;		}
 '{CHAR}'						{ return T_CONST_char;		}
-'{WARN_CHAR}'					{ lex_error(ERR_LV_WARN, "wrong escape sequence"); return T_CONST_char;	}
+'{WARN_CHAR}'					{ lex_error(ERR_LV_WARN, "Wrong escape sequence"); return T_CONST_char;	}
 \"{CHAR}*\"						{ return T_CONST_string;	}
-\"{WARN_CHAR}\"					{ lex_error(ERR_LV_WARN, "wrong escape sequence"); return T_CONST_string;	}
+\"{WARN_CHAR}\"					{ lex_error(ERR_LV_WARN, "Wrong escape sequence"); return T_CONST_string;	}
 
 {SEPAR_n_OPS}					{ return yytext[0];			}
 
@@ -136,7 +145,7 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 \%=								{ return T_opmod;			}
 
 "\/\/"[^\n]*					{ /* one-line comment */	}
-\/\*([^*]|(\*[^\/]))*\*\/		{ /* multi-line comment: If yylineno is activated, this is OK. Else we go states. */	}
+\/\*([^*]|(\*[^\/]))*\*\/		{ /* multi-line comment */	}
 
 {W}+							{ /* ignore whitespace */	}
 \n								{ /* line counting: yylineno */	}

@@ -2,7 +2,7 @@
  * .: >> comp_lib.h
  * 
  * ?: Aristoteles Panaras "ale1ster"
- *    Alexandros Mavrogiannis "nalfemp"
+ *    Alexandros Mavrogiannis "afein"
  * @: Mon 18 Mar 2013 04:10:23 PM EET
  * 
  */

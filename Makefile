@@ -1,4 +1,4 @@
-.PHONY: all clean
+.PHONY: all pzc clean
 .DEFAULT: all
 
 CC = gcc
