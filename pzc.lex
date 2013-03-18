@@ -1,7 +1,6 @@
 %{
 #include <stdlib.h>
-#include <stdarg.h>
-#include "comp_lib.h"
+#include <stdarg.h> #include "comp_lib.h"
 
 #define T_eof		0
 #define T_bool		256
@@ -43,8 +42,19 @@
 #define T_CONST_real	292
 #define T_CONST_char	293
 #define T_CONST_string	294
-//#define T_sep		295
-#define T_op		296
+#define T_eq        295
+#define T_diff      296
+#define T_greq      297
+#define T_leq       298
+#define T_logand    299 
+#define T_logor     300
+#define T_pp        301
+#define T_mm        302
+#define T_inc       303 
+#define T_dec       304 
+#define T_mul       305
+#define T_div       306
+#define T_opmod       307
 
 %}
 
@@ -58,7 +68,6 @@ CHAR		({ESC_SEQ}|[^\'\"\\\n])
 SEPAR_n_OPS	[&;.\(\):,\[\]\{\}+\-*/%!=><]
 
 %%
-
 
 "bool"					{ return T_bool;	}
 "and"					{ return T_and;		}
@@ -103,6 +112,20 @@ SEPAR_n_OPS	[&;.\(\):,\[\]\{\}+\-*/%!=><]
 \"{CHAR}*\"						{ return T_CONST_string;	}
 
 {SEPAR_n_OPS}					{ return yytext[0];			}
+
+==                              { return T_eq;              }
+!=                              { return T_diff;            }
+>=                              { return T_greq;            }
+\<=                              { return T_leq;             }
+&&                              { return T_logand;             }
+\|\|                              { return T_logor;              }
+\+\+                              { return T_pp;              }
+\-\-                              { return T_mm;              }
+\+=                              { return T_inc;             }
+\-=                              { return T_dec;             }
+\*=                              { return T_mul;             }
+\/=                              { return T_div;             }
+\%=                              { return T_opmod;             }
 
 "\/\/"[^\n]*					{ /* one-line comment */	}
 \/\*([^*]|(\*[^\/]))*\*\/		{ /* multi-line comment: If yylineno is activated, this is OK. Else we go states. */	}
