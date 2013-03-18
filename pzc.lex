@@ -117,6 +117,7 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 '{CHAR}'						{ return T_CONST_char;		}
 '{WARN_CHAR}'					{ lex_error(ERR_LV_WARN, "wrong escape sequence"); return T_CONST_char;	}
 \"{CHAR}*\"						{ return T_CONST_string;	}
+\"{WARN_CHAR}\"					{ lex_error(ERR_LV_WARN, "wrong escape sequence"); return T_CONST_string;	}
 
 {SEPAR_n_OPS}					{ return yytext[0];			}
 

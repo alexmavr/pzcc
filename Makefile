@@ -7,6 +7,8 @@ CCFLAGS += -Wall -O0
 OBJ += pzc.lex.o comp_lib.o
 DEPENDS += 
 
+all: pzc clean
+
 pzc: $(OBJ) 
 	$(CC) $(LDFLAGS) $(OBJ) -o $@
 

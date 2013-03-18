@@ -7,7 +7,6 @@
  * 
  */
 
-extern char *yytext;
 extern int yylineno;
 
 typedef enum { ERR_LV_WARN, ERR_LV_CRIT } error_lv;
