@@ -1,6 +1,7 @@
 %{
 #include <stdlib.h>
 #include <stdarg.h>
+#include "comp_lib.h"
 
 #define T_eof		0
 #define T_bool		256
@@ -44,11 +45,6 @@
 #define T_CONST_string	294
 //#define T_sep		295
 #define T_op		296
-
-void lex_error (const char *msg) {
-	fprintf(stderr, "Lexical error [%d @ %s ]: %s\n", yylineno, yytext, msg);
-	exit(EXIT_FAILURE);
-}
 
 %}
 
