@@ -70,6 +70,8 @@ INT			0|[1-9][0-9]*
 ESC_SEQ		\\[nrt0\'\"\\]
 CHAR		({ESC_SEQ}|[^\'\"\\\n])
 SEPAR_n_OPS	[&;.\(\):,\[\]\{\}+\-*/%!=><]
+WARN_SEQ	\\[^']
+WARN_CHAR	({WARN_SEQ}|[^\'\n])
 
 %%
 
@@ -113,23 +115,24 @@ SEPAR_n_OPS	[&;.\(\):,\[\]\{\}+\-*/%!=><]
 {INT}							{ return T_CONST_integer;	}
 {INT}\.[0-9]+((e|E)[-+]?{INT})?	{ return T_CONST_real;		}
 '{CHAR}'						{ return T_CONST_char;		}
+'{WARN_CHAR}'					{ lex_error(ERR_LV_WARN, "wrong escape sequence"); return T_CONST_char;	}
 \"{CHAR}*\"						{ return T_CONST_string;	}
 
 {SEPAR_n_OPS}					{ return yytext[0];			}
 
-==                              { return T_eq;              }
-!=                              { return T_diff;            }
->=                              { return T_greq;            }
-\<=                             { return T_leq;             }
-&&                              { return T_logand;          }
-\|\|                            { return T_logor;           }
-\+\+                            { return T_pp;              }
-\-\-                            { return T_mm;              }
-\+=                             { return T_inc;             }
-\-=                             { return T_dec;             }
-\*=                             { return T_mul;             }
-\/=                             { return T_div;             }
-\%=                             { return T_opmod;           }
+==								{ return T_eq;				}
+!=                              { return T_diff;			}
+>=                              { return T_greq;			}
+\<=								{ return T_leq;				}
+&&								{ return T_logand;			}
+\|\|							{ return T_logor;			}
+\+\+							{ return T_pp;				}
+\-\-							{ return T_mm;				}
+\+=								{ return T_inc;				}
+\-=								{ return T_dec;				}
+\*=								{ return T_mul;				}
+\/=								{ return T_div;				}
+\%=								{ return T_opmod;			}
 
 "\/\/"[^\n]*					{ /* one-line comment */	}
 \/\*([^*]|(\*[^\/]))*\*\/		{ /* multi-line comment: If yylineno is activated, this is OK. Else we go states. */	}

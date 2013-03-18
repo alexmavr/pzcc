@@ -18,6 +18,9 @@ pzc.lex.c: pzc.lex
 
 pzc.lex:;
 
+distclean: clean
+	rm -f pzc
+
 clena celan lcean lcena: clean
 clean:
-	rm -f $(OBJ) pzc.lex.c pzc a.out
+	rm -f $(OBJ) pzc.lex.c a.out
