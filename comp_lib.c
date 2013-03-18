@@ -33,7 +33,7 @@ void lex_error (error_lv level, const char *msg, ...) {
 			fprintf(stderr, "My mind just exploded\n");
 			exit(EXIT_FAILURE);
 	}
-	fprintf(stderr, "Lexical error [%d @ %s ]: ", yylineno, yytext);
+	fprintf(stderr, "Lexical error [line %d]: ", yylineno);
 	vfprintf(stderr, msg, va);
 	fprintf(stderr, "\n");
 	va_end(va);

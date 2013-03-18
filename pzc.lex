@@ -133,7 +133,7 @@ SEPAR_n_OPS	[&;.\(\):,\[\]\{\}+\-*/%!=><]
 
 {W}+							{ /* ignore whitespace */	}
 \n								{ /* line counting: yylineno */	}
-.								{ lex_error(ERR_LV_CRIT, "invalid token");	}
+.								{ lex_error(ERR_LV_CRIT, "Invalid token %s", yytext);	}
 
 %%
 
