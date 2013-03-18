@@ -18,7 +18,27 @@ void crit_cleanup (void) {
 }
 
 //Lexical error function.
-void lex_error (error_lv level, const char *msg) {
-	fprintf(stderr, "Lexical error [%d @ %s ]: %s\n", yylineno, yytext, msg);
-	exit(EXIT_FAILURE);
+void lex_error (error_lv level, const char *msg, ...) {
+	va_list va;
+
+	va_start(va, msg);
+	switch (level) {
+		case ERR_LV_WARN:
+			fprintf(stderr, "WARNING: ");
+			break;
+		case ERR_LV_CRIT:
+			fprintf(stderr, "ERROR: ");
+			break;
+		default:
+			fprintf(stderr, "My mind just exploded\n");
+			exit(EXIT_FAILURE);
+	}
+	fprintf(stderr, "Lexical error [%d @ %s ]: ", yylineno, yytext);
+	vfprintf(stderr, msg, va);
+	fprintf(stderr, "\n");
+	va_end(va);
+	if (level == ERR_LV_CRIT) {
+		crit_cleanup();
+		exit(EXIT_FAILURE);
+	}
 }
