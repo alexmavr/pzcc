@@ -119,6 +119,7 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 "WRITESP"				{ return T_wrsp;	}
 "WRITESPLN"				{ return T_wrspln;	}
 
+\\\n					{ /* C-like expression breakage on multiple lines (?) */	}
 
 [a-zA-Z][0-9a-zA-Z_]*			{ return T_id;				}
 {INT}							{ return T_CONST_integer;	}
