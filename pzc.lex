@@ -122,7 +122,7 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 
 [a-zA-Z][0-9a-zA-Z_]*			{ return T_id;				}
 {INT}							{ return T_CONST_integer;	}
-{INT}\.[0-9]+((e|E)[-+]?{INT})?	{ return T_CONST_real;		}
+[0-9]+\.[0-9]+((e|E)[-+]?{INT})? { return T_CONST_real;		}
 '{CHAR}'						{ return T_CONST_char;		}
 '{WARN_CHAR}'					{ lex_error(ERR_LV_WARN, "Wrong escape sequence"); return T_CONST_char;	}
 \"{CHAR}*\"						{ return T_CONST_string;	}
