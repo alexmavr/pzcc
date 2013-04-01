@@ -121,38 +121,38 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 
 \\\n					{ /* C-like expression breakage on multiple lines (?) */	}
 
-[a-zA-Z][0-9a-zA-Z_]*			{ return T_id;				}
-{INT}							{ return T_CONST_integer;	}
-{INT}\.[0-9]+((e|E)[-+]?{INT})?	{ return T_CONST_real;		}
-'{CHAR}'						{ return T_CONST_char;		}
-'{WARN_CHAR}'					{ lex_error(ERR_LV_WARN, "Wrong escape sequence"); return T_CONST_char;	}
-\"{CHAR}*\"						{ return T_CONST_string;	}
-\"{WARN_CHAR}\"					{ lex_error(ERR_LV_WARN, "Wrong escape sequence"); return T_CONST_string;	}
+[a-zA-Z][0-9a-zA-Z_]*				{ return T_id;				}
+{INT}								{ return T_CONST_integer;	}
+[0-9]+\.[0-9]+((e|E)[-+]?{INT})?	{ return T_CONST_real;		}
+'{CHAR}'							{ return T_CONST_char;		}
+'{WARN_CHAR}'						{ lex_error(ERR_LV_WARN, "Wrong escape sequence"); return T_CONST_char;	}
+\"{CHAR}*\"							{ return T_CONST_string;	}
+\"{WARN_CHAR}\"						{ lex_error(ERR_LV_WARN, "Wrong escape sequence"); return T_CONST_string;	}
+	
+{SEPAR_n_OPS}						{ return yytext[0];			}
 
-{SEPAR_n_OPS}					{ return yytext[0];			}
+==									{ return T_eq;				}
+!=								    { return T_diff;			}
+>=								    { return T_greq;			}
+\<=									{ return T_leq;				}
+&&									{ return T_logand;			}
+\|\|								{ return T_logor;			}
+\+\+								{ return T_pp;				}
+\-\-								{ return T_mm;				}
+\+=									{ return T_inc;				}
+\-=									{ return T_dec;				}
+\*=									{ return T_mul;				}
+\/=									{ return T_div;				}
+\%=									{ return T_opmod;			}
 
-==								{ return T_eq;				}
-!=                              { return T_diff;			}
->=                              { return T_greq;			}
-\<=								{ return T_leq;				}
-&&								{ return T_logand;			}
-\|\|							{ return T_logor;			}
-\+\+							{ return T_pp;				}
-\-\-							{ return T_mm;				}
-\+=								{ return T_inc;				}
-\-=								{ return T_dec;				}
-\*=								{ return T_mul;				}
-\/=								{ return T_div;				}
-\%=								{ return T_opmod;			}
+"\/\/"[^\n]*						{ /* one-line comment */	}
+\/\*([^*]|(\*[^\/]))*\*\/			{ /* multi-line comment */	}
 
-"\/\/"[^\n]*					{ /* one-line comment */	}
-\/\*([^*]|(\*[^\/]))*\*\/		{ /* multi-line comment */	}
+{W}+								{ /* ignore whitespace */	}
+\n									{ /* line counting: yylineno */	}
 
-{W}+							{ /* ignore whitespace */	}
-\n								{ /* line counting: yylineno */	}
-
-\"|\'						    { lex_error(ERR_LV_CRIT, "Unexpected token %s", yytext);	}
-.								{ lex_error(ERR_LV_CRIT, "Invalid token %s", yytext);	}
+\"|\'							    { lex_error(ERR_LV_CRIT, "Unexpected token %s", yytext);	}
+.									{ lex_error(ERR_LV_CRIT, "Invalid token %s", yytext);	}
 
 %%
 
