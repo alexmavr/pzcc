@@ -155,16 +155,3 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 .									{ lex_error(ERR_LV_CRIT, "Invalid token %s", yytext);	}
 
 %%
-
-int main (void)
-{
-    int token;
-	
-	yylineno = 1;
-    do {
-        token = yylex();
-        printf("token=%d, line=%d, lexeme=\"%s\"\n", token, yylineno, yytext);
-    } while (token != T_eof);
-
-    return EXIT_SUCCESS;
-}
