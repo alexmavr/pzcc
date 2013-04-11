@@ -3,6 +3,7 @@
 
 CC = gcc
 CCFLAGS += -Wall -O0
+LDFLAGS +=
 
 OBJ += pzc.lex.o comp_lib.o parser.o
 DEPENDS += 
@@ -12,7 +13,9 @@ all: pzc clean
 pzc: $(OBJ) 
 	$(CC) $(LDFLAGS) $(OBJ) -o $@
 
-parser.c parser.h: parser.y
+parser.h: parser.c
+
+parser.c: parser.y
 		bison -v -d -o $@ $<
 
 pzc.lex.o: pzc.lex.c parser.h
@@ -22,8 +25,6 @@ pzc.lex.c: pzc.lex
 	flex -s -o $@ $< 
 
 pzc.lex:;
-
-
 
 distclean: clean
 	rm -f pzc

@@ -11,63 +11,11 @@
 #include <stdlib.h>
 #include <stdarg.h> 
 #include "comp_lib.h"
+#include "parser.h"
 
 #define YY_NO_INPUT
 
 #define T_eof		0
-#define T_bool		256
-#define T_and		257
-#define T_break		258
-#define T_case		259
-#define T_char		260
-#define T_const		261
-#define T_cont		262
-#define T_def		263
-#define T_do		264
-#define T_downto	265
-#define T_false		266
-#define T_else		267
-#define T_for		268
-#define T_form		269
-#define T_func		270
-#define T_if		271
-#define T_int		272
-#define T_mod		273
-#define T_next		274
-#define T_not		275
-#define T_or		276
-#define T_proc		277
-#define T_prog		278
-#define T_real		279
-#define T_ret		280
-#define T_step		281
-#define T_switch	282
-#define T_to		283
-#define T_true		284
-#define T_while		285
-#define T_write		286
-#define T_wrln		287
-#define T_wrsp		288
-#define T_wrspln	289
-#define T_id		290
-#define T_CONST_integer	291
-#define T_CONST_real	292
-#define T_CONST_char	293
-#define T_CONST_string	294
-#define T_eq        295
-#define T_diff      296
-#define T_greq      297
-#define T_leq       298
-#define T_logand    299 
-#define T_logor     300
-#define T_pp        301
-#define T_mm        302
-#define T_inc       303 
-#define T_dec       304 
-#define T_mul       305
-#define T_div       306
-#define T_opmod       307
-
 %}
 
 %option noyywrap
