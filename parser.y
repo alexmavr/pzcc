@@ -65,7 +65,7 @@ void yyerror (const char * msg);
 %%
 
 
-/* Tails are ()*, opts are [] */
+/* Tails are ()*, opts are [], choice is (|) */
 module
     : declaration_list
     ;
@@ -80,11 +80,11 @@ declaration
     | program
     ;
 const_def
-    : T_const type id '=' const_expr const_def_tail ';'
+    : T_const type T_id '=' const_expr const_def_tail ';'
     ;
 const_def_tail
     : /* nothing */
-    | ',' id '=' const_expr const_def_tail
+    | ',' T_id '=' const_expr const_def_tail
     ;
 var_def
     : type var_init var_def_tail ';'
@@ -94,8 +94,8 @@ var_def_tail
     | ',' var_init var_def_tail
     ;
 var_init
-    : id var_init_opt
-    | id var_init_tail_plus
+    : T_id var_init_opt
+    | T_id var_init_tail_plus
     ;
 var_init_opt
     : /* nothing */
@@ -109,7 +109,7 @@ var_init_tail
     | '[' const_expr ']' var_init_tail
     ;
 routine_header
-    : routine_header_head id '(' routine_header_opt ')'
+    : routine_header_head T_id '(' routine_header_opt ')'
     ;
 routine_header_head
     : T_proc
@@ -123,9 +123,9 @@ routine_header_opt_tail
     | ',' type formal routine_header_opt_tail
     ;
 formal
-    : id
-    | '&' id
-    | id '[' const_expr_opt ']' formal_tail
+    : T_id
+    | '&' T_id
+    | T_id '[' const_expr_opt ']' formal_tail
     ;
 const_expr_opt
     : /* nothing */
@@ -135,8 +135,188 @@ formal_tail
     : /* nothing */
     | '[' const_expr ']' formal_tail
     ;
-
-
+routine
+    : routine_header routine_tail
+    ;
+routine_tail
+    : ';'
+    | block
+    ;
+program_header
+    : T_prog T_id '(' ')'
+    ;
+program
+    : program_header block
+    ;
+type
+    : T_int
+    | T_bool
+    | T_char
+    | T_real
+    ;
+const_expr
+    : expr
+    ;
+expr
+    : T_CONST_integer
+    | T_CONST_real
+    | T_CONST_char
+    | T_CONST_string
+    | T_true
+    | T_false
+    | '(' expr ')'
+    | l_value
+    | call
+    | unop expr
+    | expr binop expr
+    ;
+l_value
+    : T_id l_value_tail
+    ;
+l_value_tail
+    : /* Nothing */
+    | '[' expr ']' l_value_tail
+    ;
+unop
+    : '+'
+    | '-'
+    | '!'
+    | T_not
+    ;
+binop 
+    : '+'
+    | '-'
+    | '*'
+    | '/'
+    | '%'
+    | T_mod
+    | T_eq
+    | T_diff
+    | '<'
+    | '>'
+    | T_leq
+    | T_greq
+    | T_logand
+    | T_and
+    | T_logor
+    | T_or
+    ;
+call 
+    : T_id '(' call_opt ')'
+    ;
+call_opt
+    : /* Nothing */
+    | expr call_opt_tail 
+    ;
+call_opt_tail
+    : /* Nothing */
+    | ',' expr call_opt_tail
+    ;
+block
+    : '{' block_tail '}'
+    ;
+block_tail
+    : /* Nothing */
+    | local_def block_tail
+    | stmt block_tail
+    ;
+local_def
+    : const_def
+    | var_def
+    ;
+stmt
+    : ';'
+    | l_value assign expr ';'
+    | l_value stmt_choice ';'
+    | call ';'
+    | T_if '(' expr ')' stmt stmt_opt_if
+    | T_while '(' expr ')' stmt
+    | T_for '(' T_id ',' range ')' stmt 
+    | T_do stmt T_while '(' expr ')' ';'
+    | T_switch '(' expr ')' '{' stmt_tail stmt_opt_switch '}'
+    | T_break ';'
+    | T_cont ';'
+    | T_ret stmt_opt_ret ';'
+    | write '(' stmt_opt_write ')' ';'
+    ;
+stmt_choice
+    : T_pp
+    | T_mm
+    ;
+stmt_opt_if
+    : /* Nothing */
+    | T_else stmt
+    ;
+stmt_tail
+    : /* Nothing */
+    | stmt_tail_tail_plus clause stmt_tail
+    ;
+stmt_tail_tail_plus
+    : stmt_tail_tail stmt_tail_tail_plus
+    | stmt_tail_tail
+    ;
+stmt_tail_tail
+    : T_case const_expr ':' 
+    ;
+stmt_opt_switch
+    : /* Nothing */
+    | T_def':' clause
+    ;
+stmt_opt_ret
+    : /* Nothing */
+    | expr
+    ;
+stmt_opt_write
+    : format stmt_opt_write_tail
+    ;
+stmt_opt_write_tail
+    : /* Nothing */
+    | ',' format stmt_opt_write_tail
+    ;
+assign
+    : '='
+    | T_inc
+    | T_dec
+    | T_mul
+    | T_div
+    | T_opmod
+    ;
+range
+    : expr range_choice expr range_opt
+    ;
+range_choice
+    : T_to 
+    | T_downto
+    ;
+range_opt
+    : /* Nothing */
+    | T_step expr
+    ;
+clause
+    : clause_tail clause_choice
+    ;
+clause_tail
+    : /* Nothing */
+    | stmt clause_tail
+    ;
+clause_choice
+    : T_break ';'
+    | T_next ';'
+    ;
+write
+    : T_write
+    | T_wrln
+    | T_wrsp
+    | T_wrspln
+    ;
+format
+    : expr
+    | T_form '(' expr ',' expr format_opt ')'
+    ;
+format_opt
+    : /* Nothing */
+    | ',' expr
+    ;
 
 
 %%
