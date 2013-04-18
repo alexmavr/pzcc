@@ -58,9 +58,16 @@ void yyerror (const char * msg);
 %token T_div
 %token T_opmod
 
+%expect 1
 
+%left T_logor T_or
+%left T_logand T_and 
+%left T_eq T_diff
+%left '<' '>' T_leq T_greq
 %left '+' '-'
-%left '*'
+%left '*' '/' '%' T_mod
+%left UN
+
 
 %%
 
@@ -167,8 +174,8 @@ expr
     | '(' expr ')'
     | l_value
     | call
-    | unop expr
     | expr binop expr
+    | unop expr %prec UN
     ;
 l_value
     : T_id l_value_tail
@@ -230,15 +237,18 @@ stmt
     | l_value stmt_choice ';'
     | call ';'
     | T_if '(' expr ')' stmt stmt_opt_if
-    | T_while '(' expr ')' stmt
-    | T_for '(' T_id ',' range ')' stmt 
-    | T_do stmt T_while '(' expr ')' ';'
+    | T_while '(' expr ')' loop_stmt
+    | T_for '(' T_id ',' range ')' loop_stmt 
+    | T_do loop_stmt T_while '(' expr ')' ';'
     | T_switch '(' expr ')' '{' stmt_tail stmt_opt_switch '}'
-    | T_break ';'
-    | T_cont ';'
     | T_ret stmt_opt_ret ';'
     | write '(' stmt_opt_write ')' ';'
     | block
+    ;
+loop_stmt
+    : stmt
+    | T_break ';'
+    | T_cont ';'
     ;
 stmt_choice
     : T_pp
@@ -261,7 +271,7 @@ stmt_tail_tail
     ;
 stmt_opt_switch
     : /* Nothing */
-    | T_def':' clause
+    | T_def ':' clause
     ;
 stmt_opt_ret
     : /* Nothing */
@@ -319,7 +329,6 @@ format_opt
     : /* Nothing */
     | ',' expr
     ;
-
 
 %%
 

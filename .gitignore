@@ -1,5 +1,6 @@
 *.o
 *.swp
+*.swo
 pzc.lex.c
 pzc
 a.out
