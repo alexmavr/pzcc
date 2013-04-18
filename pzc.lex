@@ -94,7 +94,7 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 \%=									{ return T_opmod;			}
 
 "\/\/"[^\n]*						{ /* one-line comment */	}
-\/\*([^*]|(\*[^\/]))*\*\/			{ /* multi-line comment */	}
+\/\*([^*]|(\*[^\/]))*\*\/			{ /* multi-line comment */ printf("multi %s", yytext);	}
 
 {W}+								{ /* ignore whitespace */	}
 \n									{ /* line counting: yylineno */	}

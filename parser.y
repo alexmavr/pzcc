@@ -238,6 +238,7 @@ stmt
     | T_cont ';'
     | T_ret stmt_opt_ret ';'
     | write '(' stmt_opt_write ')' ';'
+    | block
     ;
 stmt_choice
     : T_pp
@@ -267,7 +268,8 @@ stmt_opt_ret
     | expr
     ;
 stmt_opt_write
-    : format stmt_opt_write_tail
+    : /* Nothing */
+    | format stmt_opt_write_tail
     ;
 stmt_opt_write_tail
     : /* Nothing */
@@ -324,6 +326,7 @@ format_opt
 void yyerror (const char * msg)
 {
   fprintf(stderr, "Syntax Error: %s\n", msg);
+  lex_error(1, "wow");
   exit(1);
 }
 

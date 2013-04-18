@@ -2,11 +2,22 @@
 .DEFAULT: all
 
 CC = gcc
-CCFLAGS += -Wall -O0
+CCFLAGS += -Wall 
 LDFLAGS +=
 
 OBJ += pzc.lex.o comp_lib.o parser.o
 DEPENDS += 
+
+ifndef DEBUG
+       DEBUG = y
+endif
+
+ifeq ($(DEBUG),y)
+	CCFLAGS += -O0
+	BSN_DBG += -t
+else
+	CCFLAGS += -O3
+endif
 
 all: pzc clean
 
@@ -16,7 +27,7 @@ pzc: $(OBJ)
 parser.h: parser.c
 
 parser.c: parser.y
-		bison -v -d -o $@ $<
+		bison ${BSN_DBG} -v -d -o $@ $<
 
 pzc.lex.o: pzc.lex.c parser.h
 	$(CC) $(CCFLAGS) -c -lfl $< -o $@
@@ -27,8 +38,8 @@ pzc.lex.c: pzc.lex
 pzc.lex:;
 
 distclean: clean
-	rm -f pzc
+	rm -f pzc parser.output
 
 clena celan lcean lcena: clean
 clean:
-	rm -f $(OBJ) pzc.lex.c a.out parser.output parser.c parser.h
+	rm -f $(OBJ) pzc.lex.c a.out parser.c parser.h
