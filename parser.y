@@ -58,7 +58,7 @@ void yyerror (const char * msg);
 %token T_div
 %token T_opmod
 
-%expect 1
+%expect 17
 
 %left T_logor T_or
 %left T_logand T_and 
@@ -335,7 +335,6 @@ format_opt
 void yyerror (const char * msg)
 {
   fprintf(stderr, "Syntax Error: %s\n", msg);
-  lex_error(1, "wow");
   exit(1);
 }
 
