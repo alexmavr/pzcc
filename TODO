@@ -1,0 +1,3 @@
+set operator precedence
+error reporting for parser
+AST, symbol table & semantics
