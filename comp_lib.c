@@ -17,7 +17,7 @@ void crit_cleanup (void) {
 	;
 }
 
-/*  Lexical error function  */
+/*  Lexical Error function  */
 void lex_error (error_lv level, const char *msg, ...) {
 	va_list va;
 
@@ -43,9 +43,8 @@ void lex_error (error_lv level, const char *msg, ...) {
 	}
 }
 
-/* Parsing error function */
+/* Parsing Error function */
 void yyerror (const char *msg) {
-    /* ignores the string "syntax error," 
-     * that bison produces */
-	fprintf(stderr, "Syntax error [line %d]: %s\n ", yylineno, &msg[14]);
+    /* ignores the string "syntax error," */
+	fprintf(stderr, "Syntax error [line %d]: %s\n", yylineno, &msg[14]);
 }

@@ -1,10 +1,9 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
-
 %}
 
-%token T_bool               "boolean"
+%token T_bool               "bool"
 %token T_and                "and"
 %token T_break              "break"
 %token T_case               "case"
@@ -13,31 +12,31 @@
 %token T_cont               "continue"
 %token T_def                "default"
 %token T_do                 "do"
-%token T_downto             "downto"
+%token T_downto             "DOWNTO"
 %token T_false              "false"
 %token T_else               "else"
-%token T_for                "for"
-%token T_form               "form"
-%token T_func               "function"
+%token T_for                "FOR"
+%token T_form               "FORM"
+%token T_func               "FUNC"
 %token T_if                 "if"
 %token T_int                "int"
 %token T_mod                "mod"
 %token T_next               "next"
 %token T_not                "not"
 %token T_or                 "or"
-%token T_proc               "procedure"
-%token T_prog               "program"
-%token T_real               "real"
+%token T_proc               "PROC"
+%token T_prog               "PROGRAM"
+%token T_real               "REAL"
 %token T_ret                "return"
-%token T_step               "step"
+%token T_step               "STEP"
 %token T_switch             "switch"
-%token T_to                 "to"
+%token T_to                 "TO"
 %token T_true               "true"
 %token T_while              "while"
-%token T_write              "write"
-%token T_wrln               "writeln"
-%token T_wrsp               "writesp"
-%token T_wrspln             "writespln"
+%token T_write              "WRITE"
+%token T_wrln               "WRITELN"
+%token T_wrsp               "WRITESP"
+%token T_wrspln             "WRITESPLN"
 %token T_id                 "identifier"
 %token T_CONST_integer      "integer constant"
 %token T_CONST_real         "real constant"
@@ -244,6 +243,7 @@ stmt
     | T_ret stmt_opt_ret ';'
     | write '(' stmt_opt_write ')' ';'
     | block
+    | error ';'
     ;
 loop_stmt
     : stmt
@@ -336,6 +336,6 @@ format_opt
 int main ()
 {
     yyparse();
-    printf("\nParsing Complete\n");
+    printf("Parsing Complete\n");
     return 0;
 }
