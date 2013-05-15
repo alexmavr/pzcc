@@ -4,58 +4,58 @@
 
 %}
 
-%token T_bool
-%token T_and
-%token T_break
-%token T_case
-%token T_char
-%token T_const
-%token T_cont
-%token T_def
-%token T_do
-%token T_downto
-%token T_false
-%token T_else
-%token T_for
-%token T_form
-%token T_func
-%token T_if
-%token T_int
-%token T_mod
-%token T_next
-%token T_not
-%token T_or
-%token T_proc
-%token T_prog
-%token T_real
-%token T_ret
-%token T_step
-%token T_switch
-%token T_to
-%token T_true
-%token T_while
-%token T_write
-%token T_wrln
-%token T_wrsp
-%token T_wrspln
-%token T_id
-%token T_CONST_integer
-%token T_CONST_real
-%token T_CONST_char
-%token T_CONST_string
-%token T_eq
-%token T_diff
-%token T_greq
-%token T_leq
-%token T_logand
-%token T_logor
-%token T_pp
-%token T_mm
-%token T_inc
-%token T_dec
-%token T_mul
-%token T_div
-%token T_opmod
+%token T_bool               "boolean"
+%token T_and                "and"
+%token T_break              "break"
+%token T_case               "case"
+%token T_char               "char"
+%token T_const              "const"
+%token T_cont               "continue"
+%token T_def                "default"
+%token T_do                 "do"
+%token T_downto             "downto"
+%token T_false              "false"
+%token T_else               "else"
+%token T_for                "for"
+%token T_form               "form"
+%token T_func               "function"
+%token T_if                 "if"
+%token T_int                "int"
+%token T_mod                "mod"
+%token T_next               "next"
+%token T_not                "not"
+%token T_or                 "or"
+%token T_proc               "procedure"
+%token T_prog               "program"
+%token T_real               "real"
+%token T_ret                "return"
+%token T_step               "step"
+%token T_switch             "switch"
+%token T_to                 "to"
+%token T_true               "true"
+%token T_while              "while"
+%token T_write              "write"
+%token T_wrln               "writeln"
+%token T_wrsp               "writesp"
+%token T_wrspln             "writespln"
+%token T_id                 "identifier"
+%token T_CONST_integer      "integer constant"
+%token T_CONST_real         "real constant"
+%token T_CONST_char         "char constant"
+%token T_CONST_string       "string constant"
+%token T_eq                 "=="
+%token T_diff               "!="
+%token T_greq               ">="
+%token T_leq                "<="
+%token T_logand             "&&"
+%token T_logor              "||"
+%token T_pp                 "++" 
+%token T_mm                 "--"
+%token T_inc                "+="
+%token T_dec                "-="
+%token T_mul                "*="
+%token T_div                "/="
+%token T_opmod              "%="
 
 %expect 17
 
