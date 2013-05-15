@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void yyerror (const char * msg);
 %}
 
 %token T_bool
@@ -68,6 +67,7 @@ void yyerror (const char * msg);
 %left '*' '/' '%' T_mod
 %left UN
 
+%error-verbose
 
 %%
 
@@ -332,13 +332,10 @@ format_opt
 
 %%
 
-void yyerror (const char * msg)
-{
-  fprintf(stderr, "Syntax Error: %s\n", msg);
-  exit(1);
-}
 
 int main ()
 {
-  return yyparse();
+    yyparse();
+    printf("\nParsing Complete\n");
+    return 0;
 }

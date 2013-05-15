@@ -26,7 +26,7 @@ pzc: $(OBJ)
 
 parser.h: parser.c
 
-parser.c: parser.y
+parser.c: parser.y comp_lib.h
 		bison ${BSN_DBG} -v -d -o $@ $<
 
 pzc.lex.o: pzc.lex.c parser.h
@@ -34,6 +34,10 @@ pzc.lex.o: pzc.lex.c parser.h
 
 pzc.lex.c: pzc.lex
 	flex -s -o $@ $< 
+
+comp_lib.o: comp_lib.c
+	$(CC) $(CCFLAGS) -c $< -o $@
+
 
 pzc.lex:;
 

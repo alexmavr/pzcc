@@ -17,7 +17,7 @@ void crit_cleanup (void) {
 	;
 }
 
-//Lexical error function.
+/*  Lexical error function  */
 void lex_error (error_lv level, const char *msg, ...) {
 	va_list va;
 
@@ -41,4 +41,11 @@ void lex_error (error_lv level, const char *msg, ...) {
 		crit_cleanup();
 		exit(EXIT_FAILURE);
 	}
+}
+
+/* Parsing error function */
+void yyerror (const char *msg) {
+    /* ignores the string "syntax error," 
+     * that bison produces */
+	fprintf(stderr, "Syntax error [line %d]: %s\n ", yylineno, &msg[14]);
 }
