@@ -64,7 +64,9 @@
 %left '<' '>' T_leq T_greq
 %left '+' '-'
 %left '*' '/' '%' T_mod
+
 %left UN
+
 
 %error-verbose
 
@@ -164,7 +166,7 @@ const_expr
     : expr
     ;
 expr
-    : T_CONST_integer
+    : T_CONST_integer {$$ = $1;}
     | T_CONST_real
     | T_CONST_char
     | T_CONST_string
@@ -173,7 +175,12 @@ expr
     | '(' expr ')'
     | l_value
     | call
-    | expr binop expr
+    | expr binop1 expr %prec '*' 
+    | expr binop2 expr %prec '+' 
+    | expr binop3 expr %prec '<' 
+    | expr binop4 expr %prec T_eq 
+    | expr binop5 expr %prec T_and 
+    | expr binop6 expr %prec T_or 
     | unop expr %prec UN
     ;
 l_value
@@ -189,24 +196,14 @@ unop
     | '!'
     | T_not
     ;
-binop 
-    : '+'
-    | '-'
-    | '*'
-    | '/'
-    | '%'
-    | T_mod
-    | T_eq
-    | T_diff
-    | '<'
-    | '>'
-    | T_leq
-    | T_greq
-    | T_logand
-    | T_and
-    | T_logor
-    | T_or
-    ;
+
+binop1:'*' | '/' | '%' | T_mod ;
+binop2: '+'| '-' ;
+binop3: '<'| '>'| T_leq | T_greq ;
+binop4: T_eq | T_diff ;
+binop5: T_logand | T_and ;
+binop6: T_logor | T_or;
+
 call 
     : T_id '(' call_opt ')'
     ;
@@ -243,7 +240,7 @@ stmt
     | T_ret stmt_opt_ret ';'
     | write '(' stmt_opt_write ')' ';'
     | block
-    | error ';'
+    | error 
     ;
 loop_stmt
     : stmt
