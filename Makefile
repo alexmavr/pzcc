@@ -5,7 +5,7 @@ CC = gcc
 CCFLAGS += -Wall 
 LDFLAGS +=
 
-OBJ += pzc.lex.o comp_lib.o parser.o
+OBJ += pzc.lex.o comp_lib.o parser.o symbol.o error.o general.o
 DEPENDS += 
 
 ifndef DEBUG
@@ -35,9 +35,12 @@ pzc.lex.o: pzc.lex.c parser.h
 pzc.lex.c: pzc.lex
 	flex -s -o $@ $< 
 
-comp_lib.o: comp_lib.c
-	$(CC) $(CCFLAGS) -c $< -o $@
-
+general.o  : $(addprefix symbol/, general.c general.h error.h)
+	$(CC) $(CFLAGS) -c $< -o $@
+error.o    : $(addprefix symbol/, error.c general.h error.h)
+	$(CC) $(CFLAGS) -c $< -o $@
+symbol.o   : $(addprefix symbol/, symbol.c symbol.h general.h error.h)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 pzc.lex:;
 

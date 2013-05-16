@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include "symbol/symbol.h"
 %}
 
 %token T_bool               "bool"
