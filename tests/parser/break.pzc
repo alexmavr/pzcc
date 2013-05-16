@@ -1,0 +1,18 @@
+PROGRAM hello ()
+{
+	switch (a5) {
+		case 3:
+			WRITELN("Hello world!");
+			NEXT;
+		case 4:
+			haha = 5;
+			break;
+		default:
+			copy = 0;
+			if (3) {
+				haha = 5;
+				break;
+			}
+			break;
+	}
+}
