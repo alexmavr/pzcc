@@ -56,7 +56,7 @@
 %token T_div                "/="
 %token T_opmod              "%="
 
-%expect 17
+%expect 1
 
 %left T_logor T_or
 %left T_logand T_and 
