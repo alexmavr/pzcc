@@ -267,17 +267,16 @@ stmt
     | l_value stmt_choice ';'
     | call ';'
     | T_if '(' expr ')' stmt stmt_opt_if
-    | T_while '(' expr ')' stmt
-    | T_for '(' T_id ',' range ')' stmt 
-    | T_do stmt T_while '(' expr ')' ';'
+    | T_while '(' expr ')' loop_stmt
+    | T_for '(' T_id ',' range ')' loop_stmt 
+    | T_do loop_stmt T_while '(' expr ')' ';'
     | T_switch '(' expr ')' '{' stmt_tail stmt_opt_switch '}'
     | T_ret stmt_opt_ret ';'
     | write '(' stmt_opt_write ')' ';'
-    | T_break ';'
-    | T_cont ';'
     | block
     | error
     ;
+
 loop_stmt
     : stmt
     | T_break ';'
