@@ -1,0 +1,12 @@
+FUNC int fact (int n)
+{
+    if (n == 0)
+        return 1;
+    else
+        return n * fact(n-1);
+}
+
+PROGRAM factorial ()
+{
+    WRITESPLN("The factorial of ", 10, " is ", fact(10));
+}

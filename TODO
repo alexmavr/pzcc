@@ -1,4 +1,4 @@
 break is not error. it is statement. instead we must use contexts to check for constructs that use loops, so that we can assign value to break or continue statements.
-set operator precedence
-error reporting for parser
-AST, symbol table & semantics
+add and lookup entries at the symbol table 
+
+* add type interpretation to constants

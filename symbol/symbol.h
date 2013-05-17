@@ -54,7 +54,7 @@ typedef enum { false=0, true=1 } bool;
 /* Τύποι δεδομένων για την υλοποίηση των σταθερών */
 
 typedef int           RepInteger;         /* Ακέραιες                  */
-typedef unsigned char RepBoolean;         /* Λογικές τιμές             */
+typedef char          RepBoolean;         /* Λογικές τιμές             */
 typedef char          RepChar;            /* Χαρακτήρες                */
 typedef long double   RepReal;            /* Πραγματικές               */
 typedef const char *  RepString;          /* Συμβολοσειρές             */
@@ -73,7 +73,6 @@ struct Type_tag {
        TYPE_REAL,                        /* Πραγματικοί               */
        TYPE_ARRAY,                       /* Πίνακες γνωστού μεγέθους  */
        TYPE_IARRAY,                      /* Πίνακες άγνωστου μεγέθους */
-       TYPE_POINTER                      /* Δείκτες                   */
     } kind;
     Type           refType;              /* Τύπος αναφοράς            */
     RepInteger     size;                 /* Μέγεθος, αν είναι πίνακας */

@@ -70,11 +70,27 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 \\\n					{ /* C-like expression breakage on multiple lines (?) */	}
 
 [a-zA-Z][0-9a-zA-Z_]*				{ return T_id;				}
-{INT}								{ return T_CONST_integer;	}
-[0-9]+\.[0-9]+((e|E)[-+]?{INT})?	{ return T_CONST_real;		}
-'{CHAR}'							{ return T_CONST_char;		}
+{INT}								{ 
+                                        yylval.i = atoi(yytext); 
+                                        return T_CONST_integer;
+                                	}
+[0-9]+\.[0-9]+((e|E)[-+]?{INT})?	{
+                                        yylval.d = atof(yytext); 
+                                        return T_CONST_real;		
+                                    }
+'{CHAR}'							{
+                                        yylval.c = yytext[1];
+                                        return T_CONST_char;	
+                                	}
 '{WARN_CHAR}'						{ lex_error(ERR_LV_WARN, "Wrong escape sequence"); return T_CONST_char;	}
-\"{CHAR}*\"							{ return T_CONST_string;	}
+\"{CHAR}*\"							{ 
+                                        int i = 1;
+                                        while (yytext[i] != '\"' || yytext[i-1] == '\\')
+                                            i++;
+                                        yylval.s = &yytext[1]; 
+                                        yylval.s[i-1] = '\0';
+                                        return T_CONST_string;
+                                	}
 \"{WARN_CHAR}\"						{ lex_error(ERR_LV_WARN, "Wrong escape sequence"); return T_CONST_string;	}
 	
 {SEPAR_n_OPS}						{ return yytext[0];			}

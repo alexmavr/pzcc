@@ -48,3 +48,13 @@ void yyerror (const char *msg) {
     /* ignores the string "syntax error," */
 	fprintf(stderr, "Syntax error [line %d]: %s\n", yylineno, &msg[14]);
 }
+
+void type_error (const char *msg, ...) {
+	va_list va;
+
+	va_start(va, msg);
+	fprintf(stderr, "Semantic error [line %d]: ", yylineno);
+    vfprintf(stderr, msg, va);
+    fprintf(stderr, "\n");
+    va_end(va);
+}

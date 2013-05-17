@@ -1,0 +1,9 @@
+PROGRAM ops ()
+{
+    int n = 5;
+    REAL d = 13.6523; 
+    bool a = true;
+    char c = 's';
+    char s[10];
+    s  = "stringy";
+}

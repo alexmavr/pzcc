@@ -4,6 +4,13 @@
 #include "symbol/symbol.h"
 %}
 
+%union { 
+    int i;
+    char c;
+    char * s;
+    long double d;
+}
+
 %token T_bool               "bool"
 %token T_and                "and"
 %token T_break              "break"
@@ -39,10 +46,10 @@
 %token T_wrsp               "WRITESP"
 %token T_wrspln             "WRITESPLN"
 %token T_id                 "identifier"
-%token T_CONST_integer      "integer constant"
-%token T_CONST_real         "real constant"
-%token T_CONST_char         "char constant"
-%token T_CONST_string       "string constant"
+%token<i> T_CONST_integer  "integer constant"
+%token<d> T_CONST_real     "real constant"
+%token<c> T_CONST_char     "char constant"
+%token<s> T_CONST_string   "string constant"
 %token T_eq                 "=="
 %token T_diff               "!="
 %token T_greq               ">="
@@ -56,6 +63,8 @@
 %token T_mul                "*="
 %token T_div                "/="
 %token T_opmod              "%="
+%token END 0                "end of file"
+
 
 %expect 1
 
@@ -71,15 +80,21 @@
 
 %error-verbose
 
+%initial-action
+{
+    initSymbolTable(256);
+    openScope();
+}
+
 %%
 
 
 /* Tails are ()*, opts are [], choice is (|) */
 module
-    : declaration_list
+    : declaration_list 
     ;
 declaration_list
-    : /* nothing */
+    : /* nothing */ 
     | declaration declaration_list
     ;
 declaration
@@ -152,10 +167,10 @@ routine_tail
     | block
     ;
 program_header
-    : T_prog T_id '(' ')'
+    : T_prog T_id '(' ')' {openScope();}
     ;
 program
-    : program_header block
+    : program_header block {closeScope();}
     ;
 type
     : T_int
@@ -167,12 +182,30 @@ const_expr
     : expr
     ;
 expr
-    : T_CONST_integer {$$ = $1;}
-    | T_CONST_real
-    | T_CONST_char
+    : T_CONST_integer 
+        {
+             printf("%d\n", $1); 
+        }
+    | T_CONST_real 
+        { 
+            printf("%Lf\n", $1); 
+        }
+    | T_CONST_char 
+        { 
+            printf("%c\n", $1); 
+        }
     | T_CONST_string
+        { 
+            printf("%s\n", $1); 
+        }
     | T_true
+        { 
+            printf("true\n"); 
+        }
     | T_false
+        { 
+            printf("false\n"); 
+        }
     | '(' expr ')'
     | l_value
     | call
@@ -241,7 +274,7 @@ stmt
     | T_ret stmt_opt_ret ';'
     | write '(' stmt_opt_write ')' ';'
     | block
-    | error 
+    | error
     ;
 loop_stmt
     : stmt
@@ -334,6 +367,7 @@ format_opt
 int main ()
 {
     yyparse();
+    closeScope();
     printf("Parsing Complete\n");
     return 0;
 }

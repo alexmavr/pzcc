@@ -13,5 +13,6 @@ typedef enum { ERR_LV_WARN, ERR_LV_CRIT } error_lv;
 
 void lex_error (error_lv level, const char *msg, ...);
 void yyerror (const char *msg);
+void type_error (const char *msg, ...);
 
 void crit_cleanup (void);

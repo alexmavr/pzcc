@@ -578,25 +578,11 @@ Type typeIArray (Type refType)
     return n;
 }
 
-Type typePointer (Type refType)
-{
-    Type n = (Type) new(sizeof(struct Type_tag));
-
-    n->kind     = TYPE_POINTER;
-    n->refType  = refType;
-    n->refCount = 1;
-    
-    refType->refCount++;
-
-    return n;
-}
-
 void destroyType (Type type)
 {
     switch (type->kind) {
         case TYPE_ARRAY:
         case TYPE_IARRAY:
-        case TYPE_POINTER:
             if (--(type->refCount) == 0) {
                 destroyType(type->refType);
                 delete(type);
@@ -612,7 +598,6 @@ unsigned int sizeOfType (Type type)
             break;
         case TYPE_INTEGER:
         case TYPE_IARRAY:
-        case TYPE_POINTER:
             return 2;
         case TYPE_BOOLEAN:
         case TYPE_CHAR:
@@ -634,7 +619,6 @@ bool equalType (Type type1, Type type2)
             if (type1->size != type2->size)
                 return false;
         case TYPE_IARRAY:
-        case TYPE_POINTER:
             return equalType(type1->refType, type2->refType);
     }
     return true;        
@@ -669,10 +653,6 @@ void printType (Type type)
             break;
         case TYPE_IARRAY:
             printf("array of ");
-            printType(type->refType);
-            break;
-        case TYPE_POINTER:
-            printf("^");
             printType(type->refType);
             break;
     }
