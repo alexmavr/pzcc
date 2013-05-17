@@ -24,12 +24,12 @@ all: pzc clean
 pzc: $(OBJ) 
 	$(CC) $(LDFLAGS) $(OBJ) -o $@
 
-parser.h: parser.c
+parser.h: parser.c symbol/symbol.h
 
-parser.c: parser.y comp_lib.h
+parser.c: parser.y comp_lib.h 
 		bison ${BSN_DBG} -v -d -o $@ $<
 
-pzc.lex.o: pzc.lex.c parser.h
+pzc.lex.o: pzc.lex.c parser.h 
 	$(CC) $(CCFLAGS) -c -lfl $< -o $@
 
 pzc.lex.c: pzc.lex

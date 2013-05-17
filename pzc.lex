@@ -75,7 +75,7 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
                                         return T_CONST_integer;
                                 	}
 [0-9]+\.[0-9]+((e|E)[-+]?{INT})?	{
-                                        yylval.d = atof(yytext); 
+                                        yylval.r = atof(yytext); 
                                         return T_CONST_real;		
                                     }
 '{CHAR}'							{
@@ -85,10 +85,14 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 '{WARN_CHAR}'						{ lex_error(ERR_LV_WARN, "Wrong escape sequence"); return T_CONST_char;	}
 \"{CHAR}*\"							{ 
                                         int i = 1;
+                                        /* Remove the "" surrounding the string */
                                         while (yytext[i] != '\"' || yytext[i-1] == '\\')
                                             i++;
-                                        yylval.s = &yytext[1]; 
-                                        yylval.s[i-1] = '\0';
+                                        char *tmp= malloc(i*sizeof(char));
+                                        tmp = &yytext[1];
+                                        tmp[i-1] = '\0';
+                                        yylval.s = (const char *) tmp;
+                                        free(tmp);
                                         return T_CONST_string;
                                 	}
 \"{WARN_CHAR}\"						{ lex_error(ERR_LV_WARN, "Wrong escape sequence"); return T_CONST_string;	}

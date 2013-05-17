@@ -2,13 +2,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "symbol/symbol.h"
+
 %}
 
 %union { 
     int i;
+    long double r;
     char c;
-    char * s;
-    long double d;
+    const char * s;
+    int type; // from the kind enum of symbol.h
 }
 
 %token T_bool               "bool"
@@ -47,7 +49,7 @@
 %token T_wrspln             "WRITESPLN"
 %token T_id                 "identifier"
 %token<i> T_CONST_integer  "integer constant"
-%token<d> T_CONST_real     "real constant"
+%token<r> T_CONST_real     "real constant"
 %token<c> T_CONST_char     "char constant"
 %token<s> T_CONST_string   "string constant"
 %token T_eq                 "=="
@@ -64,6 +66,8 @@
 %token T_div                "/="
 %token T_opmod              "%="
 %token END 0                "end of file"
+
+%type<type> expr
 
 
 %expect 1
@@ -184,27 +188,27 @@ const_expr
 expr
     : T_CONST_integer 
         {
-             printf("%d\n", $1); 
+            $$ = TYPE_INTEGER;
         }
     | T_CONST_real 
         { 
-            printf("%Lf\n", $1); 
+            $$ = TYPE_REAL;
         }
     | T_CONST_char 
         { 
-            printf("%c\n", $1); 
+            $$ = TYPE_CHAR;
         }
     | T_CONST_string
         { 
-            printf("%s\n", $1); 
+            $$ = TYPE_ARRAY;
         }
     | T_true
         { 
-            printf("true\n"); 
+            $$ = TYPE_BOOLEAN;
         }
     | T_false
         { 
-            printf("false\n"); 
+            $$ = TYPE_BOOLEAN;
         }
     | '(' expr ')'
     | l_value
