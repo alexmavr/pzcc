@@ -202,11 +202,7 @@ expr
     | T_CONST_string
         { 
             /* should be freed when appropriate */
-            $$ = malloc(sizeof(struct Type_tag));
-            $$->kind = TYPE_ARRAY;
-            $$->refType = typeChar;
-            $$->size = $1.len;
-            $$->refCount = 0;
+            $$ = typeArray($1.len, typeChar);
             printf("%s %d\n", $1.s, $$->size);
         }
     | T_true
