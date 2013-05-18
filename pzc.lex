@@ -53,7 +53,7 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 "if"					{ return T_if;		}
 "int"					{ return T_int;		}
 "MOD"					{ 
-                            yylval.s = yytext;
+                            yylval.s = "MOD";
                             return T_mod;	
                     	}
 "NEXT"					{ return T_next;	}
@@ -127,56 +127,56 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
                                 	}
 
 ==									{ 
-                                        yylval.s = yytext;
+                                        yylval.s = "==";
                                         return T_eq;			
                                 	}
 \!\=							    { 
 
-                                        yylval.s = yytext;
+                                        yylval.s = "!=";
                                         return T_diff;			
                                 	}
 >=								    { 
-                                        yylval.s = yytext;
+                                        yylval.s = ">=";
                                         return T_greq;			
                                 	}
 \<=									{ 
-                                        yylval.s = yytext;
+                                        yylval.s = "<=";
                                         return T_leq;			
                                 	}
 &&									{ 
-                                        yylval.s = yytext;
+                                        yylval.s = "&&";
                                         return T_logand;		
                                 	}
 \|\|								{ 
-                                        yylval.s = yytext;
+                                        yylval.s = "||";
                                         return T_logor;		
                                 	}
 \+\+								{ 
-                                        yylval.s = yytext;
+                                        yylval.s = "++";
                                         return T_pp;		
                                 	}
 \-\-								{ 
-                                        yylval.s = yytext;
+                                        yylval.s = "--";
                                         return T_mm;		
                                 	}
 \+=									{ 
-                                        yylval.s = yytext;
+                                        yylval.s = "+=";
                                         return T_inc;		
                                 	}
 \-=									{ 
-                                        yylval.s = yytext;
+                                        yylval.s = "-=";
                                         return T_dec;		
                                 	}
 \*=									{ 
-                                        yylval.s = yytext;
+                                        yylval.s = "*=";
                                         return T_mul;		
                                 	}
 \/=									{ 
-                                        yylval.s = yytext;
+                                        yylval.s = "/=";
                                         return T_div;		
                                 	}
 \%=									{ 
-                                        yylval.s = yytext;
+                                        yylval.s = "%=";
                                         return T_opmod;;		
                                 	}
 

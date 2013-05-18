@@ -302,7 +302,7 @@ unop
 binop1: '*'| '/' | '%' | T_mod ;
 binop2: '+'| '-' ;
 binop3: '<'| '>'| T_leq | T_greq ;
-binop4: T_eq | T_diff ;
+binop4: T_eq | T_diff;
 binop5: T_logand | T_and ;
 binop6: T_logor | T_or;
 
