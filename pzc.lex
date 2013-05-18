@@ -10,6 +10,7 @@
 
 #include <stdlib.h>
 #include <stdarg.h> 
+#include <string.h> 
 #include "comp_lib.h"
 #include "symbol/symbol.h"
 #include "parser.h"
@@ -70,7 +71,13 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 
 \\\n					{ /* C-like expression breakage on multiple lines (?) */	}
 
-[a-zA-Z][0-9a-zA-Z_]*				{ return T_id;				}
+[a-zA-Z][0-9a-zA-Z_]*				{ 
+                                        char *tmp= (char *) malloc(yyleng * sizeof(char));
+                                        strcpy(tmp, yytext);
+                                        yylval.str.s = tmp;
+                                        yylval.str.len = yyleng;
+                                        return T_id;
+                    				}
 {INT}								{ 
                                         yylval.i = atoi(yytext); 
                                         return T_CONST_integer;
@@ -85,15 +92,12 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
                                 	}
 '{WARN_CHAR}'						{ lex_error(ERR_LV_WARN, "Wrong escape sequence"); return T_CONST_char;	}
 \"{CHAR}*\"							{ 
-                                        int i = 1;
                                         /* allocate the string without the surrounding " chars */
-                                        while (yytext[i] != '\"' || yytext[i-1] == '\\')
-                                            i++;
-                                        char *tmp= (char *) malloc(i * sizeof(char));
-                                        tmp = &yytext[1];
-                                        tmp[i-1] = '\0';
+                                        char * tmp= (char *) malloc((yyleng-1) * sizeof(char));
+                                        strcpy (tmp, &yytext[1]);
+                                        tmp[yyleng-2] = '\0';
                                         yylval.str.s = (const char *) tmp;
-                                        yylval.str.len = i;
+                                        yylval.str.len = yyleng-2;
                                         return T_CONST_string;
                                 	}
 \"{WARN_CHAR}\"						{ lex_error(ERR_LV_WARN, "Wrong escape sequence"); return T_CONST_string;	}
