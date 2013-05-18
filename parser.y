@@ -48,7 +48,7 @@
 %token T_wrln               "WRITELN"
 %token T_wrsp               "WRITESP"
 %token T_wrspln             "WRITESPLN"
-%token T_id                 "identifier"
+%token<str> T_id            "identifier"
 %token<i> T_CONST_integer  "integer constant"
 %token<r> T_CONST_real     "real constant"
 %token<c> T_CONST_char     "char constant"
@@ -69,6 +69,8 @@
 %token END 0                "end of file"
 
 %type<type> expr
+%type<type> l_value
+%type<type> call
 
 
 %expect 1
@@ -201,7 +203,6 @@ expr
         }
     | T_CONST_string
         { 
-            /* should be freed when appropriate */
             $$ = typeArray($1.len, typeChar);
             printf("%s %d\n", $1.s, $$->size);
         }
@@ -232,9 +233,12 @@ expr
     | expr binop5 expr %prec T_and 
     | expr binop6 expr %prec T_or 
     | unop expr %prec UN
+        {
+            $$ = $2;
+        }
     ;
 l_value
-    : T_id l_value_tail
+    : T_id l_value_tail {   }
     ;
 l_value_tail
     : /* Nothing */
@@ -256,6 +260,9 @@ binop6: T_logor | T_or;
 
 call 
     : T_id '(' call_opt ')'
+        {
+            // return the function's call type
+        }
     ;
 call_opt
     : /* Nothing */

@@ -11,8 +11,9 @@
 #include <stdlib.h>
 #include <stdarg.h> 
 #include <string.h> 
-#include "comp_lib.h"
+#include "comp_lib.h" 
 #include "symbol/symbol.h"
+#include "symbol/general.h" 
 #include "parser.h"
 
 #define YY_NO_INPUT
@@ -69,38 +70,49 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 "WRITESP"				{ return T_wrsp;	}
 "WRITESPLN"				{ return T_wrspln;	}
 
-\\\n					{ /* C-like expression breakage on multiple lines (?) */	}
+\\\n					{ /* C-like expression breakage on multiple lines (?) */ }
 
 [a-zA-Z][0-9a-zA-Z_]*				{ 
-                                        char *tmp= (char *) malloc(yyleng * sizeof(char));
+                                        char *tmp = (char *) new(yyleng * sizeof(char));
                                         strcpy(tmp, yytext);
                                         yylval.str.s = tmp;
                                         yylval.str.len = yyleng;
                                         return T_id;
                     				}
+
 {INT}								{ 
                                         yylval.i = atoi(yytext); 
                                         return T_CONST_integer;
                                 	}
+
 [0-9]+\.[0-9]+((e|E)[-+]?{INT})?	{
                                         yylval.r = atof(yytext); 
                                         return T_CONST_real;		
                                     }
+
 '{CHAR}'							{
                                         yylval.c = yytext[1];
                                         return T_CONST_char;	
                                 	}
-'{WARN_CHAR}'						{ lex_error(ERR_LV_WARN, "Wrong escape sequence"); return T_CONST_char;	}
+
+'{WARN_CHAR}'						{ 
+                                        lex_error(ERR_LV_WARN, "Wrong escape sequence");
+                                        return T_CONST_char;
+                                	}
+
 \"{CHAR}*\"							{ 
-                                        /* allocate the string without the surrounding " chars */
-                                        char * tmp= (char *) malloc((yyleng-1) * sizeof(char));
+                                        /* copy the string without the surrounding " chars */
+                                        char * tmp= (char *) new((yyleng-1) * sizeof(char));
                                         strcpy (tmp, &yytext[1]);
                                         tmp[yyleng-2] = '\0';
                                         yylval.str.s = (const char *) tmp;
                                         yylval.str.len = yyleng-2;
                                         return T_CONST_string;
                                 	}
-\"{WARN_CHAR}\"						{ lex_error(ERR_LV_WARN, "Wrong escape sequence"); return T_CONST_string;	}
+\"{WARN_CHAR}\"						{ 
+                                        lex_error(ERR_LV_WARN, "Wrong escape sequence"); 
+                                        return T_CONST_string;
+                                	}
 	
 {SEPAR_n_OPS}						{ return yytext[0];			}
 
