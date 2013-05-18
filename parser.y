@@ -1,21 +1,23 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "symbol/symbol.h"
 
 %}
 
 %union { 
+    /* Constants */
     int i;
     long double r;
     char c; 
-    const char * n; // identifiers
-    struct { const char * s; int len; } str;
-    Type type;   
+    const char * s;
+
+    Type type;   // expr's type
 }
 
 %token T_bool               "bool"
-%token T_and                "and"
+%token<s> T_and             "and"
 %token T_break              "break"
 %token T_case               "case"
 %token T_char               "char"
@@ -31,10 +33,10 @@
 %token T_func               "FUNC"
 %token T_if                 "if"
 %token T_int                "int"
-%token T_mod                "mod"
+%token<s> T_mod             "mod"
 %token T_next               "next"
 %token T_not                "not"
-%token T_or                 "or"
+%token<s> T_or              "or"
 %token T_proc               "PROC"
 %token T_prog               "PROGRAM"
 %token T_real               "REAL"
@@ -48,30 +50,43 @@
 %token T_wrln               "WRITELN"
 %token T_wrsp               "WRITESP"
 %token T_wrspln             "WRITESPLN"
-%token<str> T_id            "identifier"
-%token<i> T_CONST_integer  "integer constant"
-%token<r> T_CONST_real     "real constant"
-%token<c> T_CONST_char     "char constant"
-%token<str> T_CONST_string   "string constant"
-%token T_eq                 "=="
-%token T_diff               "!="
-%token T_greq               ">="
-%token T_leq                "<="
-%token T_logand             "&&"
-%token T_logor              "||"
-%token T_pp                 "++" 
-%token T_mm                 "--"
-%token T_inc                "+="
-%token T_dec                "-="
-%token T_mul                "*="
-%token T_div                "/="
-%token T_opmod              "%="
+%token<s> T_id              "identifier"
+%token<i> T_CONST_integer   "integer constant"
+%token<r> T_CONST_real      "real constant"
+%token<c> T_CONST_char      "char constant"
+%token<s> T_CONST_string    "string constant"
+%token<s> T_eq              "=="
+%token<s> T_diff            "!="
+%token<s> T_greq            ">="
+%token<s> T_leq             "<="
+%token<s> T_logand          "&&"
+%token<s> T_logor           "||"
+%token<s> T_pp              "++" 
+%token<s> T_mm              "--"
+%token<s> T_inc             "+="
+%token<s> T_dec             "-="
+%token<s> T_mul             "*="
+%token<s> T_div             "/="
+%token<s> T_opmod           "%="
 %token END 0                "end of file"
+%token<s> '*'
+%token<s> '/'
+%token<s> '%'
+%token<s> '+'
+%token<s> '-'
+%token<s> '<'
+%token<s> '>'
 
 %type<type> expr
 %type<type> l_value
 %type<type> call
 
+%type<s> binop1
+%type<s> binop2
+%type<s> binop3
+%type<s> binop4
+%type<s> binop5
+%type<s> binop6
 
 %expect 1
 
@@ -203,8 +218,7 @@ expr
         }
     | T_CONST_string
         { 
-            $$ = typeArray($1.len, typeChar);
-            printf("%s %d\n", $1.s, $$->size);
+            $$ = typeArray(strlen($1), typeChar);
         }
     | T_true
         { 
@@ -225,13 +239,44 @@ expr
     | call
     | expr binop1 expr %prec '*' 
         {
-            // $$ = binop_type_check($1, $3);
+            if ($1 == $3) {
+                // IR
+                $$ = $1;
+            } else if (($1 == typeReal) && ($3 == typeInteger)) {
+                // Promote and IR
+                $$ = typeReal;
+            } else if (($1 == typeInteger) && ($3 == typeReal)) {
+                // Promote and IR
+                $$ = typeReal;
+            } else {
+                type_error("Type mismatch on \"%s\" operator", $2 );
+            }
         }
     | expr binop2 expr %prec '+' 
+            {
+                if ($1 != $3) 
+                    type_error("Type mismatch on \"%s\" operator", $2 );
+            }
     | expr binop3 expr %prec '<' 
+            {
+                if ($1 != $3) 
+                    type_error("Type mismatch on \"%s\" operator", $2 );
+            }
     | expr binop4 expr %prec T_eq 
+            {
+                if ($1 != $3) 
+                    type_error("Type mismatch on \"%s\" operator", $2 );
+            }
     | expr binop5 expr %prec T_and 
+            {
+                if ($1 != $3) 
+                    type_error("Type mismatch on \"%s\" operator", $2 );
+            }
     | expr binop6 expr %prec T_or 
+            {
+                if ($1 != $3) 
+                    type_error("Type mismatch on \"%s\" operator", $2 );
+            }
     | unop expr %prec UN
         {
             $$ = $2;
@@ -239,6 +284,9 @@ expr
     ;
 l_value
     : T_id l_value_tail {   }
+        {
+            // Lookup T_id on symbol table
+        }
     ;
 l_value_tail
     : /* Nothing */
@@ -251,7 +299,7 @@ unop
     | T_not
     ;
 
-binop1:'*' | '/' | '%' | T_mod ;
+binop1: '*'| '/' | '%' | T_mod ;
 binop2: '+'| '-' ;
 binop3: '<'| '>'| T_leq | T_greq ;
 binop4: T_eq | T_diff ;

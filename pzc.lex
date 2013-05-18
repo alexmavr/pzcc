@@ -52,10 +52,16 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 "FUNC"					{ return T_func;	}
 "if"					{ return T_if;		}
 "int"					{ return T_int;		}
-"MOD"					{ return T_mod;		}
+"MOD"					{ 
+                            yylval.s = yytext;
+                            return T_mod;	
+                    	}
 "NEXT"					{ return T_next;	}
 "not"					{ return T_not;		}
-"or"					{ return T_or;		}
+"or"					{ 
+                            yylval.s = "or";
+                            return T_or;		
+                        }
 "PROC"					{ return T_proc;	}
 "PROGRAM"				{ return T_prog;	}
 "REAL"					{ return T_real;	}
@@ -75,8 +81,7 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 [a-zA-Z][0-9a-zA-Z_]*				{ 
                                         char *tmp = (char *) new(yyleng * sizeof(char));
                                         strcpy(tmp, yytext);
-                                        yylval.str.s = tmp;
-                                        yylval.str.len = yyleng;
+                                        yylval.s = (const char *) tmp;
                                         return T_id;
                     				}
 
@@ -105,8 +110,7 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
                                         char * tmp= (char *) new((yyleng-1) * sizeof(char));
                                         strcpy (tmp, &yytext[1]);
                                         tmp[yyleng-2] = '\0';
-                                        yylval.str.s = (const char *) tmp;
-                                        yylval.str.len = yyleng-2;
+                                        yylval.s = (const char *) tmp;
                                         return T_CONST_string;
                                 	}
 \"{WARN_CHAR}\"						{ 
@@ -114,21 +118,67 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
                                         return T_CONST_string;
                                 	}
 	
-{SEPAR_n_OPS}						{ return yytext[0];			}
+{SEPAR_n_OPS}						{ 
+                                        char * tmp= (char *) new(2 * sizeof(char));
+                                        tmp[0] = yytext[0];
+                                        tmp[1] = '\0';
+                                        yylval.s = tmp;
+                                        return yytext[0];		
+                                	}
 
-==									{ return T_eq;				}
-!=								    { return T_diff;			}
->=								    { return T_greq;			}
-\<=									{ return T_leq;				}
-&&									{ return T_logand;			}
-\|\|								{ return T_logor;			}
-\+\+								{ return T_pp;				}
-\-\-								{ return T_mm;				}
-\+=									{ return T_inc;				}
-\-=									{ return T_dec;				}
-\*=									{ return T_mul;				}
-\/=									{ return T_div;				}
-\%=									{ return T_opmod;			}
+==									{ 
+                                        yylval.s = yytext;
+                                        return T_eq;			
+                                	}
+\!\=							    { 
+
+                                        yylval.s = yytext;
+                                        return T_diff;			
+                                	}
+>=								    { 
+                                        yylval.s = yytext;
+                                        return T_greq;			
+                                	}
+\<=									{ 
+                                        yylval.s = yytext;
+                                        return T_leq;			
+                                	}
+&&									{ 
+                                        yylval.s = yytext;
+                                        return T_logand;		
+                                	}
+\|\|								{ 
+                                        yylval.s = yytext;
+                                        return T_logor;		
+                                	}
+\+\+								{ 
+                                        yylval.s = yytext;
+                                        return T_pp;		
+                                	}
+\-\-								{ 
+                                        yylval.s = yytext;
+                                        return T_mm;		
+                                	}
+\+=									{ 
+                                        yylval.s = yytext;
+                                        return T_inc;		
+                                	}
+\-=									{ 
+                                        yylval.s = yytext;
+                                        return T_dec;		
+                                	}
+\*=									{ 
+                                        yylval.s = yytext;
+                                        return T_mul;		
+                                	}
+\/=									{ 
+                                        yylval.s = yytext;
+                                        return T_div;		
+                                	}
+\%=									{ 
+                                        yylval.s = yytext;
+                                        return T_opmod;;		
+                                	}
 
 "\/\/"[^\n]*						{ /* one-line comment */	}
 \/\*([^*]|(\**[^\/]))*\*\/			{ /* multi-line comment */  }
