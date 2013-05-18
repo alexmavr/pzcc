@@ -5,3 +5,5 @@ pzc.lex.c
 pzc
 a.out
 parser.output
+symbol/symbtest*
+symbol/Makefile

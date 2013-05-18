@@ -8,9 +8,10 @@
 %union { 
     int i;
     long double r;
-    char c;
-    const char * s;
-    int type; // from the kind enum of symbol.h
+    char c; 
+    const char * n; // identifiers
+    struct { const char * s; int len; } str;
+    Type type;   
 }
 
 %token T_bool               "bool"
@@ -51,7 +52,7 @@
 %token<i> T_CONST_integer  "integer constant"
 %token<r> T_CONST_real     "real constant"
 %token<c> T_CONST_char     "char constant"
-%token<s> T_CONST_string   "string constant"
+%token<str> T_CONST_string   "string constant"
 %token T_eq                 "=="
 %token T_diff               "!="
 %token T_greq               ">="
@@ -188,32 +189,47 @@ const_expr
 expr
     : T_CONST_integer 
         {
-            $$ = TYPE_INTEGER;
+            $$ = typeInteger;
         }
     | T_CONST_real 
         { 
-            $$ = TYPE_REAL;
+            $$ = typeReal;
         }
     | T_CONST_char 
         { 
-            $$ = TYPE_CHAR;
+            $$ = typeChar;
         }
     | T_CONST_string
         { 
-            $$ = TYPE_ARRAY;
+            /* should be freed when appropriate */
+            $$ = malloc(sizeof(struct Type_tag));
+            $$->kind = TYPE_ARRAY;
+            $$->refType = typeChar;
+            $$->size = $1.len;
+            $$->refCount = 0;
+            printf("%s %d\n", $1.s, $$->size);
         }
     | T_true
         { 
-            $$ = TYPE_BOOLEAN;
+            $$ = typeBoolean;
         }
     | T_false
         { 
-            $$ = TYPE_BOOLEAN;
+            $$ = typeBoolean;
         }
     | '(' expr ')'
+        {
+            $$ = $2;
+        }
     | l_value
+        {
+            // $$ = $1; need to specify types for identifiers
+        }
     | call
     | expr binop1 expr %prec '*' 
+        {
+            // $$ = binop_type_check($1, $3);
+        }
     | expr binop2 expr %prec '+' 
     | expr binop3 expr %prec '<' 
     | expr binop4 expr %prec T_eq 
@@ -278,7 +294,7 @@ stmt
     | T_ret stmt_opt_ret ';'
     | write '(' stmt_opt_write ')' ';'
     | block
-    | error
+    | error 
     ;
 
 loop_stmt

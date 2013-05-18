@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <stdarg.h> 
 #include "comp_lib.h"
+#include "symbol/symbol.h"
 #include "parser.h"
 
 #define YY_NO_INPUT
@@ -85,14 +86,14 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 '{WARN_CHAR}'						{ lex_error(ERR_LV_WARN, "Wrong escape sequence"); return T_CONST_char;	}
 \"{CHAR}*\"							{ 
                                         int i = 1;
-                                        /* Remove the "" surrounding the string */
+                                        /* allocate the string without the surrounding " chars */
                                         while (yytext[i] != '\"' || yytext[i-1] == '\\')
                                             i++;
-                                        char *tmp= malloc(i*sizeof(char));
+                                        char *tmp= (char *) malloc(i * sizeof(char));
                                         tmp = &yytext[1];
                                         tmp[i-1] = '\0';
-                                        yylval.s = (const char *) tmp;
-                                        free(tmp);
+                                        yylval.str.s = (const char *) tmp;
+                                        yylval.str.len = i;
                                         return T_CONST_string;
                                 	}
 \"{WARN_CHAR}\"						{ lex_error(ERR_LV_WARN, "Wrong escape sequence"); return T_CONST_string;	}

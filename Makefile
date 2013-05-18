@@ -24,17 +24,6 @@ all: pzc clean
 pzc: $(OBJ) 
 	$(CC) $(LDFLAGS) $(OBJ) -o $@
 
-parser.h: parser.c symbol/symbol.h
-
-parser.c: parser.y comp_lib.h 
-		bison ${BSN_DBG} -v -d -o $@ $<
-
-pzc.lex.o: pzc.lex.c parser.h 
-	$(CC) $(CCFLAGS) -c -lfl $< -o $@
-
-pzc.lex.c: pzc.lex
-	flex -s -o $@ $< 
-
 general.o  : $(addprefix symbol/, general.c general.h error.h)
 	$(CC) $(CFLAGS) -c $< -o $@
 error.o    : $(addprefix symbol/, error.c general.h error.h)
@@ -42,6 +31,16 @@ error.o    : $(addprefix symbol/, error.c general.h error.h)
 symbol.o   : $(addprefix symbol/, symbol.c symbol.h general.h error.h)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+parser.h: parser.c 
+
+parser.c: parser.y comp_lib.h
+		bison ${BSN_DBG} -v -d -o $@ $<
+
+pzc.lex.o: pzc.lex.c comp_lib.h parser.h symbol/symbol.h
+	$(CC) $(CCFLAGS) -c -lfl $< -o $@
+
+pzc.lex.c: pzc.lex
+	flex -s -o $@ $< 
 pzc.lex:;
 
 distclean: clean
