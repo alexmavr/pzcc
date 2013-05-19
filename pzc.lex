@@ -101,20 +101,20 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
                                 	}
 
 '{WARN_CHAR}'						{ 
-                                        lex_error(ERR_LV_WARN, "Wrong escape sequence");
+                                        lex_error(ERR_LV_WARN, "Wrong escape sequence: %s ", yytext);
                                         return T_CONST_char;
                                 	}
 
 \"{CHAR}*\"							{ 
                                         /* copy the string without the surrounding " chars */
-                                        char * tmp= (char *) new((yyleng-1) * sizeof(char));
+                                        char * tmp = (char *) new((yyleng-1) * sizeof(char));
                                         strcpy (tmp, &yytext[1]);
                                         tmp[yyleng-2] = '\0';
                                         yylval.s = (const char *) tmp;
                                         return T_CONST_string;
                                 	}
 \"{WARN_CHAR}\"						{ 
-                                        lex_error(ERR_LV_WARN, "Wrong escape sequence"); 
+                                        lex_error(ERR_LV_WARN, "Wrong escape sequence: %s", yytext); 
                                         return T_CONST_string;
                                 	}
 	
