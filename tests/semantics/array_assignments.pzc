@@ -3,5 +3,7 @@ PROGRAM array_assignments ()
 {
     int y[15] = 2;
     char y[15.6];
-    int a[b];
+    int a[5][2+1];
+    char r['c'];
+    int d[b*2];
 }

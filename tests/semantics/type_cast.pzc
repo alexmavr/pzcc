@@ -1,0 +1,12 @@
+PROGRAM type_cast ()
+{
+    // Shouldn't fail
+    REAL y = 5 + 3.0; 
+    int z;
+    z = 2;
+    REAL k = 4 + z;
+    k = 4.0 + z;
+    k = z + 4.0;
+    k = z + y;
+    z = k;
+}
