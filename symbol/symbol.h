@@ -1,9 +1,7 @@
 /******************************************************************************
  *  CVS version:
  *     $Id: symbol.h,v 1.1 2003/05/13 22:21:01 nickie Exp $
- ******************************************************************************
- *
- *  C header file : symbol.h
+ ****************************************************************************** * *  C header file : symbol.h
  *  Project       : PCL Compiler
  *  Version       : 1.0 alpha
  *  Written by    : Nikolaos S. Papaspyrou (nickie@softlab.ntua.gr)

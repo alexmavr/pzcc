@@ -2,10 +2,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include "symbol/symbol.h"
 
-%}
+Type currentType; // global type indicator for variable initializations
 
+struct const_val {
+    union {
+        int i;
+        char c;
+        long double r;
+        const char * s;
+        bool b;
+    } value;
+    Type type;
+};
+
+%}
 %union { 
     /* Constants */
     int i;
@@ -14,6 +27,7 @@
     const char * s;
 
     Type type;   // expr's type
+    const_val const_val;
 }
 
 %token T_bool               "bool"
@@ -77,16 +91,22 @@
 %token<s> '<'
 %token<s> '>'
 
-%type<type> expr
-%type<type> l_value
-%type<type> call
+%type <type> expr
+%type <type> l_value
+%type <type> call
+%type <type> type
+%type <type> var_init_opt
+%type <type> var_init_tail
+%type <type> var_init_tail_plus
 
-%type<s> binop1
-%type<s> binop2
-%type<s> binop3
-%type<s> binop4
-%type<s> binop5
-%type<s> binop6
+%type <const_val> const_expr
+
+%type <s> binop1
+%type <s> binop2
+%type <s> binop3
+%type <s> binop4
+%type <s> binop5
+%type <s> binop6
 
 %expect 1
 
@@ -133,26 +153,35 @@ const_def_tail
     | ',' T_id '=' const_expr const_def_tail
     ;
 var_def
-    : type var_init var_def_tail ';'
+    : type { currentType = $1; } var_init var_def_tail ';' 
     ;
 var_def_tail
     : /* nothing */
-    | ',' var_init var_def_tail
+    | ',' var_init {} var_def_tail
+        {
+        }
     ;
 var_init
-    : T_id var_init_opt
+    : T_id var_init_opt 
+        { 
+            if (($2 != NULL) && ($2 != currentType)){
+                type_error("Illegal assigment to \"%s\"", $1);
+            } else {
+                newVariable($1, currentType);
+            }
+        }
     | T_id var_init_tail_plus
     ;
 var_init_opt
-    : /* nothing */
-    | '=' expr 
+    : /* nothing */ {$$ = NULL;}
+    | '=' expr  { $$ = $2; }
     ;
 var_init_tail_plus
-    : '[' const_expr ']' var_init_tail
+    : '[' const_expr ']' var_init_tail { $$ = typeArray($2, $4); }
     ;
 var_init_tail
-    : /* nothing */
-    | '[' const_expr ']' var_init_tail
+    : /* nothing */ { $$ = currentType; }
+    | '[' const_expr ']' var_init_tail { $$ = typeArray($2, $4); }
     ;
 routine_header
     : routine_header_head T_id '(' routine_header_opt ')'
@@ -195,39 +224,65 @@ program
     : program_header block {closeScope();}
     ;
 type
-    : T_int
-    | T_bool
-    | T_char
-    | T_real
+    : T_int     { $$ = typeInteger; }
+    | T_bool    { $$ = typeBoolean; }
+    | T_char    { $$ = typeChar; }
+    | T_real    { $$ = typeReal; }
     ;
+
 const_expr
-    : expr
-    ;
-expr
     : T_CONST_integer 
         {
-            $$ = typeInteger;
+            $$.type = typeInteger;
+            $$.value.i = $1;
         }
     | T_CONST_real 
         { 
-            $$ = typeReal;
+            $$.type = typeReal;
+            $$.value.r = $1;
         }
     | T_CONST_char 
         { 
-            $$ = typeChar;
+            $$.type = typeChar;
+            $$.value.c = $1;
         }
     | T_CONST_string
         { 
-            $$ = typeArray(strlen($1), typeChar);
+            $$.type = typeArray(strlen($1), typeChar);
+            $$.value.s = $1;
         }
     | T_true
         { 
+            $$.value.b = true;
             $$ = typeBoolean;
         }
     | T_false
         { 
+            $$.value.b = false;
             $$ = typeBoolean;
         }
+    | const_expr binop1 const_expr %prec '*' 
+        {
+            if ((($1.type == typeInteger) && ($3.type == typeReal)) \
+            || (($1.type == typeReal) && ($3.type == typeInteger)) \
+            || (($1.type == typeReal) && ($3.type == typeReal))) {
+                    $$.type = typeReal;
+                    $$.value = (long double) $3.value * (long double) $1.value;
+            } else if (($1.type == typeInteger) && ($3.type == typeInteger)) {
+                    $$.type = typeInteger;
+                    $$.value = $1.value * $3.value;
+            } else {
+                    type_error("Type mismatch on \"%s\" operator", $2);
+            }
+        }
+    | const_expr binop2 const_expr %prec '+' 
+    | const_expr binop3 const_expr %prec '<' 
+    | const_expr binop4 const_expr %prec T_eq 
+    | const_expr binop5 const_expr %prec T_and 
+    | const_expr binop6 const_expr %prec T_or 
+    ;
+expr
+    :  const_expr { $$ = $1.type; }
     | '(' expr ')'
         {
             $$ = $2;
