@@ -1,0 +1,7 @@
+const int b = 5;
+PROGRAM array_assignments ()
+{
+    int y[15] = 2;
+    char y[15.6];
+    int a[b];
+}

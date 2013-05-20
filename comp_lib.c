@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
 #include "comp_lib.h"
 
 //Cleanup on critical error.
@@ -43,7 +44,6 @@ void lex_error (error_lv level, const char *msg, ...) {
 	}
 }
 
-/* Parsing Error function */
 void yyerror (const char *msg) {
     /* ignores the string "syntax error," */
 	fprintf(stderr, "Syntax error [line %d]: %s\n", yylineno, &msg[14]);
@@ -58,3 +58,29 @@ void type_error (const char *msg, ...) {
     fprintf(stderr, "\n");
     va_end(va);
 }
+
+const char * verbose_type(Type t ) {
+    char * res = "Array of ";
+    if (t == typeInteger)
+        return "Integer";
+    else if (t == typeReal)
+        return "Real";
+    else if (t == typeBoolean)
+        return "Boolean";
+    else if (t == typeChar)
+        return "Char";
+    else if (t == typeVoid)
+        return "Void";
+    else if ((t->kind == TYPE_ARRAY) || (t->kind == TYPE_IARRAY)) {
+        if (t->refType->kind == TYPE_ARRAY)
+            return "Multidimensional Array";
+        else {       
+            strcat(res, verbose_type(t->refType));
+            strcat(res, "s");
+            return res;
+        }
+    }
+}
+
+
+

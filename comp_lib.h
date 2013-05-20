@@ -18,3 +18,4 @@ void type_error (const char *msg, ...);
 
 void crit_cleanup (void);
 
+const char * verbose_type(Type t); 

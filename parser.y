@@ -7,18 +7,21 @@
 
 Type currentType; // global type indicator for variable initializations
 
-struct const_val {
-    union {
-        int i;
-        char c;
-        long double r;
-        const char * s;
-        bool b;
-    } value;
-    Type type;
-};
-
 %}
+
+%code requires {
+    struct ast_node {
+        union {
+            int i;
+            char c;
+            long double r;
+            const char * s;
+            bool b;
+        } value;
+        Type type;
+    };
+}
+
 %union { 
     /* Constants */
     int i;
@@ -26,8 +29,7 @@ struct const_val {
     char c; 
     const char * s;
 
-    Type type;   // expr's type
-    const_val const_val;
+    struct ast_node node;
 }
 
 %token T_bool               "bool"
@@ -91,15 +93,15 @@ struct const_val {
 %token<s> '<'
 %token<s> '>'
 
-%type <type> expr
-%type <type> l_value
-%type <type> call
-%type <type> type
-%type <type> var_init_opt
-%type <type> var_init_tail
-%type <type> var_init_tail_plus
-
-%type <const_val> const_expr
+%type <node> expr
+%type <node> l_value
+%type <node> call
+%type <node> type
+%type <node> var_init_opt
+%type <node> var_init_tail
+%type <node> var_init_tail_plus
+%type <node> const_expr
+%type <node> const_unit
 
 %type <s> binop1
 %type <s> binop2
@@ -153,7 +155,7 @@ const_def_tail
     | ',' T_id '=' const_expr const_def_tail
     ;
 var_def
-    : type { currentType = $1; } var_init var_def_tail ';' 
+    : type { currentType = $1.type; } var_init var_def_tail ';' 
     ;
 var_def_tail
     : /* nothing */
@@ -164,8 +166,9 @@ var_def_tail
 var_init
     : T_id var_init_opt 
         { 
-            if (($2 != NULL) && ($2 != currentType)){
-                type_error("Illegal assigment to \"%s\"", $1);
+            if (($2.type != NULL) && ($2.type != currentType)){
+                type_error("Illegal assignment from %s to %s at variable \"%s\"", \
+                        verbose_type($2.type), verbose_type(currentType), $1);
             } else {
                 newVariable($1, currentType);
             }
@@ -173,15 +176,27 @@ var_init
     | T_id var_init_tail_plus
     ;
 var_init_opt
-    : /* nothing */ {$$ = NULL;}
-    | '=' expr  { $$ = $2; }
+    : /* nothing */ {$$.type = NULL;}
+    | '=' expr  { $$.type = $2.type; }
     ;
 var_init_tail_plus
-    : '[' const_expr ']' var_init_tail { $$ = typeArray($2, $4); }
+    : '[' const_expr ']' var_init_tail 
+        { 
+            if ($2.type == typeInteger) 
+                $$.type = typeArray($2.value.i, $4.type); 
+            else
+                type_error("Array index is %s instead of Integer", verbose_type($2.type));
+        }
     ;
 var_init_tail
-    : /* nothing */ { $$ = currentType; }
-    | '[' const_expr ']' var_init_tail { $$ = typeArray($2, $4); }
+    : /* nothing */ { $$.type = currentType; }
+    | '[' const_expr ']' var_init_tail
+        {
+            if ($2.type == typeInteger) 
+                $$.type = typeArray($2.value.i, $4.type); 
+            else
+                type_error("Array index is %s instead of Integer", verbose_type($2.type));
+        }
     ;
 routine_header
     : routine_header_head T_id '(' routine_header_opt ')'
@@ -224,13 +239,13 @@ program
     : program_header block {closeScope();}
     ;
 type
-    : T_int     { $$ = typeInteger; }
-    | T_bool    { $$ = typeBoolean; }
-    | T_char    { $$ = typeChar; }
-    | T_real    { $$ = typeReal; }
+    : T_int     { $$.type = typeInteger; }
+    | T_bool    { $$.type = typeBoolean; }
+    | T_char    { $$.type = typeChar; }
+    | T_real    { $$.type = typeReal; }
     ;
 
-const_expr
+const_unit
     : T_CONST_integer 
         {
             $$.type = typeInteger;
@@ -254,35 +269,48 @@ const_expr
     | T_true
         { 
             $$.value.b = true;
-            $$ = typeBoolean;
+            $$.type = typeBoolean;
         }
     | T_false
         { 
             $$.value.b = false;
-            $$ = typeBoolean;
+            $$.type = typeBoolean;
         }
-    | const_expr binop1 const_expr %prec '*' 
+
+const_expr
+        : const_unit { $$ = $1; }
+        | T_id       
+            { /* constant variables only */ 
+            }
+        | const_expr binop1 const_expr %prec '*' 
         {
-            if ((($1.type == typeInteger) && ($3.type == typeReal)) \
-            || (($1.type == typeReal) && ($3.type == typeInteger)) \
-            || (($1.type == typeReal) && ($3.type == typeReal))) {
+/*            if (($1.type == typeInteger) && ($3.type == typeReal)) 
                     $$.type = typeReal;
-                    $$.value = (long double) $3.value * (long double) $1.value;
+                    if (strcmp($2, "*")) 
+                        $$.value.r = (long double) $3.value.i * $1.value.r;
+                    else if (strcmp($2, "/")) 
+                        $$.value.r = (long double) $3.value.i / $1.value.r;
+                    else if (strcmp($2, "%") || strcmp($2, "MOD"))
+                        type_error("Type mismatch on constant \"%s\" operator", $2);
             } else if (($1.type == typeInteger) && ($3.type == typeInteger)) {
                     $$.type = typeInteger;
-                    $$.value = $1.value * $3.value;
+                    if (strcmp($2, "*")) 
+                        $$.value.i = $3.value.i * $1.value.i;
+                    else if (strcmp($2, "/")) 
+                        $$.value.i = $3.value.i / $1.value.i;
+                    else if (strcmp($2, "%") || strcmp($2, "MOD"))
+                        $$.value.i = $3.value.i % $1.value.i;
             } else {
                     type_error("Type mismatch on \"%s\" operator", $2);
             }
+*/
         }
     | const_expr binop2 const_expr %prec '+' 
-    | const_expr binop3 const_expr %prec '<' 
-    | const_expr binop4 const_expr %prec T_eq 
-    | const_expr binop5 const_expr %prec T_and 
-    | const_expr binop6 const_expr %prec T_or 
+        {
+        }
     ;
 expr
-    :  const_expr { $$ = $1.type; }
+    :  const_unit { $$.type = $1.type; }
     | '(' expr ')'
         {
             $$ = $2;
@@ -294,43 +322,22 @@ expr
     | call
     | expr binop1 expr %prec '*' 
         {
-            if ($1 == $3) {
-                // IR
-                $$ = $1;
-            } else if (($1 == typeReal) && ($3 == typeInteger)) {
-                // Promote and IR
-                $$ = typeReal;
-            } else if (($1 == typeInteger) && ($3 == typeReal)) {
-                // Promote and IR
-                $$ = typeReal;
-            } else {
-                type_error("Type mismatch on \"%s\" operator", $2 );
-            }
+            
         }
     | expr binop2 expr %prec '+' 
             {
-                if ($1 != $3) 
-                    type_error("Type mismatch on \"%s\" operator", $2 );
             }
     | expr binop3 expr %prec '<' 
             {
-                if ($1 != $3) 
-                    type_error("Type mismatch on \"%s\" operator", $2 );
             }
     | expr binop4 expr %prec T_eq 
             {
-                if ($1 != $3) 
-                    type_error("Type mismatch on \"%s\" operator", $2 );
             }
     | expr binop5 expr %prec T_and 
             {
-                if ($1 != $3) 
-                    type_error("Type mismatch on \"%s\" operator", $2 );
             }
     | expr binop6 expr %prec T_or 
             {
-                if ($1 != $3) 
-                    type_error("Type mismatch on \"%s\" operator", $2 );
             }
     | unop expr %prec UN
         {
