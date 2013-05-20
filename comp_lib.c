@@ -73,13 +73,13 @@ const char * verbose_type(Type t ) {
         return "Void";
     else if ((t->kind == TYPE_ARRAY) || (t->kind == TYPE_IARRAY)) {
         if (t->refType->kind == TYPE_ARRAY)
-            return "Multidimensional Array";
+            res = "Multidimensional Array";
         else {       
             strcat(res, verbose_type(t->refType));
             strcat(res, "s");
-            return res;
         }
     }
+    return res;
 }
 
 

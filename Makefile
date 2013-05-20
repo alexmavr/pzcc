@@ -2,7 +2,7 @@
 .DEFAULT: all
 
 CC = gcc
-CCFLAGS += -Wall 
+CFLAGS += -Wall 
 LDFLAGS +=
 
 OBJ += pzc.lex.o comp_lib.o parser.o symbol.o error.o general.o
@@ -13,10 +13,10 @@ ifndef DEBUG
 endif
 
 ifeq ($(DEBUG),y)
-	CCFLAGS += -O0
+	CFLAGS += -O0
 	BSN_DBG += -t
 else
-	CCFLAGS += -O3
+	CFLAGS += -O3
 endif
 
 all: pzc clean
@@ -37,7 +37,7 @@ parser.c: parser.y comp_lib.h
 		bison ${BSN_DBG} -v -d -o $@ $<
 
 pzc.lex.o: pzc.lex.c comp_lib.h parser.h symbol/symbol.h
-	$(CC) $(CCFLAGS) -c -lfl $< -o $@
+	$(CC) $(CFLAGS) -c -lfl $< -o $@
 
 pzc.lex.c: pzc.lex
 	flex -s -o $@ $< 

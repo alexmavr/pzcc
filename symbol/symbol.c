@@ -310,6 +310,8 @@ SymbolEntry * newConstant (const char * name, Type type, ...)
                 strcpy(buffer, "\"");
                 strAppendString(buffer, value.vString);
                 strcat(buffer, "\"");           
+        default:
+            internal("Invalid type for constant");
         }
         e = newEntry(buffer);
     }
@@ -335,6 +337,8 @@ SymbolEntry * newConstant (const char * name, Type type, ...)
                 break;
             case TYPE_ARRAY:
                 e->u.eConstant.value.vString = value.vString;
+            default:
+                internal("Invalid type for constant");
         }
     }
     return e;
@@ -587,6 +591,7 @@ void destroyType (Type type)
                 destroyType(type->refType);
                 delete(type);
             }
+        default: ;
     }
 }
 
@@ -620,6 +625,8 @@ bool equalType (Type type1, Type type2)
                 return false;
         case TYPE_IARRAY:
             return equalType(type1->refType, type2->refType);
+        default:
+            ;
     }
     return true;        
 }

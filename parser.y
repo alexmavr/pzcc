@@ -3,7 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include "comp_lib.h"
 #include "symbol/symbol.h"
+#include "symbol/general.h"
+
+extern int yylex();
 
 Type currentType; // global type indicator for variable initializations
 
