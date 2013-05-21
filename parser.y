@@ -14,14 +14,16 @@ Type currentType; // global type indicator for variable initializations
 %}
 
 %code requires {
+    typedef union {
+            RepInteger i;
+            RepBoolean b;
+            RepChar c;
+            RepReal r;
+            RepString s;
+    } val_union;
+
     struct ast_node {
-        union {
-            int i;
-            char c;
-            long double r;
-            const char * s;
-            bool b;
-        } value;
+        val_union value;
         Type type;
     };
 }
@@ -152,26 +154,24 @@ declaration
     | program
     ;
 const_def
-    : T_const type T_id '=' const_expr const_def_tail ';'
+    : T_const type {currentType=$2.type;} T_id '=' const_expr const_def_tail ';'
         {
-            SymbolEntry * con = newConstant($3, $2.type);
-            if (($2.type == typeReal) && ($5.type == typeInteger)) {
-                // Promote const_expr to REAL
-            } else if ($2.type != $5.type) {
+            SymbolEntry * con = newConstant($4, currentType);
+
+            if ((currentType == typeReal) && ($6.type == typeInteger)) {
+                con->u.eConstant.value.vReal = $6.value.r = (RepReal)  $6.value.i;
+            } else if (currentType != $6.type) {
                 type_error("Cannot assign %s to %s at variable \"%s\"", \
-                            verbose_type($2.type), verbose_type($5.type), $3);
+                            verbose_type(currentType), verbose_type($6.type), $4);
             }
-            if ($2.type == typeInteger)
-                con->u.eConstant.value.vInteger = $5.value.i;
-            else if ($2.type == typeReal)
-                con->u.eConstant.value.vReal = $5.value.r;
-            else if ($2.type == typeBoolean)
-                con->u.eConstant.value.vBoolean = $5.value.b;
-            else if ($2.type == typeChar)
-                con->u.eConstant.value.vBoolean = $5.value.b;
-            else if (($2.type->kind == TYPE_ARRAY) && \
-                        ($2.type->refType == typeChar))
-                con->u.eConstant.value.vString = $5.value.s;
+            else if (currentType == typeInteger)
+                con->u.eConstant.value.vInteger = $6.value.i;
+            else if (currentType == typeReal)
+                con->u.eConstant.value.vReal = $6.value.r;
+            else if (currentType == typeBoolean)
+                con->u.eConstant.value.vBoolean = $6.value.b;
+            else if (currentType == typeChar)
+                con->u.eConstant.value.vChar = $6.value.c;
             else
                 type_error("Unexpected type for constant declaration");
         }
@@ -179,6 +179,26 @@ const_def
 const_def_tail
     : /* nothing */
     | ',' T_id '=' const_expr const_def_tail
+        {
+            SymbolEntry * con = newConstant($2, currentType);
+
+            if ((currentType == typeReal) && ($4.type == typeInteger)) {
+                con->u.eConstant.value.vReal = $4.value.r = (RepReal) $4.value.i;
+            } else if (currentType != $4.type) {
+                type_error("Cannot assign %s to %s at variable \"%s\"", \
+                            verbose_type(currentType), verbose_type($4.type), $2);
+            }
+            else if (currentType == typeInteger)
+                con->u.eConstant.value.vInteger = $4.value.i;
+            else if (currentType == typeReal)
+                con->u.eConstant.value.vReal = $4.value.r;
+            else if (currentType == typeBoolean)
+                con->u.eConstant.value.vBoolean = $4.value.b;
+            else if (currentType == typeChar)
+                con->u.eConstant.value.vChar = $4.value.c;
+            else
+                type_error("Unexpected type for constant declaration");
+        }
     ;
 var_def
     : type { currentType = $1.type; } var_init var_def_tail ';' 
@@ -245,11 +265,17 @@ formal
     ;
 const_expr_opt
     : /* nothing */
-    | const_expr
+    | const_expr 
+        {
+            array_index_check(&($1));
+        }
     ;
 formal_tail
     : /* nothing */
     | '[' const_expr ']' formal_tail
+        {
+            array_index_check(&($2));
+        }
     ;
 routine
     : routine_header routine_tail
@@ -307,32 +333,22 @@ const_expr
         : const_unit { $$ = $1; }
         | T_id       
             { /* constant variables only */ 
+                SymbolEntry * id = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
+                if (id->entryType != ENTRY_CONSTANT) 
+                    type_error("Non-costant identifier \"%s\" found in constant expression", T_id);
+                else {
+                    $$.type = id->u.eConstant.type;
+                    memcpy(&($$.value), &(id->u.eConstant.value), sizeof(val_union));
+                    printf("%s %Lf\n", $1, $$.value.r);
+                }
             }
         | const_expr binop1 const_expr %prec '*' 
         {
-/*            if (($1.type == typeInteger) && ($3.type == typeReal)) 
-                    $$.type = typeReal;
-                    if (strcmp($2, "*")) 
-                        $$.value.r = (long double) $3.value.i * $1.value.r;
-                    else if (strcmp($2, "/")) 
-                        $$.value.r = (long double) $3.value.i / $1.value.r;
-                    else if (strcmp($2, "%") || strcmp($2, "MOD"))
-                        type_error("Type mismatch on constant \"%s\" operator", $2);
-            } else if (($1.type == typeInteger) && ($3.type == typeInteger)) {
-                    $$.type = typeInteger;
-                    if (strcmp($2, "*")) 
-                        $$.value.i = $3.value.i * $1.value.i;
-                    else if (strcmp($2, "/")) 
-                        $$.value.i = $3.value.i / $1.value.i;
-                    else if (strcmp($2, "%") || strcmp($2, "MOD"))
-                        $$.value.i = $3.value.i % $1.value.i;
-            } else {
-                    type_error("Type mismatch on \"%s\" operator", $2);
-            }
-*/
+            const_binop_semantics(&($1), &($3), $2, &($$));
         }
     | const_expr binop2 const_expr %prec '+' 
         {
+            const_binop_semantics(&($1), &($3), $2, &($$));
         }
     ;
 expr
@@ -433,7 +449,7 @@ stmt
     | T_ret stmt_opt_ret ';'
     | write '(' stmt_opt_write ')' ';'
     | block
-    | error 
+    | error ';'
     ;
 
 loop_stmt

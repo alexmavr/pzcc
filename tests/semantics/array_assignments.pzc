@@ -1,4 +1,8 @@
-const int b = 5;
+const int b = 5 ;
+const REAL c = b;
+const REAL d = c + 1;
+const REAL e = d;
+
 PROGRAM array_assignments ()
 {
     int y[15] = 2;

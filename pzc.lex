@@ -11,10 +11,10 @@
 #include <stdlib.h>
 #include <stdarg.h> 
 #include <string.h> 
-#include "comp_lib.h" 
 #include "symbol/symbol.h"
 #include "symbol/general.h" 
 #include "parser.h"
+#include "comp_lib.h" 
 
 #define YY_NO_INPUT
 

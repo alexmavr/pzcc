@@ -12,6 +12,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include "comp_lib.h"
+#include "parser.h"
 
 //Cleanup on critical error.
 void crit_cleanup (void) {
@@ -83,4 +84,58 @@ const char * verbose_type(Type t ) {
 }
 
 
+RepReal eval_real_op(RepReal left, RepReal right, const char * op) {
+    RepReal res = 0.0;
+    if (!strcmp(op, "*")) 
+        res = left * right;
+    else if (!strcmp(op, "/")) 
+        res = left / right;
+    else if (!strcmp(op, "+")) 
+        res = (RepReal) left + (RepReal) right;
+    else if (!strcmp(op, "-")) 
+        res = left - right;
+    else if (!strcmp(op, "%") || !strcmp(op, "MOD"))
+        type_error("Type mismatch on constant \"%s\" operator", op);
+    return res;
+}
+
+RepInteger eval_int_op(RepInteger left, RepInteger right, const char * op) {
+    RepInteger res = 0;
+    if (!strcmp(op, "*")) 
+        res = left * right;
+    else if (!strcmp(op, "/")) 
+        res = left / right;
+    else if (!strcmp(op, "+")) 
+        res = left + right;
+    else if (!strcmp(op, "-")) 
+        res = left - right;
+    else if (!strcmp(op, "%") || !strcmp(op, "MOD"))
+        res = left % right;
+    return res;
+}
+
+void const_binop_semantics(struct ast_node * left, struct ast_node * right, const char * op, struct ast_node * res ) {
+    if ((left->type == typeInteger) && (right->type == typeReal)) {
+        res->type = typeReal;
+        res->value.r = eval_real_op((RepReal) left->value.i, right->value.r, op);
+
+    } else if ((left->type == typeReal) && (right->type == typeInteger)) {
+        res->type = typeReal;
+        res->value.r = eval_real_op(left->value.r, (RepReal) right->value.i, op);
+
+    } else if ((left->type == typeInteger) && (right->type == typeInteger)) {
+        res->type = typeInteger;
+        res->value.i = eval_int_op(left->value.i, right->value.i, op);
+    } else {
+        type_error("Type mismatch on \"%s\" operator", op);
+    }   
+}
+
+
+void array_index_check(struct ast_node * _) {
+    if (_->type != typeInteger)
+        type_error("Array index is %s instead of Integer", verbose_type(_->type));
+    else if (_->value.i <= 0) 
+        type_error("Array index is negative");
+}
 

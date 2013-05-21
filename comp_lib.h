@@ -7,6 +7,8 @@
  * 
  */
 #include "symbol/symbol.h"
+#include "parser.h"
+
 
 extern int yylineno;
 
@@ -19,3 +21,7 @@ void type_error (const char *msg, ...);
 void crit_cleanup (void);
 
 const char * verbose_type(Type t); 
+
+void const_binop_semantics(struct ast_node * left, struct ast_node * right, const char * op, struct ast_node * res );
+
+void array_index_check(struct ast_node * _);

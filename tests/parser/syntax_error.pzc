@@ -4,7 +4,7 @@ FUNC bool prime (int n)
     if (n < 0)              return prime(-n);
     else if (n < 2)         return false;
     else if (n == 2)        return true
-    else if (n MOD 2 == 0)  return false;
+    else if (n MOD 2 == 0)  return false
     else {
         int i;
         FOR (i, 3 TO n /2 STEP 2 STEP)
