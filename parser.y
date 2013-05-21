@@ -155,6 +155,12 @@ const_def
     : T_const type T_id '=' const_expr const_def_tail ';'
         {
             SymbolEntry * con = newConstant($3, $2.type);
+            if (($2.type == typeReal) && ($5.type == typeInteger)) {
+                // Promote const_expr to REAL
+            } else if ($2.type != $5.type) {
+                type_error("Cannot assign %s to %s at variable \"%s\"", \
+                            verbose_type($2.type), verbose_type($5.type), $3);
+            }
             if ($2.type == typeInteger)
                 con->u.eConstant.value.vInteger = $5.value.i;
             else if ($2.type == typeReal)
