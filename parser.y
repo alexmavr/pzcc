@@ -104,8 +104,6 @@ Type currentType; // global type indicator for variable initializations
 %type <node> call
 %type <node> type
 %type <node> var_init_opt
-%type <node> var_init_tail
-%type <node> var_init_tail_plus
 %type <node> const_expr
 %type <node> const_unit
 
@@ -226,23 +224,11 @@ var_init_opt
     | '=' expr  { $$.type = $2.type; }
     ;
 var_init_tail_plus
-    : '[' const_expr ']' var_init_tail 
-        { 
-            if ($2.type == typeInteger) 
-                $$.type = typeArray($2.value.i, $4.type); 
-            else
-                type_error("Array index is %s instead of Integer", verbose_type($2.type));
-        }
+    : '[' const_expr ']' {array_index_check(&($2));} var_init_tail 
     ;
 var_init_tail
-    : /* nothing */ { $$.type = currentType; }
-    | '[' const_expr ']' var_init_tail
-        {
-            if ($2.type == typeInteger) 
-                $$.type = typeArray($2.value.i, $4.type); 
-            else
-                type_error("Array index is %s instead of Integer", verbose_type($2.type));
-        }
+    : /* nothing */ 
+    | '[' const_expr ']' { array_index_check(&($2));} var_init_tail
     ;
 routine_header
     : routine_header_head T_id '(' routine_header_opt ')'
@@ -339,7 +325,6 @@ const_expr
                 else {
                     $$.type = id->u.eConstant.type;
                     memcpy(&($$.value), &(id->u.eConstant.value), sizeof(val_union));
-                    printf("%s %Lf\n", $1, $$.value.r);
                 }
             }
         | const_expr binop1 const_expr %prec '*' 
