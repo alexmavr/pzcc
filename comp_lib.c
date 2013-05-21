@@ -13,6 +13,7 @@
 #include <string.h>
 #include "comp_lib.h"
 #include "parser.h"
+#include "symbol/general.h"
 
 //Cleanup on critical error.
 void crit_cleanup (void) {
@@ -61,7 +62,7 @@ void type_error (const char *msg, ...) {
 }
 
 const char * verbose_type(Type t ) {
-    char * res = "Array of ";
+    char * res = new(35 * sizeof(char));
     if (t == typeInteger)
         return "Integer";
     else if (t == typeReal)
@@ -76,8 +77,8 @@ const char * verbose_type(Type t ) {
         if (t->refType->kind == TYPE_ARRAY)
             res = "Multidimensional Array";
         else {       
-            strcat(res, verbose_type(t->refType));
-            strcat(res, "s");
+            strcpy(res, verbose_type(t->refType));
+            strcat(res, " Array");
         }
     }
     return res;

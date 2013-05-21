@@ -105,6 +105,8 @@ Type currentType; // global type indicator for variable initializations
 %type <node> call
 %type <node> type
 %type <node> var_init_opt
+%type <node> var_init_tail
+%type <node> var_init_tail_plus
 %type <node> const_expr
 %type <node> const_unit
 
@@ -212,7 +214,7 @@ var_init
     : T_id var_init_opt 
         { 
             if (($2.type != NULL) && ($2.type != currentType)){
-                /* Promoting - Char Conversions */
+                /* do Promoting - Char Conversions */
                 type_error("Illegal assignment from %s to %s at variable \"%s\"", \
                         verbose_type($2.type), verbose_type(currentType), $1);
             } else {
@@ -221,7 +223,8 @@ var_init
         }
     | T_id var_init_tail_plus
         {
-            /* Create a new variable of the correct array type */
+            /* Creates a new variable of the correct array type */
+            newVariable($1, $2.type);
         }
     ;
 var_init_opt
@@ -230,10 +233,16 @@ var_init_opt
     ;
 var_init_tail_plus
     : '[' const_expr ']' { array_index_check(&($2)); } var_init_tail 
+        {
+            $$.type = typeArray($2.value.i, $5.type);
+        }
     ;
 var_init_tail
-    : /* nothing */ 
+    : /* nothing */  { $$.type = currentType; }
     | '[' const_expr ']' { array_index_check(&($2)); } var_init_tail
+        {
+            $$.type = typeArray($2.value.i, $5.type);
+        }
     ;
 routine
     : routine_header routine_tail
