@@ -14,6 +14,7 @@ Type currentType; // global type indicator for variable initializations
 %}
 
 %code requires {
+
     typedef union {
             RepInteger i;
             RepBoolean b;
@@ -39,7 +40,7 @@ Type currentType; // global type indicator for variable initializations
 }
 
 %token T_bool               "bool"
-%token<s> T_and             "and"
+%token <s> T_and            "and"
 %token T_break              "break"
 %token T_case               "case"
 %token T_char               "char"
@@ -55,10 +56,10 @@ Type currentType; // global type indicator for variable initializations
 %token T_func               "FUNC"
 %token T_if                 "if"
 %token T_int                "int"
-%token<s> T_mod             "mod"
+%token <s> T_mod            "mod"
 %token T_next               "next"
 %token T_not                "not"
-%token<s> T_or              "or"
+%token <s> T_or             "or"
 %token T_proc               "PROC"
 %token T_prog               "PROGRAM"
 %token T_real               "REAL"
@@ -72,32 +73,32 @@ Type currentType; // global type indicator for variable initializations
 %token T_wrln               "WRITELN"
 %token T_wrsp               "WRITESP"
 %token T_wrspln             "WRITESPLN"
-%token<s> T_id              "identifier"
-%token<i> T_CONST_integer   "integer constant"
-%token<r> T_CONST_real      "real constant"
-%token<c> T_CONST_char      "char constant"
-%token<s> T_CONST_string    "string constant"
-%token<s> T_eq              "=="
-%token<s> T_diff            "!="
-%token<s> T_greq            ">="
-%token<s> T_leq             "<="
-%token<s> T_logand          "&&"
-%token<s> T_logor           "||"
-%token<s> T_pp              "++" 
-%token<s> T_mm              "--"
-%token<s> T_inc             "+="
-%token<s> T_dec             "-="
-%token<s> T_mul             "*="
-%token<s> T_div             "/="
-%token<s> T_opmod           "%="
 %token END 0                "end of file"
-%token<s> '*'
-%token<s> '/'
-%token<s> '%'
-%token<s> '+'
-%token<s> '-'
-%token<s> '<'
-%token<s> '>'
+%token <s> T_id             "identifier"
+%token <i> T_CONST_integer  "integer constant"
+%token <r> T_CONST_real     "real constant"
+%token <c> T_CONST_char     "char constant"
+%token <s> T_CONST_string   "string constant"
+%token <s> T_eq             "=="
+%token <s> T_diff           "!="
+%token <s> T_greq           ">="
+%token <s> T_leq            "<="
+%token <s> T_logand         "&&"
+%token <s> T_logor          "||"
+%token <s> T_pp             "++" 
+%token <s> T_mm             "--"
+%token <s> T_inc            "+="
+%token <s> T_dec            "-="
+%token <s> T_mul            "*="
+%token <s> T_div            "/="
+%token <s> T_opmod          "%="
+%token <s> '*'
+%token <s> '/'
+%token <s> '%'
+%token <s> '+'
+%token <s> '-'
+%token <s> '<'
+%token <s> '>'
 
 %type <node> expr
 %type <node> l_value
@@ -106,6 +107,8 @@ Type currentType; // global type indicator for variable initializations
 %type <node> var_init_opt
 %type <node> const_expr
 %type <node> const_unit
+
+%type <i> l_value_tail
 
 %type <s> binop1
 %type <s> binop2
@@ -203,14 +206,13 @@ var_def
     ;
 var_def_tail
     : /* nothing */
-    | ',' var_init {} var_def_tail
-        {
-        }
+    | ',' var_init var_def_tail
     ;
 var_init
     : T_id var_init_opt 
         { 
             if (($2.type != NULL) && ($2.type != currentType)){
+                /* Promoting - Char Conversions */
                 type_error("Illegal assignment from %s to %s at variable \"%s\"", \
                         verbose_type($2.type), verbose_type(currentType), $1);
             } else {
@@ -218,17 +220,27 @@ var_init
             }
         }
     | T_id var_init_tail_plus
+        {
+            /* Create a new variable of the correct array type */
+        }
     ;
 var_init_opt
     : /* nothing */ {$$.type = NULL;}
     | '=' expr  { $$.type = $2.type; }
     ;
 var_init_tail_plus
-    : '[' const_expr ']' {array_index_check(&($2));} var_init_tail 
+    : '[' const_expr ']' { array_index_check(&($2)); } var_init_tail 
     ;
 var_init_tail
     : /* nothing */ 
-    | '[' const_expr ']' { array_index_check(&($2));} var_init_tail
+    | '[' const_expr ']' { array_index_check(&($2)); } var_init_tail
+    ;
+routine
+    : routine_header routine_tail
+    ;
+routine_tail
+    : ';'
+    | block
     ;
 routine_header
     : routine_header_head T_id '(' routine_header_opt ')'
@@ -262,13 +274,6 @@ formal_tail
         {
             array_index_check(&($2));
         }
-    ;
-routine
-    : routine_header routine_tail
-    ;
-routine_tail
-    : ';'
-    | block
     ;
 program_header
     : T_prog T_id '(' ')' {openScope();}
@@ -318,8 +323,9 @@ const_unit
 const_expr
         : const_unit { $$ = $1; }
         | T_id       
-            { /* constant variables only */ 
+            {   /* constant variables only */ 
                 SymbolEntry * id = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
+
                 if (id->entryType != ENTRY_CONSTANT) 
                     type_error("Non-costant identifier \"%s\" found in constant expression", T_id);
                 else {
@@ -329,11 +335,11 @@ const_expr
             }
         | const_expr binop1 const_expr %prec '*' 
         {
-            const_binop_semantics(&($1), &($3), $2, &($$));
+            eval_const_binop(&($1), &($3), $2, &($$));
         }
     | const_expr binop2 const_expr %prec '+' 
         {
-            const_binop_semantics(&($1), &($3), $2, &($$));
+            eval_const_binop(&($1), &($3), $2, &($$));
         }
     ;
 expr
@@ -344,7 +350,7 @@ expr
         }
     | l_value
         {
-            // $$ = $1; need to specify types for identifiers
+             $$ = $1; 
         }
     | call
     | expr binop1 expr %prec '*' 
@@ -372,14 +378,39 @@ expr
         }
     ;
 l_value
-    : T_id l_value_tail {   }
+    : T_id l_value_tail
         {
-            // Lookup T_id on symbol table
+            SymbolEntry * id = lookupEntry($1, LOOKUP_CURRENT_SCOPE, true);
+
+            switch (id->entryType) {
+                case ENTRY_VARIABLE:
+                    {
+                        int dims = array_dimensions(id->u.eVariable.type);
+                        if ($2 > dims )
+                            type_error(" \"%s\" has less dimensions than specified",id->id);
+                        else if ($2 < dims)
+                            $$.type = n_dimension_type(id->u.eVariable.type, (dims-$2));
+                        else
+                            $$.type = id->u.eVariable.type;
+                        break;
+                    }
+                case ENTRY_CONSTANT:
+                    if ($2)
+                        type_error("Constant \"%s\" is not an array",id->id);
+                    $$.type = id->u.eConstant.type;
+                    break;
+                default: ;
+            }
         }
     ;
 l_value_tail
-    : /* Nothing */
-    | '[' expr ']' l_value_tail
+    : /* Nothing */ {$$ = 0;}
+    | '[' expr ']' l_value_tail 
+        {
+             if ($2.type != typeInteger)
+                type_error("Array index cannot be %s", verbose_type($2.type));
+             $$ = 1 + $4;
+        }
     ;
 unop
     : '+'

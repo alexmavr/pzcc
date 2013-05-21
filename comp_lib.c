@@ -95,7 +95,7 @@ RepReal eval_real_op(RepReal left, RepReal right, const char * op) {
     else if (!strcmp(op, "-")) 
         res = left - right;
     else if (!strcmp(op, "%") || !strcmp(op, "MOD"))
-        type_error("Type mismatch on constant \"%s\" operator", op);
+        type_error("Cannot perform \"%s\" on Reals", op);
     return res;
 }
 
@@ -114,7 +114,7 @@ RepInteger eval_int_op(RepInteger left, RepInteger right, const char * op) {
     return res;
 }
 
-void const_binop_semantics(struct ast_node * left, struct ast_node * right, const char * op, struct ast_node * res ) {
+void eval_const_binop(struct ast_node * left, struct ast_node * right, const char * op, struct ast_node * res ) {
     if ((left->type == typeInteger) && (right->type == typeReal)) {
         res->type = typeReal;
         res->value.r = eval_real_op((RepReal) left->value.i, right->value.r, op);
@@ -134,8 +134,32 @@ void const_binop_semantics(struct ast_node * left, struct ast_node * right, cons
 
 void array_index_check(struct ast_node * _) {
     if (_->type != typeInteger)
-        type_error("Array index is %s instead of Integer", verbose_type(_->type));
+        type_error("Array index cannot be %s" , verbose_type(_->type));
     else if (_->value.i <= 0) 
-        type_error("Array index is negative");
+        type_error("Array index cannot be negative");
 }
 
+int array_dimensions(Type t) {
+    Type current = t;
+    int dimensions = 0;
+    
+    while ((current->kind == TYPE_ARRAY) || (current->kind == TYPE_IARRAY)) {
+        current = current->refType;
+        dimensions++;
+    }
+    return dimensions;
+}
+
+/* Calculates the type of the n-th dimension of the array */
+Type n_dimension_type(Type t, int n) {
+    Type current = t;
+    int m = n;
+
+    while ((current->kind == TYPE_ARRAY) || (current->kind == TYPE_IARRAY)) {
+        if (m == 0)
+            break;
+        t = t->refType;
+        m--;
+    }
+    return t;
+}
