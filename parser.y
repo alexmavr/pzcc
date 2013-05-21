@@ -153,6 +153,22 @@ declaration
     ;
 const_def
     : T_const type T_id '=' const_expr const_def_tail ';'
+        {
+            SymbolEntry * con = newConstant($3, $2.type);
+            if ($2.type == typeInteger)
+                con->u.eConstant.value.vInteger = $5.value.i;
+            else if ($2.type == typeReal)
+                con->u.eConstant.value.vReal = $5.value.r;
+            else if ($2.type == typeBoolean)
+                con->u.eConstant.value.vBoolean = $5.value.b;
+            else if ($2.type == typeChar)
+                con->u.eConstant.value.vBoolean = $5.value.b;
+            else if (($2.type->kind == TYPE_ARRAY) && \
+                        ($2.type->refType == typeChar))
+                con->u.eConstant.value.vString = $5.value.s;
+            else
+                type_error("Unexpected type for constant declaration");
+        }
     ;
 const_def_tail
     : /* nothing */
