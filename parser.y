@@ -227,7 +227,7 @@ var_init
         }
     | T_id var_init_tail_plus
         {
-            /* $2.type has the correct array type */
+            /* $2.type is of the correct array type */
             newVariable($1, $2.type);
         }
     ;
@@ -404,7 +404,7 @@ l_value
     : T_id l_value_tail
         {
             SymbolEntry * id = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
-            if (id != NULL)
+            if (id != NULL) {
                 switch (id->entryType) {
                     case ENTRY_VARIABLE:
                         {
@@ -412,7 +412,8 @@ l_value
                             *  $2 is the number of dimensions following the id */
                             int dims = array_dimensions(id->u.eVariable.type);
                             if ($2 > dims)
-                                type_error("\"%s\" has less dimensions than specified",id->id);
+                                type_error("\"%s\" has less dimensions than specified", \
+                                                                                 id->id);
                             else if ($2 < dims)
                                 /* the type is that of the (dims - $2) dimension */
                                 $$.type = n_dimension_type(id->u.eVariable.type, (dims-$2));
@@ -427,6 +428,8 @@ l_value
                         break;
                     default: ;
                 }
+                $$.value.s = id->id;
+            }
         }
     ;
 l_value_tail
@@ -483,8 +486,8 @@ stmt
     | l_value assign expr ';'
         {
             if (!compat_types($1.type, $3.type)) {
-                type_error("Illegal assignment from %s to %s", \
-                        verbose_type($3.type), verbose_type($1.type));
+                type_error("Illegal assignment from %s to %s at \"%s\"", \
+                        verbose_type($3.type), verbose_type($1.type), $1.value.s);
             }
         }
     | l_value stmt_choice ';'

@@ -14,5 +14,4 @@ PROGRAM exprs ()
     i = "s"; 
     z = y2[10];
     
-    
 }
