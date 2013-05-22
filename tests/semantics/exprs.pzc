@@ -2,9 +2,17 @@ const int n = 10;
 
 PROGRAM exprs ()
 {
-    int n[10];
-    int y[10][10];
-    int l = n[5];
-    REAL k = n[5];
-    n = y[10]; // allowed i think
+    // var_inits
+    int z[10];
+    int y[10][n], kk[n];
+    int y2[10][10];
+    int l = n[2];
+    REAL k = 15;
+    char c = 5; 
+    char c = 5.2; 
+    int i = 's'; 
+    i = "s"; 
+    z = y2[10];
+    
+    
 }

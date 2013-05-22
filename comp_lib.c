@@ -140,6 +140,8 @@ void array_index_check(struct ast_node * _) {
         type_error("Array index cannot be negative");
 }
 
+/* Returns the number of dimensions of the type t 
+ * If not an array, returns 0 */
 int array_dimensions(Type t) {
     Type current = t;
     int dimensions = 0;
@@ -163,4 +165,14 @@ Type n_dimension_type(Type t, int n) {
         m--;
     }
     return t;
+}
+
+/* Return true if t2 can be cast to t1 */
+bool compat_types(Type t1, Type t2) {
+    bool res = false;
+    if (((t1 == typeInteger) && ((t2 == typeInteger) || (t2 == typeChar))) \
+    || ((t1 == typeReal) && ((t2 == typeReal) || (t2 == typeInteger))) \
+    || ((t1 == typeChar) && ((t2 == typeChar) || (t2 == typeInteger)))) \
+            res = true;
+    return res;
 }

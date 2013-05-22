@@ -8,6 +8,7 @@
  */
 #include "symbol/symbol.h"
 #include "parser.h"
+#include "stdbool.h"
 
 
 extern int yylineno;
@@ -25,6 +26,7 @@ void crit_cleanup (void);
 const char * verbose_type(Type t); 
 int array_dimensions(Type t);
 Type n_dimension_type(Type t, int n);
+bool compat_types(Type t1, Type t2); // true if t2 can be converted to t1
 
 void eval_const_binop(struct ast_node * left, struct ast_node * right, const char * op, struct ast_node * res );
 

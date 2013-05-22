@@ -161,6 +161,7 @@ const_def
         {
             SymbolEntry * con = newConstant($4, currentType);
 
+            /* Constants can only be promoted from int to real */
             if ((currentType == typeReal) && ($6.type == typeInteger)) {
                 con->u.eConstant.value.vReal = $6.value.r = (RepReal)  $6.value.i;
             } else if (currentType != $6.type) {
@@ -176,7 +177,8 @@ const_def
             else if (currentType == typeChar)
                 con->u.eConstant.value.vChar = $6.value.c;
             else
-                type_error("Unexpected type for constant declaration");
+                type_error("Unexpected type %s for constant declaration", \
+                                                                 currentType);
         }
     ;
 const_def_tail
@@ -185,6 +187,7 @@ const_def_tail
         {
             SymbolEntry * con = newConstant($2, currentType);
 
+            /* Constants can only be promoted from int to real */
             if ((currentType == typeReal) && ($4.type == typeInteger)) {
                 con->u.eConstant.value.vReal = $4.value.r = (RepReal) $4.value.i;
             } else if (currentType != $4.type) {
@@ -200,7 +203,8 @@ const_def_tail
             else if (currentType == typeChar)
                 con->u.eConstant.value.vChar = $4.value.c;
             else
-                type_error("Unexpected type for constant declaration");
+                type_error("Unexpected type %s for constant declaration", \
+                                                                 currentType);
         }
     ;
 var_def
@@ -213,17 +217,17 @@ var_def_tail
 var_init
     : T_id var_init_opt 
         { 
-            if (($2.type != NULL) && ($2.type != currentType)){
-                /* do Promoting - Char Conversions */
-                type_error("Illegal assignment from %s to %s at variable \"%s\"", \
-                        verbose_type($2.type), verbose_type(currentType), $1);
-            } else {
-                newVariable($1, currentType);
+            if ($2.type != NULL) {
+                /* (IR) TODO: Real Promoting - Char/Int Conversions */
+                if (!compat_types(currentType, $2.type))
+                    type_error("Illegal assignment from %s to %s at \"%s\"", \
+                        verbose_type($2.type), verbose_type(currentType), $1);  
             }
+            newVariable($1, currentType);
         }
     | T_id var_init_tail_plus
         {
-            /* Creates a new variable of the correct array type */
+            /* $2.type has the correct array type */
             newVariable($1, $2.type);
         }
     ;
@@ -335,8 +339,18 @@ const_expr
             {   /* constant variables only */ 
                 SymbolEntry * id = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
 
-                if (id->entryType != ENTRY_CONSTANT) 
-                    type_error("Non-costant identifier \"%s\" found in constant expression", T_id);
+                if (id->entryType != ENTRY_CONSTANT) {
+                    type_error("Non-constant identifier \"%s\" found in constant expression", $1);
+                    /* Error Recovery */
+                    if (id->entryType == ENTRY_VARIABLE)
+                        $$.type = id->u.eVariable.type; 
+                    else if (id->entryType == ENTRY_FUNCTION)
+                        $$.type = id->u.eFunction.resultType; 
+                    else if (id->entryType == ENTRY_TEMPORARY)
+                        $$.type = id->u.eTemporary.type; 
+                    else
+                        exit(1);
+                }
                 else {
                     $$.type = id->u.eConstant.type;
                     memcpy(&($$.value), &(id->u.eConstant.value), sizeof(val_union));
@@ -389,34 +403,37 @@ expr
 l_value
     : T_id l_value_tail
         {
-            SymbolEntry * id = lookupEntry($1, LOOKUP_CURRENT_SCOPE, true);
-
-            switch (id->entryType) {
-                case ENTRY_VARIABLE:
-                    {
-                        int dims = array_dimensions(id->u.eVariable.type);
-                        if ($2 > dims )
-                            type_error(" \"%s\" has less dimensions than specified",id->id);
-                        else if ($2 < dims)
-                            $$.type = n_dimension_type(id->u.eVariable.type, (dims-$2));
-                        else
-                            $$.type = id->u.eVariable.type;
+            SymbolEntry * id = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
+            if (id != NULL)
+                switch (id->entryType) {
+                    case ENTRY_VARIABLE:
+                        {
+                            /* Return the appropriate type if it's an array 
+                            *  $2 is the number of dimensions following the id */
+                            int dims = array_dimensions(id->u.eVariable.type);
+                            if ($2 > dims)
+                                type_error("\"%s\" has less dimensions than specified",id->id);
+                            else if ($2 < dims)
+                                /* the type is that of the (dims - $2) dimension */
+                                $$.type = n_dimension_type(id->u.eVariable.type, (dims-$2));
+                            else
+                                $$.type = id->u.eVariable.type;
+                            break;
+                        }
+                    case ENTRY_CONSTANT:
+                        if ($2)
+                            type_error("Constant \"%s\" is not an Array",id->id);
+                        $$.type = id->u.eConstant.type;
                         break;
-                    }
-                case ENTRY_CONSTANT:
-                    if ($2)
-                        type_error("Constant \"%s\" is not an array",id->id);
-                    $$.type = id->u.eConstant.type;
-                    break;
-                default: ;
-            }
+                    default: ;
+                }
         }
     ;
 l_value_tail
-    : /* Nothing */ {$$ = 0;}
+    : /* Nothing */ { $$ = 0; }
     | '[' expr ']' l_value_tail 
         {
-             if ($2.type != typeInteger)
+             if (($2.type != typeInteger) && ($2.type != typeChar))
                 type_error("Array index cannot be %s", verbose_type($2.type));
              $$ = 1 + $4;
         }
@@ -464,6 +481,12 @@ local_def
 stmt
     : ';'
     | l_value assign expr ';'
+        {
+            if (!compat_types($1.type, $3.type)) {
+                type_error("Illegal assignment from %s to %s", \
+                        verbose_type($3.type), verbose_type($1.type));
+            }
+        }
     | l_value stmt_choice ';'
     | call ';'
     | T_if '(' expr ')' stmt stmt_opt_if

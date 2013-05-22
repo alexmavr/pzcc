@@ -2,7 +2,7 @@ PROGRAM type_cast ()
 {
     // Shouldn't fail
     int y = 5 + 3.0; 
-    int y = 5 ; 
+    int r = 5 ; 
     int z;
     z = 2;
     REAL k = 4 + z;
