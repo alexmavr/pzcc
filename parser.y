@@ -111,6 +111,7 @@ Type currentType; // global type indicator for variable initializations
 %type <node> const_unit
 
 %type <i> l_value_tail
+%type <i> format_opt
 
 %type <s> binop1
 %type <s> binop2
@@ -227,7 +228,6 @@ var_init
         }
     | T_id var_init_tail_plus
         {
-            /* $2.type is of the correct array type */
             newVariable($1, $2.type);
         }
     ;
@@ -349,6 +349,7 @@ const_expr
                     else if (id->entryType == ENTRY_TEMPORARY)
                         $$.type = id->u.eTemporary.type; 
                     else
+                        // Parameter?
                         exit(1);
                 }
                 else {
@@ -470,7 +471,7 @@ call_opt_tail
     | ',' expr call_opt_tail
     ;
 block
-    : '{' block_tail '}'
+    : '{' {openScope();} block_tail '}' {closeScope();}
     ;
 block_tail
     : /* Nothing */
@@ -493,10 +494,40 @@ stmt
     | l_value stmt_choice ';'
     | call ';'
     | T_if '(' expr ')' stmt stmt_opt_if
-    | T_while '(' expr ')' loop_stmt
+        {
+            if ($3.type != typeBoolean)
+                type_error("if: condition is %s instead of Boolean", \
+                            verbose_type($3.type));
+           
+        }
     | T_for '(' T_id ',' range ')' loop_stmt 
+        {
+                SymbolEntry * i = lookupEntry($3, LOOKUP_ALL_SCOPES, true);
+                
+                if (i->entryType != ENTRY_VARIABLE)
+                    type_error("\"%s\" is not a variable", i->id);
+                else if (i->u.eVariable.type != typeInteger)
+                    type_error("Control variable \"%s\" is not an Integer", i->id);
+        }
+    | T_while '(' expr ')' loop_stmt
+        {
+            if ($3.type != typeBoolean)
+                type_error("while: condition is %s instead of Boolean", \
+                            verbose_type($3.type));
+        }
     | T_do loop_stmt T_while '(' expr ')' ';'
+        {
+            if ($5.type != typeBoolean)
+                type_error("do..while: condition is %s instead of Boolean", \
+                            verbose_type($5.type));
+        }
     | T_switch '(' expr ')' '{' stmt_tail stmt_opt_switch '}'
+        {
+            if ($3.type != typeInteger)
+                type_error("switch: expression is %s instead of Integer", \
+                            verbose_type($3.type));
+        }
+
     | T_ret stmt_opt_ret ';'
     | write '(' stmt_opt_write ')' ';'
     | block
@@ -526,6 +557,11 @@ stmt_tail_tail_plus
     ;
 stmt_tail_tail
     : T_case const_expr ':' 
+        {
+            if ($2.type != typeInteger)
+                type_error("switch case is %s instead of Integer", \
+                        verbose_type($2.type));
+        }
     ;
 stmt_opt_switch
     : /* Nothing */
@@ -553,6 +589,14 @@ assign
     ;
 range
     : expr range_choice expr range_opt
+        {
+            if ($1.type != typeInteger)
+                type_error("FOR: range start is %s instead of Integer", \
+                                        verbose_type($1.type));
+            if ($3.type != typeInteger)
+                type_error("FOR: range end is %s instead of Integer", \
+                                        verbose_type($3.type));
+        }
     ;
 range_choice
     : T_to 
@@ -561,6 +605,11 @@ range_choice
 range_opt
     : /* Nothing */
     | T_step expr
+        {
+            if ($2.type != typeInteger)
+                type_error("FOR: STEP is %s instead of Integer", \
+                                        verbose_type($2.type));
+        }
     ;
 clause
     : clause_tail clause_choice
@@ -581,11 +630,29 @@ write
     ;
 format
     : expr
+        {
+            if ((($1.type->kind == TYPE_ARRAY) || ($1.type->kind == TYPE_IARRAY)) \
+              && ( $1.type->refType != typeChar))
+                type_error("Cannot display an Array of type other than Char");
+        }
     | T_form '(' expr ',' expr format_opt ')'
+        {
+            if ($5.type != typeInteger)
+                type_error("FORM: second argument is %s instead of Integer", \
+                                        verbose_type($5.type));
+            if (($6 == 1) && ($3.type != typeReal))
+                type_error("FORM: first argument is not Real and precision is specified", verbose_type($5.type));
+        }
     ;
 format_opt
-    : /* Nothing */
-    | ',' expr
+    : /* Nothing */ { $$ = 0; }
+    | ',' expr  
+        {
+            if ($2.type != typeInteger)
+                type_error("FORM: third argument is %s instead of Integer", \
+                                        verbose_type($2.type));
+            $$ = 1;
+        }
     ;
 
 %%
