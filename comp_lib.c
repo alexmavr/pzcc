@@ -134,7 +134,7 @@ void eval_const_binop(struct ast_node * left, struct ast_node * right, const cha
 
 
 void array_index_check(struct ast_node * _) {
-    if (_->type != typeInteger)
+    if (!compat_types(typeInteger, _->type))
         type_error("Array index cannot be %s" , verbose_type(_->type));
     else if (_->value.i <= 0) 
         type_error("Array index cannot be negative");

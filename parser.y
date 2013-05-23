@@ -162,13 +162,17 @@ const_def
         {
             SymbolEntry * con = newConstant($4, currentType);
 
-            /* Constants can only be promoted from int to real */
-            if ((currentType == typeReal) && ($6.type == typeInteger)) {
-                con->u.eConstant.value.vReal = $6.value.r = (RepReal)  $6.value.i;
-            } else if (currentType != $6.type) {
+            if ((currentType == typeReal) && ($6.type == typeInteger)) 
+                con->u.eConstant.value.vReal = (RepReal) $6.value.i;
+            else if ((currentType == typeReal) && ($6.type == typeChar)) 
+                con->u.eConstant.value.vReal = (RepReal) $6.value.c;
+            else if ((currentType == typeInteger) && ($6.type == typeChar)) 
+                con->u.eConstant.value.vInteger = (RepInteger) $6.value.c;
+            else if ((currentType == typeChar) && ($6.type == typeInteger)) 
+                con->u.eConstant.value.vChar = (RepChar) $6.value.i;
+            else if (currentType != $6.type) 
                 type_error("Cannot assign %s to %s at variable \"%s\"", \
                             verbose_type(currentType), verbose_type($6.type), $4);
-            }
             else if (currentType == typeInteger)
                 con->u.eConstant.value.vInteger = $6.value.i;
             else if (currentType == typeReal)
@@ -188,13 +192,18 @@ const_def_tail
         {
             SymbolEntry * con = newConstant($2, currentType);
 
-            /* Constants can only be promoted from int to real */
-            if ((currentType == typeReal) && ($4.type == typeInteger)) {
-                con->u.eConstant.value.vReal = $4.value.r = (RepReal) $4.value.i;
-            } else if (currentType != $4.type) {
+            if ((currentType == typeReal) && ($4.type == typeInteger)) 
+                con->u.eConstant.value.vReal = (RepReal) $4.value.i;
+            else if ((currentType == typeReal) && ($4.type == typeChar)) 
+                con->u.eConstant.value.vReal = (RepReal) $4.value.c;
+            else if ((currentType == typeInteger) && ($4.type == typeChar)) 
+                con->u.eConstant.value.vInteger = (RepInteger) $4.value.c;
+            else if ((currentType == typeChar) && ($4.type == typeInteger)) 
+                con->u.eConstant.value.vChar = (RepChar) $4.value.i;
+
+            else if (currentType != $4.type)
                 type_error("Cannot assign %s to %s at variable \"%s\"", \
                             verbose_type(currentType), verbose_type($4.type), $2);
-            }
             else if (currentType == typeInteger)
                 con->u.eConstant.value.vInteger = $4.value.i;
             else if (currentType == typeReal)
@@ -257,6 +266,9 @@ routine_tail
     ;
 routine_header
     : routine_header_head T_id '(' routine_header_opt ')'
+        {
+            // newFunction($2);
+        }
     ;
 routine_header_head
     : T_proc
@@ -437,7 +449,7 @@ l_value_tail
     : /* Nothing */ { $$ = 0; }
     | '[' expr ']' l_value_tail 
         {
-             if (($2.type != typeInteger) && ($2.type != typeChar))
+             if (!compat_types(typeInteger, $2.type))
                 type_error("Array index cannot be %s", verbose_type($2.type));
              $$ = 1 + $4;
         }
@@ -523,7 +535,7 @@ stmt
         }
     | T_switch '(' expr ')' '{' stmt_tail stmt_opt_switch '}'
         {
-            if ($3.type != typeInteger)
+            if (!compat_types(typeInteger, $3.type))
                 type_error("switch: expression is %s instead of Integer", \
                             verbose_type($3.type));
         }
@@ -656,7 +668,6 @@ format_opt
     ;
 
 %%
-
 
 int main ()
 {
