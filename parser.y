@@ -169,10 +169,10 @@ const_def
             else if ((currentType == typeInteger) && ($6.type == typeChar)) 
                 con->u.eConstant.value.vInteger = (RepInteger) $6.value.c;
             else if ((currentType == typeChar) && ($6.type == typeInteger)) 
-                con->u.eConstant.value.vChar = (RepChar) $6.value.i;
+                con->u.eConstant.value.vChar = int_to_char($6.value.i);
             else if (currentType != $6.type) 
-                type_error("Cannot assign %s to %s at variable \"%s\"", \
-                            verbose_type(currentType), verbose_type($6.type), $4);
+                type_error("Illegal assignment from %s to %s at variable \"%s\"", \
+                        verbose_type($6.type), verbose_type(currentType), $4);
             else if (currentType == typeInteger)
                 con->u.eConstant.value.vInteger = $6.value.i;
             else if (currentType == typeReal)
@@ -202,8 +202,8 @@ const_def_tail
                 con->u.eConstant.value.vChar = (RepChar) $4.value.i;
 
             else if (currentType != $4.type)
-                type_error("Cannot assign %s to %s at variable \"%s\"", \
-                            verbose_type(currentType), verbose_type($4.type), $2);
+                type_error("Illegal assignment from %s to %s at variable \"%s\"", \
+                        verbose_type($4.type), verbose_type(currentType), $2);
             else if (currentType == typeInteger)
                 con->u.eConstant.value.vInteger = $4.value.i;
             else if (currentType == typeReal)
@@ -370,13 +370,13 @@ const_expr
                 }
             }
         | const_expr binop1 const_expr %prec '*' 
-        {
-            eval_const_binop(&($1), &($3), $2, &($$));
-        }
-    | const_expr binop2 const_expr %prec '+' 
-        {
-            eval_const_binop(&($1), &($3), $2, &($$));
-        }
+            {
+                eval_const_binop(&($1), &($3), $2, &($$));
+            }
+        | const_expr binop2 const_expr %prec '+' 
+            {
+                eval_const_binop(&($1), &($3), $2, &($$));
+            }
     ;
 expr
     :  const_unit { $$.type = $1.type; }
@@ -426,10 +426,10 @@ l_value
                             int dims = array_dimensions(id->u.eVariable.type);
                             if ($2 > dims)
                                 type_error("\"%s\" has less dimensions than specified", \
-                                                                                 id->id);
+                                                                id->id);
                             else if ($2 < dims)
                                 /* the type is that of the (dims - $2) dimension */
-                                $$.type = n_dimension_type(id->u.eVariable.type, (dims-$2));
+                                $$.type = n_dimension_type(id->u.eVariable.type, $2);
                             else
                                 $$.type = id->u.eVariable.type;
                             break;
@@ -518,7 +518,7 @@ stmt
                 
                 if (i->entryType != ENTRY_VARIABLE)
                     type_error("\"%s\" is not a variable", i->id);
-                else if (i->u.eVariable.type != typeInteger)
+                else if (!compat_types(typeInteger, i->u.eVariable.type))
                     type_error("Control variable \"%s\" is not an Integer", i->id);
         }
     | T_while '(' expr ')' loop_stmt
@@ -533,7 +533,7 @@ stmt
                 type_error("do..while: condition is %s instead of Boolean", \
                             verbose_type($5.type));
         }
-    | T_switch '(' expr ')' '{' stmt_tail stmt_opt_switch '}'
+    | T_switch '(' expr ')' '{' {openScope();} stmt_tail stmt_opt_switch '}' {closeScope();}
         {
             if (!compat_types(typeInteger, $3.type))
                 type_error("switch: expression is %s instead of Integer", \
@@ -570,7 +570,7 @@ stmt_tail_tail_plus
 stmt_tail_tail
     : T_case const_expr ':' 
         {
-            if ($2.type != typeInteger)
+            if (!compat_types(typeInteger, $2.type))
                 type_error("switch case is %s instead of Integer", \
                         verbose_type($2.type));
         }
@@ -602,10 +602,10 @@ assign
 range
     : expr range_choice expr range_opt
         {
-            if ($1.type != typeInteger)
+            if (!compat_types(typeInteger, $1.type))
                 type_error("FOR: range start is %s instead of Integer", \
                                         verbose_type($1.type));
-            if ($3.type != typeInteger)
+            if (!compat_types(typeInteger, $3.type))
                 type_error("FOR: range end is %s instead of Integer", \
                                         verbose_type($3.type));
         }
@@ -618,7 +618,7 @@ range_opt
     : /* Nothing */
     | T_step expr
         {
-            if ($2.type != typeInteger)
+            if (!compat_types(typeInteger, $2.type))
                 type_error("FOR: STEP is %s instead of Integer", \
                                         verbose_type($2.type));
         }
@@ -649,10 +649,10 @@ format
         }
     | T_form '(' expr ',' expr format_opt ')'
         {
-            if ($5.type != typeInteger)
+            if (!compat_types(typeInteger, $5.type))
                 type_error("FORM: second argument is %s instead of Integer", \
                                         verbose_type($5.type));
-            if (($6 == 1) && ($3.type != typeReal))
+            if (($6 == 1) && (!compat_types(typeReal, $3.type)))
                 type_error("FORM: first argument is not Real and precision is specified", verbose_type($5.type));
         }
     ;
@@ -660,7 +660,7 @@ format_opt
     : /* Nothing */ { $$ = 0; }
     | ',' expr  
         {
-            if ($2.type != typeInteger)
+            if (!compat_types(typeInteger, $2.type))
                 type_error("FORM: third argument is %s instead of Integer", \
                                         verbose_type($2.type));
             $$ = 1;

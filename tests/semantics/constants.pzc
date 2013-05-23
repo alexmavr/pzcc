@@ -1,5 +1,6 @@
 PROGRAM ops ()
 {
+    const char car = 63.2;
     int n = 5;
     REAL d = 13.6523; 
     bool a = true;

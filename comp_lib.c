@@ -115,7 +115,7 @@ RepInteger eval_int_op(RepInteger left, RepInteger right, const char * op) {
     return res;
 }
 
-void eval_const_binop(struct ast_node * left, struct ast_node * right, const char * op, struct ast_node * res ) {
+void eval_const_binop(struct ast_node * left, struct ast_node * right, const char * op, struct ast_node * res) {
     if ((left->type == typeInteger) && (right->type == typeReal)) {
         res->type = typeReal;
         res->value.r = eval_real_op((RepReal) left->value.i, right->value.r, op);
@@ -124,11 +124,36 @@ void eval_const_binop(struct ast_node * left, struct ast_node * right, const cha
         res->type = typeReal;
         res->value.r = eval_real_op(left->value.r, (RepReal) right->value.i, op);
 
+    } else if ((left->type == typeChar) && (right->type == typeReal)) {
+        res->type = typeReal;
+        res->value.r = eval_real_op((RepReal) left->value.c, right->value.r, op);
+
+    } else if ((left->type == typeReal) && (right->type == typeChar)) {
+        res->type = typeReal;
+        res->value.r = eval_real_op(left->value.r, (RepReal) right->value.c, op);
+
+    } else if ((left->type == typeReal) && (right->type == typeReal)) {
+        res->type = typeReal;
+        res->value.r = eval_real_op(left->value.r, right->value.r, op);
+
     } else if ((left->type == typeInteger) && (right->type == typeInteger)) {
         res->type = typeInteger;
         res->value.i = eval_int_op(left->value.i, right->value.i, op);
+
+    } else if ((left->type == typeChar) && (right->type == typeInteger)) {
+        res->type = typeInteger;
+        res->value.i = eval_int_op((RepInteger) left->value.c, right->value.i, op);
+
+    } else if ((left->type == typeInteger) && (right->type == typeChar)) {
+        res->type = typeInteger;
+        res->value.i = eval_int_op(left->value.i, (RepInteger) right->value.c, op);
+
+    } else if ((left->type == typeChar) && (right->type == typeChar)) {
+        res->type = typeInteger;
+        res->value.i = eval_int_op((RepInteger) left->value.c, (RepInteger) right->value.c, op);
+
     } else {
-        type_error("Type mismatch on \"%s\" operator", op);
+        type_error("Type mismatch on \"%s\" constant operator", op);
     }   
 }
 
@@ -158,9 +183,7 @@ Type n_dimension_type(Type t, int n) {
     Type current = t;
     int m = n;
 
-    while ((current->kind == TYPE_ARRAY) || (current->kind == TYPE_IARRAY)) {
-        if (m == 0)
-            break;
+    while ((m > 0) && ((current->kind == TYPE_ARRAY) || (current->kind == TYPE_IARRAY))) {
         t = t->refType;
         m--;
     }
@@ -170,9 +193,18 @@ Type n_dimension_type(Type t, int n) {
 /* Return true if t2 can be cast to t1 */
 bool compat_types(Type t1, Type t2) {
     bool res = false;
-    if (((t1 == typeInteger) && ((t2 == typeInteger) || (t2 == typeChar))) \
-    || ((t1 == typeReal) && ((t2 == typeReal) || (t2 == typeInteger))) \
-    || ((t1 == typeChar) && ((t2 == typeChar) || (t2 == typeInteger)))) \
+    while (((t1->kind == TYPE_ARRAY) && (t2->kind == TYPE_ARRAY)) \
+        || ((t1->kind == TYPE_IARRAY) && (t2->kind == TYPE_IARRAY))) {
+        /* is the grouping correct ? */
+        t1 = t1->refType;
+        t2 = t2->refType;
+    }
+    if ((t1 == t2)
+    || ((t1 == typeInteger) && (t2 == typeChar)) \
+    || ((t1 == typeReal) && (t2 == typeInteger)) \
+    || ((t1 == typeReal) && (t2 == typeChar)) \
+    || ((t1 == typeChar) && (t2 == typeInteger))) \
             res = true;
     return res;
 }
+

@@ -10,8 +10,9 @@
 #include "parser.h"
 #include "stdbool.h"
 
-
 extern int yylineno;
+
+#define int_to_char(n) ((char) ((n) & 0xFF))
 
 /* Error Reporting */
 typedef enum { ERR_LV_WARN, ERR_LV_CRIT } error_lv;
