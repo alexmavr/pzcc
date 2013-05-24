@@ -31,4 +31,4 @@ bool compat_types(Type t1, Type t2); // true if t2 can be converted to t1
 
 void eval_const_binop(struct ast_node * left, struct ast_node * right, const char * op, struct ast_node * res );
 
-void array_index_check(struct ast_node * _);
+int array_index_check(struct ast_node * _);

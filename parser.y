@@ -10,6 +10,7 @@
 extern int yylex();
 
 Type currentType; // global type indicator for variable initializations
+SymbolEntry * currentFun; // global function indicator for parameter declaration
 
 %}
 
@@ -109,6 +110,10 @@ Type currentType; // global type indicator for variable initializations
 %type <node> var_init_tail_plus
 %type <node> const_expr
 %type <node> const_unit
+%type <node> formal
+%type <node> formal_tail
+%type <node> routine_header_head
+%type <node> const_expr_opt
 
 %type <i> l_value_tail
 %type <i> format_opt
@@ -265,46 +270,86 @@ routine_tail
     | block
     ;
 routine_header
-    : routine_header_head T_id '(' routine_header_opt ')'
-        {
-            // newFunction($2);
-        }
+    : routine_header_head T_id {currentFun = newFunction($2);} '(' routine_header_opt ')' {endFunctionHeader(currentFun, $1.type); }
     ;
 routine_header_head
-    : T_proc
-    | T_func type 
+    : T_proc       { $$.type = typeVoid; }
+    | T_func type  { $$.type = $2.type; }
     ;
 routine_header_opt
     : type formal routine_header_opt_tail
+        {
+            if ($2.type == NULL)
+                newParameter($2.value.s, $1.type, PASS_BY_REFERENCE, currentFun);
+            else if ($2.type->kind >= TYPE_ARRAY) {
+                Type current = $2.type;
+                while (current->refType != typeVoid) 
+                    current = current->refType;
+                current->refType = $1.type;
+                newParameter($2.value.s, $2.type, PASS_BY_REFERENCE, currentFun);   
+            } else 
+                newParameter($2.value.s, $1.type, PASS_BY_VALUE, currentFun);
+        }
     ;
 routine_header_opt_tail
-    : /* nothing */
+    : /* nothing */ 
     | ',' type formal routine_header_opt_tail
+        {
+            if ($3.type == NULL)
+                 newParameter($3.value.s, $2.type, PASS_BY_REFERENCE, currentFun);
+            else if ($3.type->kind >= TYPE_ARRAY) {
+                Type current = $3.type;
+                while (current->refType != typeVoid)
+                    current = current->refType;
+                current->refType = $2.type;
+                newParameter($3.value.s, $3.type, PASS_BY_REFERENCE, currentFun);   
+            } else
+                newParameter($3.value.s, $2.type, PASS_BY_VALUE, currentFun);
+        }
     ;
 formal
-    : T_id
+    : T_id 
+        {
+            $$.value.s = $1;
+            $$.type = typeVoid; // to be backpatched
+        }
     | '&' T_id
+        {
+            $$.value.s = $2;
+            $$.type = NULL; 
+        }
     | T_id '[' const_expr_opt ']' formal_tail
+        {
+            $$.value.s = $1;
+            if (!$3.value.i)
+                $$.type = typeIArray($5.type);
+            else
+                $$.type = typeArray($3.value.i, $5.type); 
+        }
     ;
 const_expr_opt
-    : /* nothing */
+    : /* nothing */ { $$.value.i = 0; }
     | const_expr 
         {
             array_index_check(&($1));
+            $$ = $1;
         }
     ;
 formal_tail
-    : /* nothing */
+    : /* nothing */ { $$.type = typeVoid;} // to be backpatched
     | '[' const_expr ']' formal_tail
         {
-            array_index_check(&($2));
+            if (array_index_check(&($2)))
+                $$.type = typeArray($2.value.i, $4.type);
+            else
+                $$.type = typeVoid; // error recovery 
         }
     ;
 program_header
-    : T_prog T_id '(' ')' {openScope();}
+    : T_prog T_id '(' ')'
     ;
 program
-    : program_header block {closeScope();}
+    : program_header block
     ;
 type
     : T_int     { $$.type = typeInteger; }
@@ -388,26 +433,31 @@ expr
         {
              $$ = $1; 
         }
-    | call
+    | call { $$ = $1; }
     | expr binop1 expr %prec '*' 
         {
-            
+            $$ = $1;
         }
     | expr binop2 expr %prec '+' 
-            {
-            }
+        {
+            $$ = $1;
+        }
     | expr binop3 expr %prec '<' 
-            {
-            }
+        {
+            $$.type = typeBoolean;
+        }
     | expr binop4 expr %prec T_eq 
-            {
-            }
+        {
+            $$ = $1;
+        }
     | expr binop5 expr %prec T_and 
-            {
-            }
+        {
+            $$ = $1;
+        }
     | expr binop6 expr %prec T_or 
-            {
-            }
+        {
+            $$ = $1;
+        }
     | unop expr %prec UN
         {
             $$ = $2;
@@ -417,13 +467,14 @@ l_value
     : T_id l_value_tail
         {
             SymbolEntry * id = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
+            int dims;
             if (id != NULL) {
                 switch (id->entryType) {
                     case ENTRY_VARIABLE:
                         {
                             /* Return the appropriate type if it's an array 
                             *  $2 is the number of dimensions following the id */
-                            int dims = array_dimensions(id->u.eVariable.type);
+                            dims = array_dimensions(id->u.eVariable.type);
                             if ($2 > dims)
                                 type_error("\"%s\" has less dimensions than specified", \
                                                                 id->id);
@@ -434,15 +485,29 @@ l_value
                                 $$.type = id->u.eVariable.type;
                             break;
                         }
+                    case ENTRY_PARAMETER:
+                        {
+                            dims = array_dimensions(id->u.eParameter.type);
+                            if ($2 > dims)
+                                type_error("\"%s\" has less dimensions than specified", \
+                                                                id->id);
+                            else if ($2 < dims)
+                                /* the type is that of the (dims - $2) dimension */
+                                $$.type = n_dimension_type(id->u.eParameter.type, $2);
+                            else
+                                $$.type = id->u.eParameter.type;
+                            break;
+                        }
                     case ENTRY_CONSTANT:
                         if ($2)
                             type_error("Constant \"%s\" is not an Array",id->id);
                         $$.type = id->u.eConstant.type;
                         break;
+                        
                     default: ;
                 }
                 $$.value.s = id->id;
-            }
+            } 
         }
     ;
 l_value_tail
@@ -471,12 +536,16 @@ binop6: T_logor | T_or;
 call 
     : T_id '(' call_opt ')'
         {
-            // return the function's call type
+            SymbolEntry * fun = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
+            
+            if (fun != NULL) {
+               $$.type = fun->u.eFunction.resultType;
+            }
         }
     ;
 call_opt
     : /* Nothing */
-    | expr call_opt_tail 
+    | expr call_opt_tail  
     ;
 call_opt_tail
     : /* Nothing */
@@ -505,7 +574,7 @@ stmt
         }
     | l_value stmt_choice ';'
     | call ';'
-    | T_if '(' expr ')' stmt stmt_opt_if
+    | T_if '(' expr ')' stmt stmt_opt_if 
         {
             if ($3.type != typeBoolean)
                 type_error("if: condition is %s instead of Boolean", \
@@ -521,7 +590,7 @@ stmt
                 else if (!compat_types(typeInteger, i->u.eVariable.type))
                     type_error("Control variable \"%s\" is not an Integer", i->id);
         }
-    | T_while '(' expr ')' loop_stmt
+    | T_while '(' expr ')' loop_stmt 
         {
             if ($3.type != typeBoolean)
                 type_error("while: condition is %s instead of Boolean", \
@@ -541,7 +610,7 @@ stmt
         }
 
     | T_ret stmt_opt_ret ';'
-    | write '(' stmt_opt_write ')' ';'
+    | write '(' stmt_opt_write ')' ';' 
     | block
     | error ';'
     ;
@@ -588,7 +657,7 @@ stmt_opt_write
     | format stmt_opt_write_tail
     ;
 stmt_opt_write_tail
-    : /* Nothing */
+    : /* Nothing */ 
     | ',' format stmt_opt_write_tail
     ;
 assign
@@ -643,8 +712,7 @@ write
 format
     : expr
         {
-            if ((($1.type->kind == TYPE_ARRAY) || ($1.type->kind == TYPE_IARRAY)) \
-              && ( $1.type->refType != typeChar))
+            if ($1.type == NULL || (($1.type->kind >= TYPE_ARRAY) && ( $1.type->refType != typeChar)))
                 type_error("Cannot display an Array of type other than Char");
         }
     | T_form '(' expr ',' expr format_opt ')'

@@ -13,7 +13,7 @@ ifndef DEBUG
 endif
 
 ifeq ($(DEBUG),y)
-	CFLAGS += -O0
+	CFLAGS += -O0 -g
 	BSN_DBG += -t
 else
 	CFLAGS += -O3

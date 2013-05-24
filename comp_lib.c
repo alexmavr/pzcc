@@ -73,7 +73,7 @@ const char * verbose_type(Type t ) {
         return "Char";
     else if (t == typeVoid)
         return "Void";
-    else if ((t->kind == TYPE_ARRAY) || (t->kind == TYPE_IARRAY)) {
+    else if (t->kind >= TYPE_ARRAY) {
         if (t->refType->kind == TYPE_ARRAY)
             res = "Multidimensional Array";
         else {       
@@ -158,11 +158,17 @@ void eval_const_binop(struct ast_node * left, struct ast_node * right, const cha
 }
 
 
-void array_index_check(struct ast_node * _) {
-    if (!compat_types(typeInteger, _->type))
+int array_index_check(struct ast_node * _) {
+    int ret = 0;
+    if (!compat_types(typeInteger, _->type)) {
         type_error("Array index cannot be %s" , verbose_type(_->type));
-    else if (_->value.i <= 0) 
+        ret = 1;
+    }
+    else if (_->value.i <= 0) {
         type_error("Array index cannot be negative");
+        ret = 1;
+    }
+    return ret;
 }
 
 /* Returns the number of dimensions of the type t 
@@ -207,4 +213,3 @@ bool compat_types(Type t1, Type t2) {
             res = true;
     return res;
 }
-
