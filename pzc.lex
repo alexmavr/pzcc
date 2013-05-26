@@ -36,7 +36,10 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 %%
 
 "bool"					{ return T_bool;	}
-"and"					{ return T_and;		}
+"and"					{
+                            yylval.s = "and";
+                            return T_and;
+                		}
 "break"					{ return T_break;	}
 "case"					{ return T_case;	}
 "char"					{ return T_char;	}

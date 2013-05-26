@@ -167,6 +167,9 @@ const_def
         {
             SymbolEntry * con = newConstant($4, currentType);
 
+            if (con == NULL)
+                YYERROR;
+
             if ((currentType == typeReal) && ($6.type == typeInteger)) 
                 con->u.eConstant.value.vReal = (RepReal) $6.value.i;
             else if ((currentType == typeReal) && ($6.type == typeChar)) 
@@ -196,6 +199,9 @@ const_def_tail
     | ',' T_id '=' const_expr const_def_tail
         {
             SymbolEntry * con = newConstant($2, currentType);
+
+            if (con == NULL)
+                YYERROR;
 
             if ((currentType == typeReal) && ($4.type == typeInteger)) 
                 con->u.eConstant.value.vReal = (RepReal) $4.value.i;
@@ -396,24 +402,19 @@ const_expr
             {   /* constant variables only */ 
                 SymbolEntry * id = lookupEntry($1, LOOKUP_CURRENT_SCOPE, true);
 
+                if (id == NULL)
+                    YYERROR;
+
                 if (id->entryType != ENTRY_CONSTANT) {
                     type_error("Non-constant identifier \"%s\" found in constant expression", $1);
-                    /* Error Recovery */
-                    if (id->entryType == ENTRY_VARIABLE)
-                        $$.type = id->u.eVariable.type; 
-                    else if (id->entryType == ENTRY_FUNCTION)
-                        $$.type = id->u.eFunction.resultType; 
-                    else if (id->entryType == ENTRY_TEMPORARY)
-                        $$.type = id->u.eTemporary.type; 
-                    else
-                        // Parameter?
-                        exit(1);
+                    YYERROR;
                 }
                 else {
                     $$.type = id->u.eConstant.type;
                     memcpy(&($$.value), &(id->u.eConstant.value), sizeof(val_union));
                 }
             }
+        | '(' const_expr ')' { $$ = $2; }
         | const_expr binop1 const_expr %prec '*' 
             {
                 eval_const_binop(&($1), &($3), $2, &($$));
@@ -424,7 +425,19 @@ const_expr
             }
         | const_expr binop3 const_expr %prec '<' 
             {
-                $$.type = typeBoolean;
+                eval_const_binop(&($1), &($3), $2, &($$));
+            }
+        | const_expr binop4 const_expr %prec T_eq
+            {
+                eval_const_binop(&($1), &($3), $2, &($$));
+            }
+        | const_expr binop5 const_expr %prec T_and
+            {
+                eval_const_binop(&($1), &($3), $2, &($$));
+            }
+        | const_expr binop6 const_expr %prec T_or
+            {
+                eval_const_binop(&($1), &($3), $2, &($$));
             }
     ;
 expr
@@ -472,44 +485,43 @@ l_value
         {
             SymbolEntry * id = lookupEntry($1, LOOKUP_CURRENT_SCOPE, true);
             int dims;
+
             if (id == NULL) 
-                $$.type = typeVoid;
-            else {
-                switch (id->entryType) {
-                    case ENTRY_VARIABLE:
-                        {
-                            /* Return the appropriate type if it's an array 
-                            *  $2 is the number of dimensions following the id */
-                            dims = array_dimensions(id->u.eVariable.type);
-                            if ($2 > dims)
-                                type_error("\"%s\" has less dimensions than specified", id->id);
-                            else if ($2 < dims)
-                                $$.type = n_dimension_type(id->u.eVariable.type, $2);
-                            else
-                                $$.type = id->u.eVariable.type;
-                            break;
-                        }
-                    case ENTRY_PARAMETER:
-                        {
-                            dims = array_dimensions(id->u.eParameter.type);
-                            if ($2 > dims)
-                                type_error("\"%s\" has less dimensions than specified", id->id);
-                            else if ($2 < dims)
-                                $$.type = n_dimension_type(id->u.eParameter.type, $2);
-                            else
-                                $$.type = id->u.eParameter.type;
-                            break;
-                        }
-                    case ENTRY_CONSTANT:
-                        if ($2)
-                            type_error("Constant \"%s\" is not an Array",id->id);
-                        $$.type = id->u.eConstant.type;
+                YYERROR;
+            switch (id->entryType) {
+                case ENTRY_VARIABLE:
+                    {
+                        /* Return the appropriate type if it's an array 
+                        *  $2 is the number of dimensions following the id */
+                        dims = array_dimensions(id->u.eVariable.type);
+                        if ($2 > dims)
+                            type_error("\"%s\" has less dimensions than specified", id->id);
+                        else if ($2 < dims)
+                            $$.type = n_dimension_type(id->u.eVariable.type, $2);
+                        else
+                            $$.type = id->u.eVariable.type;
                         break;
-                        
-                    default: ;
-                }
-                $$.value.s = id->id;
-            } 
+                    }
+                case ENTRY_PARAMETER:
+                    {
+                        dims = array_dimensions(id->u.eParameter.type);
+                        if ($2 > dims)
+                            type_error("\"%s\" has less dimensions than specified", id->id);
+                        else if ($2 < dims)
+                            $$.type = n_dimension_type(id->u.eParameter.type, $2);
+                        else
+                            $$.type = id->u.eParameter.type;
+                        break;
+                    }
+                case ENTRY_CONSTANT:
+                    if ($2)
+                        type_error("Constant \"%s\" is not an Array",id->id);
+                    $$.type = id->u.eConstant.type;
+                    break;
+                    
+                default: ;
+            }
+            $$.value.s = id->id;
         }
     ;
 l_value_tail
@@ -539,10 +551,10 @@ call
     : T_id '(' call_opt ')'
         {
             SymbolEntry * fun = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
-            
-            if (fun != NULL) {
-               $$.type = fun->u.eFunction.resultType;
-            }
+            if (fun == NULL)
+                YYERROR;
+
+            $$.type = fun->u.eFunction.resultType;
         }
     ;
 call_opt
@@ -586,6 +598,9 @@ stmt
     | T_for '(' T_id ',' range ')' loop_stmt 
         {
                 SymbolEntry * i = lookupEntry($3, LOOKUP_CURRENT_SCOPE, true);
+
+                if (i == NULL)
+                    YYERROR;
                 
                 if (i->entryType != ENTRY_VARIABLE)
                     type_error("\"%s\" is not a variable", i->id);

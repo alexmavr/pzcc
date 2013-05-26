@@ -61,7 +61,7 @@ void type_error (const char *msg, ...) {
     va_end(va);
 }
 
-const char * verbose_type(Type t ) {
+const char * verbose_type (Type t) {
     char * res = new(35 * sizeof(char));
     if (t == typeInteger)
         return "Integer";
@@ -85,72 +85,124 @@ const char * verbose_type(Type t ) {
 }
 
 
-RepReal eval_real_op(RepReal left, RepReal right, const char * op) {
-    RepReal res = 0.0;
-    if (!strcmp(op, "*")) 
-        res = left * right;
-    else if (!strcmp(op, "/")) 
-        res = left / right;
-    else if (!strcmp(op, "+")) 
-        res = (RepReal) left + (RepReal) right;
-    else if (!strcmp(op, "-")) 
-        res = left - right;
-    else if (!strcmp(op, "%") || !strcmp(op, "MOD"))
-        type_error("Cannot perform \"%s\" on Reals", op);
-    return res;
+void eval_real_op (RepReal left, RepReal right, const char * op, struct ast_node * res) {
+    if (!strcmp(op, "*")) {
+        res->type = typeReal;
+        res->value.r = left * right;
+    } else if (!strcmp(op, "/")) {
+        res->type = typeReal;
+        res->value.r = left / right;
+    } else if (!strcmp(op, "+")) {
+        res->type = typeReal;
+        res->value.r = left + right;
+    } else if (!strcmp(op, "-")) {
+        res->type = typeReal;
+        res->value.r = left - right;
+    } else if (!strcmp(op, "<")) {
+        res->type = typeBoolean;
+        res->value.b = left < right;
+    } else if (!strcmp(op, ">")) {
+        res->type = typeBoolean;
+        res->value.b = left < right;
+    } else if (!strcmp(op, ">=")) {
+        res->type = typeBoolean;
+        res->value.b = left >= right;
+    } else if (!strcmp(op, "<=")) {
+        res->type = typeBoolean;
+        res->value.b = left <= right;
+    } else if (!strcmp(op, "==")) {
+        res->type = typeBoolean;
+        res->value.b = left == right;
+    } else if (!strcmp(op, "!=")) {
+        res->type = typeBoolean;
+        res->value.b = left != right;
+    } else
+        type_error("Cannot perform \"%s\" between Reals", op);
 }
 
-RepInteger eval_int_op(RepInteger left, RepInteger right, const char * op) {
-    RepInteger res = 0;
-    if (!strcmp(op, "*")) 
-        res = left * right;
-    else if (!strcmp(op, "/")) 
-        res = left / right;
-    else if (!strcmp(op, "+")) 
-        res = left + right;
-    else if (!strcmp(op, "-")) 
-        res = left - right;
-    else if (!strcmp(op, "%") || !strcmp(op, "MOD"))
-        res = left % right;
-    return res;
+void eval_int_op (RepInteger left, RepInteger right, const char * op, struct ast_node * res) {
+    if (!strcmp(op, "*")) {
+        res->type = typeInteger;
+        res->value.i = left * right;
+    } else if (!strcmp(op, "/")) {
+        res->type = typeInteger;
+        res->value.i = left / right;
+    } else if (!strcmp(op, "+")) {
+        res->type = typeInteger;
+        res->value.i = left + right;
+    } else if (!strcmp(op, "-")) {
+        res->type = typeInteger;
+        res->value.i = left - right;
+    } else if (!strcmp(op, "%") || !strcmp(op, "MOD")) {
+        res->type = typeInteger;
+        res->value.i = left % right;
+    } else if (!strcmp(op, "<")) {
+        res->type = typeBoolean;
+        res->value.b = left < right;
+    } else if (!strcmp(op, ">")) {
+        res->type = typeBoolean;
+        res->value.b = left > right;
+    } else if (!strcmp(op, "<=")) {
+        res->type = typeBoolean;
+        res->value.b = left <= right;
+    } else if (!strcmp(op, ">=")) {
+        res->type = typeBoolean;
+        res->value.b = left >= right;
+    } else if (!strcmp(op, "==")) {
+        res->type = typeBoolean;
+        res->value.b = left == right;
+    } else if (!strcmp(op, "!=")) {
+        res->type = typeBoolean;
+        res->value.b = left != right;
+    } else 
+        type_error("Cannot perform \"%s\" between Integers", op);
 }
+
+void eval_bool_op (RepBoolean left, RepBoolean right, const char * op, struct ast_node * res) {
+    res->type = typeBoolean;;
+    if (!strcmp(op, "==")) 
+        res->value.b = left == right;
+    else if (!strcmp(op, "!=")) 
+        res->value.b = left != right;
+    else if (!strcmp(op, "&&") || !strcmp(op,"and")) 
+        res->value.b = left && right;
+    else if (!strcmp(op, "||") || !strcmp(op,"or")) 
+        res->value.b = left || right;
+    else 
+        type_error("Cannot perform \"%s\" between Booleans", op);
+}
+
 
 void eval_const_binop(struct ast_node * left, struct ast_node * right, const char * op, struct ast_node * res) {
+    
     if ((left->type == typeInteger) && (right->type == typeReal)) {
-        res->type = typeReal;
-        res->value.r = eval_real_op((RepReal) left->value.i, right->value.r, op);
+        eval_real_op((RepReal) left->value.i, right->value.r, op, res);
 
     } else if ((left->type == typeReal) && (right->type == typeInteger)) {
-        res->type = typeReal;
-        res->value.r = eval_real_op(left->value.r, (RepReal) right->value.i, op);
+        eval_real_op(left->value.r, (RepReal) right->value.i, op, res);
 
     } else if ((left->type == typeChar) && (right->type == typeReal)) {
-        res->type = typeReal;
-        res->value.r = eval_real_op((RepReal) left->value.c, right->value.r, op);
+        eval_real_op((RepReal) left->value.c, right->value.r, op, res);
 
     } else if ((left->type == typeReal) && (right->type == typeChar)) {
-        res->type = typeReal;
-        res->value.r = eval_real_op(left->value.r, (RepReal) right->value.c, op);
+        eval_real_op(left->value.r, (RepReal) right->value.c, op, res);
 
     } else if ((left->type == typeReal) && (right->type == typeReal)) {
-        res->type = typeReal;
-        res->value.r = eval_real_op(left->value.r, right->value.r, op);
+        eval_real_op(left->value.r, right->value.r, op, res);
 
     } else if ((left->type == typeInteger) && (right->type == typeInteger)) {
-        res->type = typeInteger;
-        res->value.i = eval_int_op(left->value.i, right->value.i, op);
+        eval_int_op(left->value.i, right->value.i, op, res);
 
     } else if ((left->type == typeChar) && (right->type == typeInteger)) {
-        res->type = typeInteger;
-        res->value.i = eval_int_op((RepInteger) left->value.c, right->value.i, op);
+        eval_int_op((RepInteger) left->value.c, right->value.i, op, res);
 
     } else if ((left->type == typeInteger) && (right->type == typeChar)) {
-        res->type = typeInteger;
-        res->value.i = eval_int_op(left->value.i, (RepInteger) right->value.c, op);
+        eval_int_op(left->value.i, (RepInteger) right->value.c, op, res);
 
     } else if ((left->type == typeChar) && (right->type == typeChar)) {
-        res->type = typeInteger;
-        res->value.i = eval_int_op((RepInteger) left->value.c, (RepInteger) right->value.c, op);
+        eval_int_op((RepInteger) left->value.c, (RepInteger) right->value.c, op, res);
+    } else if ((left->type == typeBoolean) && (right->type == typeBoolean)) {
+        eval_bool_op(left->value.b, right->value.b, op, res);
 
     } else {
         type_error("Type mismatch on \"%s\" constant operator", op);
