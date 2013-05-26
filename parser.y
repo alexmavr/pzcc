@@ -266,11 +266,11 @@ routine
     : routine_header routine_tail
     ;
 routine_tail
-    : ';'
+    : ';' { forwardFunction(currentFun); }
     | block
     ;
 routine_header
-    : routine_header_head T_id {currentFun = newFunction($2);} '(' routine_header_opt ')' {endFunctionHeader(currentFun, $1.type); }
+    : routine_header_head T_id {currentFun = newFunction($2);} '(' routine_header_opt ')' {endFunctionHeader(currentFun, $1.type);}
     ;
 routine_header_head
     : T_proc       { $$.type = typeVoid; }
@@ -296,7 +296,7 @@ routine_header_opt_tail
     | ',' type formal routine_header_opt_tail
         {
             if ($3.type == NULL)
-                 newParameter($3.value.s, $2.type, PASS_BY_REFERENCE, currentFun);
+                newParameter($3.value.s, $2.type, PASS_BY_REFERENCE, currentFun);
             else if ($3.type->kind >= TYPE_ARRAY) {
                 Type current = $3.type;
                 while (current->refType != typeVoid)
@@ -311,12 +311,12 @@ formal
     : T_id 
         {
             $$.value.s = $1;
-            $$.type = typeVoid; // to be backpatched
+            $$.type = typeVoid; // Pass by value
         }
     | '&' T_id
         {
             $$.value.s = $2;
-            $$.type = NULL; 
+            $$.type = NULL;  // Pass by reference
         }
     | T_id '[' const_expr_opt ']' formal_tail
         {
@@ -336,7 +336,7 @@ const_expr_opt
         }
     ;
 formal_tail
-    : /* nothing */ { $$.type = typeVoid;} // to be backpatched
+    : /* nothing */ { $$.type = typeVoid;} 
     | '[' const_expr ']' formal_tail
         {
             if (array_index_check(&($2)))
@@ -394,7 +394,7 @@ const_expr
         : const_unit { $$ = $1; }
         | T_id       
             {   /* constant variables only */ 
-                SymbolEntry * id = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
+                SymbolEntry * id = lookupEntry($1, LOOKUP_CURRENT_SCOPE, true);
 
                 if (id->entryType != ENTRY_CONSTANT) {
                     type_error("Non-constant identifier \"%s\" found in constant expression", $1);
@@ -421,6 +421,10 @@ const_expr
         | const_expr binop2 const_expr %prec '+' 
             {
                 eval_const_binop(&($1), &($3), $2, &($$));
+            }
+        | const_expr binop3 const_expr %prec '<' 
+            {
+                $$.type = typeBoolean;
             }
     ;
 expr
@@ -466,9 +470,11 @@ expr
 l_value
     : T_id l_value_tail
         {
-            SymbolEntry * id = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
+            SymbolEntry * id = lookupEntry($1, LOOKUP_CURRENT_SCOPE, true);
             int dims;
-            if (id != NULL) {
+            if (id == NULL) 
+                $$.type = typeVoid;
+            else {
                 switch (id->entryType) {
                     case ENTRY_VARIABLE:
                         {
@@ -476,10 +482,8 @@ l_value
                             *  $2 is the number of dimensions following the id */
                             dims = array_dimensions(id->u.eVariable.type);
                             if ($2 > dims)
-                                type_error("\"%s\" has less dimensions than specified", \
-                                                                id->id);
+                                type_error("\"%s\" has less dimensions than specified", id->id);
                             else if ($2 < dims)
-                                /* the type is that of the (dims - $2) dimension */
                                 $$.type = n_dimension_type(id->u.eVariable.type, $2);
                             else
                                 $$.type = id->u.eVariable.type;
@@ -489,10 +493,8 @@ l_value
                         {
                             dims = array_dimensions(id->u.eParameter.type);
                             if ($2 > dims)
-                                type_error("\"%s\" has less dimensions than specified", \
-                                                                id->id);
+                                type_error("\"%s\" has less dimensions than specified", id->id);
                             else if ($2 < dims)
-                                /* the type is that of the (dims - $2) dimension */
                                 $$.type = n_dimension_type(id->u.eParameter.type, $2);
                             else
                                 $$.type = id->u.eParameter.type;
@@ -583,7 +585,7 @@ stmt
         }
     | T_for '(' T_id ',' range ')' loop_stmt 
         {
-                SymbolEntry * i = lookupEntry($3, LOOKUP_ALL_SCOPES, true);
+                SymbolEntry * i = lookupEntry($3, LOOKUP_CURRENT_SCOPE, true);
                 
                 if (i->entryType != ENTRY_VARIABLE)
                     type_error("\"%s\" is not a variable", i->id);
