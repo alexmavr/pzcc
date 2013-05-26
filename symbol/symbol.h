@@ -224,5 +224,6 @@ bool          equalType          (Type type1, Type type2);
 void          printType          (Type type);
 void          printMode          (PassMode mode);
 
+void printSymbolTable            ();
 
 #endif
