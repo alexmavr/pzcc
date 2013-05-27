@@ -201,11 +201,12 @@ void eval_const_binop(struct ast_node * left, struct ast_node * right, const cha
 
     } else if ((left->type == typeChar) && (right->type == typeChar)) {
         eval_int_op((RepInteger) left->value.c, (RepInteger) right->value.c, op, res);
+
     } else if ((left->type == typeBoolean) && (right->type == typeBoolean)) {
         eval_bool_op(left->value.b, right->value.b, op, res);
 
     } else {
-        type_error("Type mismatch on \"%s\" constant operator", op);
+        type_error("Type mismatch on constant \"%s\" operator", op);
     }   
 }
 

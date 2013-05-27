@@ -1,8 +1,10 @@
+const int l = '4' + '6'; 
+const int lk = 'j'; 
+
 PROGRAM ops ()
 {
-    // All boolean should be true
+    // All booleans should be true
     const char kk = 54;    
-    const int lk = 'j'; 
     const bool jk = ('4' + '6') == 'j' ;
     const bool jj = l == lk;
     const bool boo = true or false;

@@ -29,6 +29,9 @@ int array_dimensions(Type t);
 Type n_dimension_type(Type t, int n);
 bool compat_types(Type t1, Type t2); // true if t2 can be converted to t1
 
+void openLookScope();
+void closeLookScope();
+
 void eval_const_binop(struct ast_node * left, struct ast_node * right, const char * op, struct ast_node * res );
 
 int array_index_check(struct ast_node * _);

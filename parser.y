@@ -269,14 +269,14 @@ var_init_tail
         }
     ;
 routine
-    : routine_header routine_tail
+    : routine_header routine_tail {closeScope();}
     ;
 routine_tail
     : ';' { forwardFunction(currentFun); }
     | block
     ;
 routine_header
-    : routine_header_head T_id {currentFun = newFunction($2);} '(' routine_header_opt ')' {endFunctionHeader(currentFun, $1.type);}
+    : routine_header_head T_id '(' {currentFun = newFunction($2); openScope();} routine_header_opt ')' {endFunctionHeader(currentFun, $1.type);}
     ;
 routine_header_head
     : T_proc       { $$.type = typeVoid; }
@@ -400,7 +400,7 @@ const_expr
         : const_unit { $$ = $1; }
         | T_id       
             {   /* constant variables only */ 
-                SymbolEntry * id = lookupEntry($1, LOOKUP_CURRENT_SCOPE, true);
+                SymbolEntry * id = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
 
                 if (id == NULL)
                     YYERROR;
@@ -483,7 +483,7 @@ expr
 l_value
     : T_id l_value_tail
         {
-            SymbolEntry * id = lookupEntry($1, LOOKUP_CURRENT_SCOPE, true);
+            SymbolEntry * id = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
             int dims;
 
             if (id == NULL) 
@@ -496,10 +496,8 @@ l_value
                         dims = array_dimensions(id->u.eVariable.type);
                         if ($2 > dims)
                             type_error("\"%s\" has less dimensions than specified", id->id);
-                        else if ($2 < dims)
+                        else 
                             $$.type = n_dimension_type(id->u.eVariable.type, $2);
-                        else
-                            $$.type = id->u.eVariable.type;
                         break;
                     }
                 case ENTRY_PARAMETER:
@@ -507,10 +505,8 @@ l_value
                         dims = array_dimensions(id->u.eParameter.type);
                         if ($2 > dims)
                             type_error("\"%s\" has less dimensions than specified", id->id);
-                        else if ($2 < dims)
+                        else 
                             $$.type = n_dimension_type(id->u.eParameter.type, $2);
-                        else
-                            $$.type = id->u.eParameter.type;
                         break;
                     }
                 case ENTRY_CONSTANT:
@@ -597,7 +593,7 @@ stmt
         }
     | T_for '(' T_id ',' range ')' loop_stmt 
         {
-                SymbolEntry * i = lookupEntry($3, LOOKUP_CURRENT_SCOPE, true);
+                SymbolEntry * i = lookupEntry($3, LOOKUP_ALL_SCOPES, true);
 
                 if (i == NULL)
                     YYERROR;
@@ -729,7 +725,7 @@ write
 format
     : expr
         {
-            if ($1.type == NULL || (($1.type->kind >= TYPE_ARRAY) && ( $1.type->refType != typeChar)))
+            if (($1.type->kind >= TYPE_ARRAY) && ( $1.type->refType != typeChar))
                 type_error("Cannot display an Array of type other than Char");
         }
     | T_form '(' expr ',' expr format_opt ')'
