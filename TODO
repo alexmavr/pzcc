@@ -1,4 +1,6 @@
 break is not error. it is statement. instead we must use contexts to check for constructs that use loops, so that we can assign value to break or continue statements.
 add and lookup entries at the symbol table 
 
+LOOKUP_CURRENT_SCOPE vs LOOKUP_ALL_SCOPES	:	Lookup in all scopes finds the innermost declaration of the looked-up identifier. Why do we need lookup in current scope????
+
 * add type interpretation to constants
