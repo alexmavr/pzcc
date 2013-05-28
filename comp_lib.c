@@ -206,10 +206,83 @@ void eval_const_binop(struct ast_node * left, struct ast_node * right, const cha
         eval_bool_op(left->value.b, right->value.b, op, res);
 
     } else {
-        type_error("Type mismatch on constant \"%s\" operator", op);
+        type_error("Type mismatch on \"%s\" operator between %s and %s", \
+                op, verbose_type(left->type), verbose_type(right->type));
     }   
 }
 
+/* Expr Binops 
+ * Create IR for casting each */
+void binop_IR(struct ast_node * left, struct ast_node * right, const char * op, struct ast_node * res) {
+    if ((left->type == typeInteger) && (right->type == typeReal)) {
+        res->type = binop_type_check(op, typeReal);
+
+    } else if ((left->type == typeReal) && (right->type == typeInteger)) {
+        res->type = binop_type_check(op, typeReal);
+
+    } else if ((left->type == typeChar) && (right->type == typeReal)) {
+        res->type = binop_type_check(op, typeReal);
+
+    } else if ((left->type == typeReal) && (right->type == typeChar)) {
+        res->type = binop_type_check(op, typeReal);
+
+    } else if ((left->type == typeReal) && (right->type == typeReal)) {
+        res->type = binop_type_check(op, typeReal);
+
+    } else if ((left->type == typeInteger) && (right->type == typeInteger)) {
+        res->type = binop_type_check(op, typeInteger);
+
+    } else if ((left->type == typeChar) && (right->type == typeInteger)) {
+        res->type = binop_type_check(op, typeInteger);
+
+    } else if ((left->type == typeInteger) && (right->type == typeChar)) {
+        res->type = binop_type_check(op, typeInteger);
+
+    } else if ((left->type == typeChar) && (right->type == typeChar)) {
+        res->type = binop_type_check(op, typeInteger);
+
+    } else if ((left->type == typeBoolean) && (right->type == typeBoolean)) {
+        res->type = binop_type_check(op, typeBoolean);
+
+    } else {
+        type_error("Type mismatch on \"%s\" operator between %s and %s", \
+                op, verbose_type(left->type), verbose_type(right->type));
+    }   
+}
+
+Type binop_type_check(const char * op, Type t) {
+    Type res = NULL;
+
+    if (t == typeReal) {
+        if ((!strcmp(op, "*")) || (!strcmp(op, "/")) || (!strcmp(op, "+")) \
+                                                   || (!strcmp(op, "-")))
+            res = typeReal;
+        else if ((!strcmp(op, "<")) || (!strcmp(op, ">")) || (!strcmp(op, ">=")) \
+               || (!strcmp(op, "<=")) || (!strcmp(op, "!=")))
+            res = typeBoolean;
+        else 
+            type_error("Cannot perform \"%s\" between Reals", op);
+    } else if (t == typeInteger) {
+        if ((!strcmp(op, "*")) || (!strcmp(op, "/")) || (!strcmp(op, "+"))  \
+          || (!strcmp(op, "-")) || (!strcmp(op, "%") || !strcmp(op, "MOD")))
+            res = typeInteger;
+        else if ((!strcmp(op, "<")) || (!strcmp(op, ">")) || (!strcmp(op, "<="))
+          || (!strcmp(op, ">=")) || (!strcmp(op, "==")) || (!strcmp(op, "!=")))
+            res = typeBoolean;
+        else 
+            type_error("Cannot perform \"%s\" between Integers", op);
+    } else if (t == typeBoolean) {
+        if ((!strcmp(op, "==")) || (!strcmp(op, "!=")) 
+        || (!strcmp(op, "&&")) || (!strcmp(op,"and")) 
+        || (!strcmp(op, "||")) || (!strcmp(op,"or")))
+            res = typeBoolean;
+        else
+            type_error("Cannot perform \"%s\" between Booleans", op);
+    } else 
+        ; // Internal error
+
+    return res;
+}
 
 int array_index_check(struct ast_node * _) {
     int ret = 0;
@@ -252,9 +325,7 @@ Type n_dimension_type(Type t, int n) {
 /* Return true if t2 can be cast to t1 */
 bool compat_types(Type t1, Type t2) {
     bool res = false;
-    while (((t1->kind == TYPE_ARRAY) && (t2->kind == TYPE_ARRAY)) \
-        || ((t1->kind == TYPE_IARRAY) && (t2->kind == TYPE_IARRAY))) {
-        /* is the grouping correct ? */
+    while ((t1->kind >= TYPE_ARRAY) && (t2->kind >= TYPE_ARRAY)) {
         t1 = t1->refType;
         t2 = t2->refType;
     }

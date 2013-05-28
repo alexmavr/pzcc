@@ -453,27 +453,33 @@ expr
     | call { $$ = $1; }
     | expr binop1 expr %prec '*' 
         {
-            $$ = $1;
+            binop_IR(&($1), &($3), $2, &($$));
+            printf("%s: %s\n", $2, verbose_type($$.type));
         }
     | expr binop2 expr %prec '+' 
         {
-            $$ = $1;
+            binop_IR(&($1), &($3), $2, &($$));
+            printf("%s: %s\n", $2, verbose_type($$.type));
         }
     | expr binop3 expr %prec '<' 
         {
-            $$.type = typeBoolean;
+            binop_IR(&($1), &($3), $2, &($$));
+            printf("%s: %s\n", $2, verbose_type($$.type));
         }
     | expr binop4 expr %prec T_eq 
         {
-            $$ = $1;
+            binop_IR(&($1), &($3), $2, &($$));
+            printf("%s: %s\n", $2, verbose_type($$.type));
         }
     | expr binop5 expr %prec T_and 
         {
-            $$ = $1;
+            binop_IR(&($1), &($3), $2, &($$));
+            printf("%s: %s\n", $2, verbose_type($$.type));
         }
     | expr binop6 expr %prec T_or 
         {
-            $$ = $1;
+            binop_IR(&($1), &($3), $2, &($$));
+            printf("%s: %s\n", $2, verbose_type($$.type));
         }
     | unop expr %prec UN
         {
@@ -488,6 +494,7 @@ l_value
 
             if (id == NULL) 
                 YYERROR;
+
             switch (id->entryType) {
                 case ENTRY_VARIABLE:
                     {
@@ -511,7 +518,7 @@ l_value
                     }
                 case ENTRY_CONSTANT:
                     if ($2)
-                        type_error("Constant \"%s\" is not an Array",id->id);
+                        type_error("Constant \"%s\" cannot an Array",id->id);
                     $$.type = id->u.eConstant.type;
                     break;
                     
@@ -547,6 +554,7 @@ call
     : T_id '(' call_opt ')'
         {
             SymbolEntry * fun = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
+
             if (fun == NULL)
                 YYERROR;
 
@@ -586,7 +594,7 @@ stmt
     | call ';'
     | T_if '(' expr ')' stmt stmt_opt_if 
         {
-            if ($3.type != typeBoolean)
+            if (!compat_types(typeBoolean, $3.type))
                 type_error("if: condition is %s instead of Boolean", \
                             verbose_type($3.type));
            
@@ -605,13 +613,13 @@ stmt
         }
     | T_while '(' expr ')' loop_stmt 
         {
-            if ($3.type != typeBoolean)
+            if (!compat_types(typeBoolean, $3.type))
                 type_error("while: condition is %s instead of Boolean", \
                             verbose_type($3.type));
         }
     | T_do loop_stmt T_while '(' expr ')' ';'
         {
-            if ($5.type != typeBoolean)
+            if (!compat_types(typeBoolean, $5.type))
                 type_error("do..while: condition is %s instead of Boolean", \
                             verbose_type($5.type));
         }
@@ -734,7 +742,8 @@ format
                 type_error("FORM: second argument is %s instead of Integer", \
                                         verbose_type($5.type));
             if (($6 == 1) && (!compat_types(typeReal, $3.type)))
-                type_error("FORM: first argument is not Real and precision is specified", verbose_type($5.type));
+                type_error("FORM: first argument is not Real and precision is specified", \
+                                        verbose_type($5.type));
         }
     ;
 format_opt
