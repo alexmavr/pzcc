@@ -37,6 +37,7 @@ void closeLookScope();
 void eval_const_unop(struct ast_node * operand, const char * op, struct ast_node * res);
 Type binop_type_check(const char * op, Type t);
 void binop_IR(struct ast_node * left, struct ast_node * right, const char * op, struct ast_node * res);
+void unop_IR(struct ast_node * operand, const char * op, struct ast_node * res);
 
 void eval_const_binop(struct ast_node * left, struct ast_node * right, const char * op, struct ast_node * res );
 

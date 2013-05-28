@@ -201,8 +201,35 @@ void eval_const_unop(struct ast_node * operand, const char * op, struct ast_node
             type_error("Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
     } else 
         assert(INTERNAL_ERROR);
+}
 
-
+void unop_IR(struct ast_node * operand, const char * op, struct ast_node * res) {
+    if (!strcmp(op, "+")) {
+        if (operand->type == typeInteger) {
+            res->type = typeInteger;
+            // IR placeholder
+        } else if (operand->type == typeReal) {
+            res->type = typeReal;
+            // IR placeholder
+        } else
+            type_error("Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
+    } else if (!strcmp(op, "-")) {
+        if (operand->type == typeInteger) {
+            res->type = typeInteger;
+            // IR placeholder
+        } else if (operand->type == typeReal) {
+            res->type = typeReal;
+            // IR placeholder
+        } else
+            type_error("Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
+    } else if (!strcmp(op, "!") || !strcmp(op, "not")) {
+        if (operand->type == typeBoolean) {
+            res->type = typeBoolean;
+            // IR placeholder
+        } else
+            type_error("Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
+    } else 
+        assert(INTERNAL_ERROR);
 }
 
 void eval_const_binop(struct ast_node * left, struct ast_node * right, const char * op, struct ast_node * res) {

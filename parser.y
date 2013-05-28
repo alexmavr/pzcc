@@ -167,7 +167,6 @@ const_def
     : T_const type {currentType=$2.type;} T_id '=' const_expr const_def_tail ';'
         {
             SymbolEntry * con = newConstant($4, currentType);
-
             if (con == NULL)
                 YYERROR;
 
@@ -186,9 +185,8 @@ const_def
                 con->u.eConstant.value.vInteger = $6.value.i;
             else if (currentType == typeReal)
                 con->u.eConstant.value.vReal = $6.value.r;
-            else if (currentType == typeBoolean) {
+            else if (currentType == typeBoolean)
                 con->u.eConstant.value.vBoolean = $6.value.b;
-            }
             else if (currentType == typeChar)
                 con->u.eConstant.value.vChar = $6.value.c;
             else
@@ -201,7 +199,6 @@ const_def_tail
     | ',' T_id '=' const_expr const_def_tail
         {
             SymbolEntry * con = newConstant($2, currentType);
-
             if (con == NULL)
                 YYERROR;
 
@@ -485,7 +482,7 @@ expr
         }
     | unop expr %prec UN
         {
-            $$ = $2;
+            unop_IR(&($2), $1, &($$));
         }
     ;
 l_value
@@ -556,7 +553,6 @@ call
     : T_id '(' call_opt ')'
         {
             SymbolEntry * fun = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
-
             if (fun == NULL)
                 YYERROR;
 
@@ -605,7 +601,6 @@ stmt
     | T_for '(' T_id ',' range ')' loop_stmt 
         {
                 SymbolEntry * i = lookupEntry($3, LOOKUP_ALL_SCOPES, true);
-
                 if (i == NULL)
                     YYERROR;
                 
