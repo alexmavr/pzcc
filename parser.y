@@ -124,6 +124,7 @@ SymbolEntry * currentFun; // global function indicator for parameter declaration
 %type <s> binop4
 %type <s> binop5
 %type <s> binop6
+%type <s> unop
 
 %expect 1
 
@@ -185,8 +186,9 @@ const_def
                 con->u.eConstant.value.vInteger = $6.value.i;
             else if (currentType == typeReal)
                 con->u.eConstant.value.vReal = $6.value.r;
-            else if (currentType == typeBoolean)
+            else if (currentType == typeBoolean) {
                 con->u.eConstant.value.vBoolean = $6.value.b;
+            }
             else if (currentType == typeChar)
                 con->u.eConstant.value.vChar = $6.value.c;
             else
@@ -439,6 +441,11 @@ const_expr
             {
                 eval_const_binop(&($1), &($3), $2, &($$));
             }
+        | unop const_expr %prec UN
+            {
+                eval_const_unop(&($2), $1, &($$));
+            }
+
     ;
 expr
     :  const_unit { $$.type = $1.type; }
@@ -446,6 +453,7 @@ expr
         {
             $$ = $2;
         }
+    | '(' error ')' { $$.type = typeVoid; }
     | l_value
         {
              $$ = $1; 
@@ -454,32 +462,26 @@ expr
     | expr binop1 expr %prec '*' 
         {
             binop_IR(&($1), &($3), $2, &($$));
-            printf("%s: %s\n", $2, verbose_type($$.type));
         }
     | expr binop2 expr %prec '+' 
         {
             binop_IR(&($1), &($3), $2, &($$));
-            printf("%s: %s\n", $2, verbose_type($$.type));
         }
     | expr binop3 expr %prec '<' 
         {
             binop_IR(&($1), &($3), $2, &($$));
-            printf("%s: %s\n", $2, verbose_type($$.type));
         }
     | expr binop4 expr %prec T_eq 
         {
             binop_IR(&($1), &($3), $2, &($$));
-            printf("%s: %s\n", $2, verbose_type($$.type));
         }
     | expr binop5 expr %prec T_and 
         {
             binop_IR(&($1), &($3), $2, &($$));
-            printf("%s: %s\n", $2, verbose_type($$.type));
         }
     | expr binop6 expr %prec T_or 
         {
             binop_IR(&($1), &($3), $2, &($$));
-            printf("%s: %s\n", $2, verbose_type($$.type));
         }
     | unop expr %prec UN
         {
@@ -537,10 +539,10 @@ l_value_tail
         }
     ;
 unop
-    : '+'
-    | '-'
-    | '!'
-    | T_not
+    : '+'  { $$ = "+"; }
+    | '-'  { $$ = "-"; }
+    | '!'  { $$ = "!"; }
+    | T_not { $$ = "not"; }
     ;
 
 binop1: '*'| '/' | '%' | T_mod ;
@@ -576,6 +578,7 @@ block_tail
     : /* Nothing */
     | local_def block_tail
     | stmt block_tail
+    | error
     ;
 local_def
     : const_def

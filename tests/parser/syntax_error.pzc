@@ -1,6 +1,7 @@
 FUNC bool prime (int n)
 {
-    
+    /* Stress Test - Happy error recovering */
+
     if (n < 0)              return prime(-n);
     else if (n < 2)         return false;
     else if (n == 2)        return true
@@ -20,12 +21,12 @@ PROGRAM primes ()
     WRITESPLN("Prime numbers between 0 and", limit);
     WRITELN();
     int counter = 0;
-    if (limit >= 2) { WRITELN(2); counter++; }
+    if (limit >= 2) { WRITELN(2) counter++; }
     if (limit >= 3) { WRITELN(3); counter++; }
     int number;
     FOR (number, 6 TO limit STEP 6) {
         if (prime(number-1))                     {WRITELN(number-1); counter++;}
-        if (number != limit and prime(number+1)) {WRITELN(number+1); counter++;}
+        if (number != limit and prime(number+1) &&) {WRITELN(number+1); counter++;}
     }
     WRITELN();
     WRITESPLN(counter, "prime number(s) were found.");

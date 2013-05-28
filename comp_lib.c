@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <assert.h>
 #include "comp_lib.h"
 #include "parser.h"
 #include "symbol/general.h"
@@ -158,6 +159,7 @@ void eval_int_op (RepInteger left, RepInteger right, const char * op, struct ast
         type_error("Cannot perform \"%s\" between Integers", op);
 }
 
+
 void eval_bool_op (RepBoolean left, RepBoolean right, const char * op, struct ast_node * res) {
     res->type = typeBoolean;;
     if (!strcmp(op, "==")) 
@@ -172,6 +174,36 @@ void eval_bool_op (RepBoolean left, RepBoolean right, const char * op, struct as
         type_error("Cannot perform \"%s\" between Booleans", op);
 }
 
+void eval_const_unop(struct ast_node * operand, const char * op, struct ast_node * res) {
+    if (!strcmp(op, "+")) {
+        if (operand->type == typeInteger) {
+            res->type = typeInteger;
+            res->value.i = operand->value.i;
+        } else if (operand->type == typeReal) {
+            res->type = typeReal;
+            res->value.r = operand->value.r;
+        } else
+            type_error("Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
+    } else if (!strcmp(op, "-")) {
+        if (operand->type == typeInteger) {
+            res->type = typeInteger;
+            res->value.i = -(operand->value.i);
+        } else if (operand->type == typeReal) {
+            res->type = typeReal;
+            res->value.r = -(operand->value.r);
+        } else
+            type_error("Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
+    } else if (!strcmp(op, "!") || !strcmp(op, "not")) {
+        if (operand->type == typeBoolean) {
+            res->type = typeBoolean;
+            res->value.b = !(operand->value.b);
+        } else
+            type_error("Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
+    } else 
+        assert(INTERNAL_ERROR);
+
+
+}
 
 void eval_const_binop(struct ast_node * left, struct ast_node * right, const char * op, struct ast_node * res) {
     

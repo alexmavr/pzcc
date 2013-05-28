@@ -1,6 +1,9 @@
 PROGRAM ops ()
 {
+   /* should parse */
+   int x;
    if ((( 1*2.0 + 3/4 + 7) < 48) || 1==2 and x>=43 )
-   {
-   }
+   {;}
+   else if (!true && not false or true)
+   {;}
 }

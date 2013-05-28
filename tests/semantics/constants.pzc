@@ -9,6 +9,8 @@ PROGRAM ops ()
     const bool jj = l == lk;
     const bool boo = true or false;
     const bool boon = true and true;
+    const bool asdasd = !false;
+    const bool asdasd2 = !true or true;
     const bool g = boon || boo;
 
     int n = 5;

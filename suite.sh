@@ -1,6 +1,6 @@
 #!/bin/bash
 
-components=('lexer')
+components=$@
 
 make
 

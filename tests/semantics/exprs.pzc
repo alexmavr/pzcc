@@ -14,6 +14,6 @@ PROGRAM exprs ()
     z = y2[10];
     
     i = (3 + 4) * 2 + 5 / 5;  // 15
-    d = d == d;
+    d = (d == d) and true == false or true;  // true
     
 }

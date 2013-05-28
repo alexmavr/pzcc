@@ -12,6 +12,8 @@
 
 extern int yylineno;
 
+#define INTERNAL_ERROR 0
+
 #define int_to_char(n) ((char) ((n) & 0xFF))
 
 /* Error Reporting */
@@ -32,7 +34,7 @@ bool compat_types(Type t1, Type t2); // true if t2 can be converted to t1
 void openLookScope();
 void closeLookScope();
 
-
+void eval_const_unop(struct ast_node * operand, const char * op, struct ast_node * res);
 Type binop_type_check(const char * op, Type t);
 void binop_IR(struct ast_node * left, struct ast_node * right, const char * op, struct ast_node * res);
 

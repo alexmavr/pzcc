@@ -1,5 +1,6 @@
 PROGRAM hello ()
 {
+    int a5, haha, copy = 0;
 	switch (a5) {
 		case 3:
 			WRITELN("Hello world!");
@@ -7,12 +8,15 @@ PROGRAM hello ()
 		case 4:
 			haha = 5;
 			break;
+		case 5:
+			WRITELN("Hello world!");
+            /* should not parse without NEXT */
 		default:
 			copy = 0;
-			if (3) {
-				haha = 5;
-				break;
+			if (3 == 0) {
+				haha = 5; 
+				break; // should not parse
 			}
-			break;
+			break; 
 	}
 }
