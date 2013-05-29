@@ -1,8 +1,13 @@
-break is not error. it is statement. instead we must use contexts to check for constructs that use loops, so that we can assign value to break or continue statements.
+Syntax:
+    error recovery
 
-l_value++
-function calls
-array sizes
-error recovery
-refactor comp_lib
-refactor error reporting
+Semantics:
+    break is not error. it is statement. instead we must use contexts to check for constructs that use loops, so that we can assign value to break or continue statements.
+    l_value++
+    function calls
+    array sizes
+    return statements
+
+General:
+    refactor comp_lib
+    refactor error reporting
