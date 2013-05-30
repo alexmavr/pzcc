@@ -1,0 +1,12 @@
+PROGRAM br()
+{
+    int a = 0;
+    switch (a)
+    {
+        case 0:
+            a = 1;
+            break;
+        default: 
+            break;
+    }
+}

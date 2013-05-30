@@ -127,6 +127,7 @@ unsigned long long loop_counter = 0;
 %type <s> binop5
 %type <s> binop6
 %type <s> unop
+%type <s> stmt_choice
 
 %expect 1
 
@@ -592,6 +593,11 @@ stmt
             }
         }
     | l_value stmt_choice ';'
+        {
+            if (!compat_types(typeInteger, $1.type)) {
+                type_error("Type mismatch for \"%s\" operator", $2);
+            }
+        }
     | call ';'
     | T_if '(' expr ')' stmt stmt_opt_if 
         {
@@ -652,8 +658,8 @@ loop_stmt
         }
     ;
 stmt_choice
-    : T_pp
-    | T_mm
+    : T_pp { $$ = "++"; }
+    | T_mm { $$ = "--"; }
     ;
 stmt_opt_if
     : /* Nothing */
