@@ -12,6 +12,8 @@ extern int yylex();
 Type currentType; // global type indicator for variable initializations
 SymbolEntry * currentFun; // global function indicator for parameter declaration
 
+unsigned long long loop_counter = 0;
+
 %}
 
 %code requires {
@@ -598,28 +600,28 @@ stmt
                             verbose_type($3.type));
            
         }
-    | T_for '(' T_id ',' range ')' loop_stmt 
+    | T_for { loop_counter++; } '(' T_id ',' range ')' loop_stmt { loop_counter--; }
         {
-                SymbolEntry * i = lookupEntry($3, LOOKUP_ALL_SCOPES, true);
+                SymbolEntry * i = lookupEntry($4, LOOKUP_ALL_SCOPES, true);
                 if (i == NULL)
                     YYERROR;
                 
                 if (i->entryType != ENTRY_VARIABLE)
-                    type_error("\"%s\" is not a variable", i->id);
+                    type_error("FOR: \"%s\" is not a variable", i->id);
                 else if (!compat_types(typeInteger, i->u.eVariable.type))
-                    type_error("Control variable \"%s\" is not an Integer", i->id);
+                    type_error("FOR: control variable \"%s\" is not an Integer", i->id);
         }
-    | T_while '(' expr ')' loop_stmt 
+    | T_while { loop_counter++; } '(' expr ')' loop_stmt { loop_counter--; }
         {
-            if (!compat_types(typeBoolean, $3.type))
+            if (!compat_types(typeBoolean, $4.type))
                 type_error("while: condition is %s instead of Boolean", \
-                            verbose_type($3.type));
+                            verbose_type($4.type));
         }
-    | T_do loop_stmt T_while '(' expr ')' ';'
+    | T_do { loop_counter++; } loop_stmt T_while '(' expr ')' ';' { loop_counter--; }
         {
-            if (!compat_types(typeBoolean, $5.type))
+            if (!compat_types(typeBoolean, $6.type))
                 type_error("do..while: condition is %s instead of Boolean", \
-                            verbose_type($5.type));
+                            verbose_type($6.type));
         }
     | T_switch '(' expr ')' '{' {openScope();} stmt_tail stmt_opt_switch '}' {closeScope();}
         {
@@ -636,8 +638,18 @@ stmt
 
 loop_stmt
     : stmt
-    | T_break ';'
+    | T_break ';'  
+        {
+            if (loop_counter == 0) {
+                type_error("Illegal break statement");
+            }
+        }
     | T_cont ';'
+        {
+            if (loop_counter == 0) {
+                type_error("Illegal continue statement");
+            }
+        }
     ;
 stmt_choice
     : T_pp
