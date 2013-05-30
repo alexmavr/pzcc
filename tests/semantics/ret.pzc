@@ -1,0 +1,20 @@
+FUNC int fact (int n)
+{
+    return 1;
+}
+
+PROC fact2 (int n)
+{
+    return 3.4E-2;
+}
+
+FUNC int fact2 (int n)
+{
+    return;
+}
+
+PROGRAM factorial ()
+{
+    WRITESPLN("The ");
+    return a;
+}
