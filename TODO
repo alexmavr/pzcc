@@ -1,6 +1,5 @@
 Syntax:
     error recovery
-    real constants
 
 Semantics:
     l_value++
@@ -14,4 +13,5 @@ General:
 
 
 
-*    break is not error. it is statement. instead we must use contexts to check for constructs that use loops, so that we can assign value to break or continue statements.
+*	break is not error. it is statement. instead we must use contexts to check for constructs that use loops, so that we can assign value to break or continue statements.
+*	real constants : atof already converts between them.

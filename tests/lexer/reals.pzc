@@ -1,0 +1,5 @@
+PROGRAM ops ()
+{
+    REAL d = 13.6523;
+	REAL e = 13.6e-3;
+}

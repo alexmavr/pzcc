@@ -375,6 +375,7 @@ const_unit
     | T_CONST_real 
         { 
             $$.type = typeReal;
+			fprintf(stderr, "Real value is %Lf\n", $1);
             $$.value.r = $1;
         }
     | T_CONST_char 
