@@ -2,9 +2,7 @@ Syntax:
     error recovery
 
 Semantics:
-    function calls
-    array sizes
-    return statement type checking
+    tests?
 
 General:
     refactor comp_lib
@@ -15,3 +13,6 @@ General:
 *	break is not error. it is statement. instead we must use contexts to check for constructs that use loops, so that we can assign value to break or continue statements.
 *	real constants : atof already converts between them.
 *	l_value++
+*   return statement type checking
+*   function calls
+-   array sizes

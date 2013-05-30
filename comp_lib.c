@@ -161,7 +161,7 @@ void eval_int_op (RepInteger left, RepInteger right, const char * op, struct ast
 
 
 void eval_bool_op (RepBoolean left, RepBoolean right, const char * op, struct ast_node * res) {
-    res->type = typeBoolean;;
+    res->type = typeBoolean;
     if (!strcmp(op, "==")) 
         res->value.b = left == right;
     else if (!strcmp(op, "!=")) 
@@ -175,6 +175,7 @@ void eval_bool_op (RepBoolean left, RepBoolean right, const char * op, struct as
 }
 
 void eval_const_unop(struct ast_node * operand, const char * op, struct ast_node * res) {
+    res->type = typeVoid; // could be changed to NULL
     if (!strcmp(op, "+")) {
         if (operand->type == typeInteger) {
             res->type = typeInteger;
@@ -204,6 +205,7 @@ void eval_const_unop(struct ast_node * operand, const char * op, struct ast_node
 }
 
 void unop_IR(struct ast_node * operand, const char * op, struct ast_node * res) {
+    res->type = typeVoid; // could be changed to NULL
     if (!strcmp(op, "+")) {
         if (operand->type == typeInteger) {
             res->type = typeInteger;
@@ -233,7 +235,7 @@ void unop_IR(struct ast_node * operand, const char * op, struct ast_node * res) 
 }
 
 void eval_const_binop(struct ast_node * left, struct ast_node * right, const char * op, struct ast_node * res) {
-    
+    res->type = typeVoid; // could be changed to NULL
     if ((left->type == typeInteger) && (right->type == typeReal)) {
         eval_real_op((RepReal) left->value.i, right->value.r, op, res);
 
@@ -273,6 +275,7 @@ void eval_const_binop(struct ast_node * left, struct ast_node * right, const cha
 /* Expr Binops 
  * Create IR for casting each */
 void binop_IR(struct ast_node * left, struct ast_node * right, const char * op, struct ast_node * res) {
+    res->type = typeVoid; // could be changed to NULL
     if ((left->type == typeInteger) && (right->type == typeReal)) {
         res->type = binop_type_check(op, typeReal);
 

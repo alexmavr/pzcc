@@ -1,5 +1,9 @@
 const int n = 10;
 
+FUNC int tocall() {
+    return 1;
+}
+
 PROGRAM exprs ()
 {
     // var_inits
@@ -15,5 +19,6 @@ PROGRAM exprs ()
     
     i = (3 + 4) * 2 + 5 / 5;  // 15
     d = (d == d) and true == false or true;  // true
+    i = tocall(3);
     
 }

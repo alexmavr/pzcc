@@ -11,7 +11,10 @@ extern int yylex();
 
 Type currentType = NULL;			// global type indicator for variable initializations
 Type currentFunctionType = NULL;	// global type for the current function
-SymbolEntry * currentFun;			// global function indicator for parameter declaration
+Type currentCall = NULL;	// global type for the current function
+SymbolEntry * currentFun = NULL;			// global function indicator for parameter declaration
+SymbolEntry * currentParam = NULL;		 
+bool functionHasReturn = false;
 
 unsigned long long loop_counter = 0;
 
@@ -273,11 +276,20 @@ var_init_tail
         }
     ;
 routine
-    : routine_header routine_tail {closeScope();}
+    : routine_header routine_tail 
+        {
+            closeScope();
+            currentFunctionType = NULL;
+            functionHasReturn = false;
+        }
     ;
 routine_tail
     : ';' { forwardFunction(currentFun); }
     | block
+        {
+            if ((currentFunctionType != typeVoid) && (!functionHasReturn))
+                type_error("function without a return statement");
+        }
     ;
 routine_header
     : routine_header_head T_id '(' {currentFun = newFunction($2); openScope();} routine_header_opt ')' {endFunctionHeader(currentFun, $1.type);}
@@ -289,6 +301,9 @@ routine_header_head
 routine_header_opt
     : type formal routine_header_opt_tail
         {
+            if (currentFun == NULL)
+                YYERROR;
+
             if ($2.type == NULL)
                 newParameter($2.value.s, $1.type, PASS_BY_REFERENCE, currentFun);
             else if ($2.type->kind >= TYPE_ARRAY) {
@@ -300,11 +315,15 @@ routine_header_opt
             } else 
                 newParameter($2.value.s, $1.type, PASS_BY_VALUE, currentFun);
         }
+    | /* nothing */
     ;
 routine_header_opt_tail
     : /* nothing */ 
     | ',' type formal routine_header_opt_tail
         {
+            if (currentFun == NULL)
+                YYERROR;
+
             if ($3.type == NULL)
                 newParameter($3.value.s, $2.type, PASS_BY_REFERENCE, currentFun);
             else if ($3.type->kind >= TYPE_ARRAY) {
@@ -377,7 +396,6 @@ const_unit
     | T_CONST_real 
         { 
             $$.type = typeReal;
-			fprintf(stderr, "Real value is %Lf\n", $1);
             $$.value.r = $1;
         }
     | T_CONST_char 
@@ -413,8 +431,7 @@ const_expr
                 if (id->entryType != ENTRY_CONSTANT) {
                     type_error("Non-constant identifier \"%s\" found in constant expression", $1);
                     YYERROR;
-                }
-                else {
+                } else {
                     $$.type = id->u.eConstant.type;
                     memcpy(&($$.value), &(id->u.eConstant.value), sizeof(val_union));
                 }
@@ -536,9 +553,10 @@ l_value_tail
     : /* Nothing */ { $$ = 0; }
     | '[' expr ']' l_value_tail 
         {
-             if (!compat_types(typeInteger, $2.type))
-                type_error("Array index cannot be %s", verbose_type($2.type));
-             $$ = 1 + $4;
+                
+            if (!compat_types(typeInteger, $2.type))
+               type_error("Array index cannot be %s", verbose_type($2.type));
+            $$ = 1 + $4;
         }
     ;
 unop
@@ -556,22 +574,42 @@ binop5: T_logand | T_and ;
 binop6: T_logor | T_or;
 
 call 
-    : T_id '(' call_opt ')'
+    : T_id '(' 
         {
             SymbolEntry * fun = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
             if (fun == NULL)
                 YYERROR;
 
-            $$.type = fun->u.eFunction.resultType;
-        }
+            currentCall = fun->u.eFunction.resultType;
+            currentParam = fun->u.eFunction.firstArgument;
+        } call_opt ')' { $$.type = currentCall; }
     ;
 call_opt
     : /* Nothing */
     | expr call_opt_tail  
+        {
+            if (currentParam == NULL) {
+                type_error("Invalid number of parameters specified");
+                YYERROR;
+            } else if (!compat_types(currentParam->u.eParameter.type, $1.type))
+                type_error("Illegal parameter assignment from %s to %s", verbose_type($1.type), \
+                    verbose_type(currentParam->u.eParameter.type));
+            currentParam = currentParam->u.eParameter.next;
+        }
     ;
 call_opt_tail
     : /* Nothing */
     | ',' expr call_opt_tail
+        {
+            if (currentParam == NULL) {
+                type_error("Invalid number of parameters specified");
+                YYERROR;
+            }
+            if (!compat_types(currentParam->u.eParameter.type, $2.type))
+                type_error("Illegal parameter assignment from %s to %s", verbose_type($2.type), \
+                    verbose_type(currentParam->u.eParameter.type));
+            currentParam = currentParam->u.eParameter.next;
+        }
     ;
 block
     : '{' {openScope();} block_tail '}' {closeScope();}
@@ -641,8 +679,13 @@ stmt
 
     | T_ret stmt_opt_ret ';'
 		{
-			if (!compat_types(currentFunctionType, $2.type))
-				type_error("return: incompatible return type: %s instead of %s", verbose_type(currentFunctionType), verbose_type($2.type));
+            if (currentFunctionType == NULL)
+                YYERROR;
+			else if (!compat_types(currentFunctionType, $2.type))
+				type_error("return: incompatible return type: %s instead of %s", \
+                verbose_type($2.type), verbose_type(currentFunctionType));
+
+            functionHasReturn = true;
 		}
     | write '(' stmt_opt_write ')' ';' 
     | block
