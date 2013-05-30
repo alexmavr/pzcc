@@ -9,8 +9,9 @@
 
 extern int yylex();
 
-Type currentType; // global type indicator for variable initializations
-SymbolEntry * currentFun; // global function indicator for parameter declaration
+Type currentType = NULL;			// global type indicator for variable initializations
+Type currentFunctionType = NULL;	// global type for the current function
+SymbolEntry * currentFun;			// global function indicator for parameter declaration
 
 unsigned long long loop_counter = 0;
 
@@ -104,6 +105,7 @@ unsigned long long loop_counter = 0;
 %token <s> '>'
 
 %type <node> expr
+%type <node> stmt_opt_ret
 %type <node> l_value
 %type <node> call
 %type <node> type
@@ -281,8 +283,8 @@ routine_header
     : routine_header_head T_id '(' {currentFun = newFunction($2); openScope();} routine_header_opt ')' {endFunctionHeader(currentFun, $1.type);}
     ;
 routine_header_head
-    : T_proc       { $$.type = typeVoid; }
-    | T_func type  { $$.type = $2.type; }
+    : T_proc       { currentFunctionType = $$.type = typeVoid; }
+    | T_func type  { currentFunctionType = $$.type = $2.type; }
     ;
 routine_header_opt
     : type formal routine_header_opt_tail
@@ -354,7 +356,7 @@ formal_tail
         }
     ;
 program_header
-    : T_prog T_id '(' ')'
+    : T_prog { currentFunctionType = typeVoid; } T_id '(' ')'
     ;
 program
     : program_header block
@@ -398,7 +400,7 @@ const_unit
             $$.value.b = false;
             $$.type = typeBoolean;
         }
-
+	;
 const_expr
         : const_unit { $$ = $1; }
         | T_id       
@@ -638,11 +640,14 @@ stmt
         }
 
     | T_ret stmt_opt_ret ';'
+		{
+			if (!compat_types(currentFunctionType, $2.type))
+				type_error("return: incompatible return type: %s instead of %s", verbose_type(currentFunctionType), verbose_type($2.type));
+		}
     | write '(' stmt_opt_write ')' ';' 
     | block
     | error ';'
     ;
-
 loop_stmt
     : stmt
     | T_break ';'  
@@ -687,8 +692,8 @@ stmt_opt_switch
     | T_def ':' clause
     ;
 stmt_opt_ret
-    : /* Nothing */
-    | expr
+    : /* Nothing */ { $$.type = typeVoid; }
+    | expr { $$.type = $1.type; }
     ;
 stmt_opt_write
     : /* Nothing */

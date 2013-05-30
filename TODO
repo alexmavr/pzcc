@@ -2,7 +2,6 @@ Syntax:
     error recovery
 
 Semantics:
-    l_value++
     function calls
     array sizes
     return statement type checking
@@ -15,3 +14,4 @@ General:
 
 *	break is not error. it is statement. instead we must use contexts to check for constructs that use loops, so that we can assign value to break or continue statements.
 *	real constants : atof already converts between them.
+*	l_value++
