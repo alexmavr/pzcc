@@ -9,9 +9,9 @@
 
 extern int yylex();
 
-Type currentType = NULL;			// global type indicator for variable initializations
-Type currentFunctionType = NULL;	// global type for the current function
-Type currentCall = NULL;	// global type for the current function
+Type currentType = NULL;			// type indicator for var_init_tail
+Type currentFunctionType = NULL;	// type indicator for function body
+Type currentCallType = NULL;	    // type indicator for the return type of a func
 SymbolEntry * currentFun = NULL;			// global function indicator for parameter declaration
 SymbolEntry * currentParam = NULL;		 
 bool functionHasReturn = false;
@@ -292,7 +292,14 @@ routine_tail
         }
     ;
 routine_header
-    : routine_header_head T_id '(' {currentFun = newFunction($2); openScope();} routine_header_opt ')' {endFunctionHeader(currentFun, $1.type);}
+    : routine_header_head T_id '(' 
+        {
+            currentFun = newFunction($2); 
+            openScope();
+        } routine_header_opt ')' 
+        {
+            endFunctionHeader(currentFun, $1.type);
+        }
     ;
 routine_header_head
     : T_proc       { currentFunctionType = $$.type = typeVoid; }
@@ -420,51 +427,51 @@ const_unit
         }
 	;
 const_expr
-        : const_unit { $$ = $1; }
-        | T_id       
-            {   /* constant variables only */ 
-                SymbolEntry * id = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
+    : const_unit { $$ = $1; }
+    | T_id       
+        {   /* constant variables only */ 
+            SymbolEntry * id = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
 
-                if (id == NULL)
-                    YYERROR;
+            if (id == NULL)
+                YYERROR;
 
-                if (id->entryType != ENTRY_CONSTANT) {
-                    type_error("Non-constant identifier \"%s\" found in constant expression", $1);
-                    YYERROR;
-                } else {
-                    $$.type = id->u.eConstant.type;
-                    memcpy(&($$.value), &(id->u.eConstant.value), sizeof(val_union));
-                }
+            if (id->entryType != ENTRY_CONSTANT) {
+                type_error("Non-constant identifier \"%s\" found in constant expression", $1);
+                YYERROR;
+            } else {
+                $$.type = id->u.eConstant.type;
+                memcpy(&($$.value), &(id->u.eConstant.value), sizeof(val_union));
             }
-        | '(' const_expr ')' { $$ = $2; }
-        | const_expr binop1 const_expr %prec '*' 
-            {
-                eval_const_binop(&($1), &($3), $2, &($$));
-            }
-        | const_expr binop2 const_expr %prec '+' 
-            {
-                eval_const_binop(&($1), &($3), $2, &($$));
-            }
-        | const_expr binop3 const_expr %prec '<' 
-            {
-                eval_const_binop(&($1), &($3), $2, &($$));
-            }
-        | const_expr binop4 const_expr %prec T_eq
-            {
-                eval_const_binop(&($1), &($3), $2, &($$));
-            }
-        | const_expr binop5 const_expr %prec T_and
-            {
-                eval_const_binop(&($1), &($3), $2, &($$));
-            }
-        | const_expr binop6 const_expr %prec T_or
-            {
-                eval_const_binop(&($1), &($3), $2, &($$));
-            }
-        | unop const_expr %prec UN
-            {
-                eval_const_unop(&($2), $1, &($$));
-            }
+        }
+    | '(' const_expr ')' { $$ = $2; }
+    | const_expr binop1 const_expr %prec '*' 
+        {
+            eval_const_binop(&($1), &($3), $2, &($$));
+        }
+    | const_expr binop2 const_expr %prec '+' 
+        {
+            eval_const_binop(&($1), &($3), $2, &($$));
+        }
+    | const_expr binop3 const_expr %prec '<' 
+        {
+            eval_const_binop(&($1), &($3), $2, &($$));
+        }
+    | const_expr binop4 const_expr %prec T_eq
+        {
+            eval_const_binop(&($1), &($3), $2, &($$));
+        }
+    | const_expr binop5 const_expr %prec T_and
+        {
+            eval_const_binop(&($1), &($3), $2, &($$));
+        }
+    | const_expr binop6 const_expr %prec T_or
+        {
+            eval_const_binop(&($1), &($3), $2, &($$));
+        }
+    | unop const_expr %prec UN
+        {
+            eval_const_unop(&($2), $1, &($$));
+        }
 
     ;
 expr
@@ -580,9 +587,9 @@ call
             if (fun == NULL)
                 YYERROR;
 
-            currentCall = fun->u.eFunction.resultType;
+            currentCallType = fun->u.eFunction.resultType;
             currentParam = fun->u.eFunction.firstArgument;
-        } call_opt ')' { $$.type = currentCall; }
+        } call_opt ')' { $$.type = currentCallType; }
     ;
 call_opt
     : /* Nothing */
@@ -696,13 +703,13 @@ loop_stmt
     | T_break ';'  
         {
             if (loop_counter == 0) {
-                type_error("Illegal break statement");
+                type_error("break statement outside of loop context");
             }
         }
     | T_cont ';'
         {
             if (loop_counter == 0) {
-                type_error("Illegal continue statement");
+                type_error("continue statement outside of loop context");
             }
         }
     ;
@@ -726,7 +733,7 @@ stmt_tail_tail
     : T_case const_expr ':' 
         {
             if (!compat_types(typeInteger, $2.type))
-                type_error("switch case is %s instead of Integer", \
+                type_error("switch: case number is %s instead of Integer", \
                         verbose_type($2.type));
         }
     ;

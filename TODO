@@ -2,11 +2,13 @@ Syntax:
     error recovery
 
 Semantics:
-    tests?
+    test forward function declarations
+    
 
 General:
     refactor comp_lib
     refactor error reporting
+    parser.y cleanup and polishing 
 
 
 
