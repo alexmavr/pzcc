@@ -1,25 +1,13 @@
-/******************************************************************************
- *  CVS version:
- *     $Id: symbol.h,v 1.1 2003/05/13 22:21:01 nickie Exp $
- ****************************************************************************** * *  C header file : symbol.h
- *  Project       : PCL Compiler
- *  Version       : 1.0 alpha
- *  Written by    : Nikolaos S. Papaspyrou (nickie@softlab.ntua.gr)
- *  Date          : May 14, 2003
- *  Description   : Generic symbol table in C
+/*
+ * .: Symbol table implementation.
  *
- *  Comments: (in Greek iso-8859-7)
- *  ---------
- *  Εθνικό Μετσόβιο Πολυτεχνείο.
- *  Σχολή Ηλεκτρολόγων Μηχανικών και Μηχανικών Υπολογιστών.
- *  Τομέας Τεχνολογίας Πληροφορικής και Υπολογιστών.
- *  Εργαστήριο Τεχνολογίας Λογισμικού
+ * ?: Nikolaos S. Papaspyrou (nickie@softlab.ntua.gr)
+ * @: Mon 03 Jun 2013 08:37:25 PM EEST
+ *
  */
-
 
 #ifndef __SYMBOL_H__
 #define __SYMBOL_H__
-
 
 /* ---------------------------------------------------------------------
    -------------------------- Τύπος bool -------------------------------
@@ -44,7 +32,6 @@ typedef enum { false=0, true=1 } bool;
 #define START_POSITIVE_OFFSET 8     /* Αρχικό θετικό offset στο Ε.Δ.   */
 #define START_NEGATIVE_OFFSET 0     /* Αρχικό αρνητικό offset στο Ε.Δ. */
 
-
 /* ---------------------------------------------------------------------
    --------------- Ορισμός τύπων του πίνακα συμβόλων -------------------
    --------------------------------------------------------------------- */
@@ -56,7 +43,6 @@ typedef char          RepBoolean;         /* Λογικές τιμές             */
 typedef char          RepChar;            /* Χαρακτήρες                */
 typedef long double   RepReal;            /* Πραγματικές               */
 typedef const char *  RepString;          /* Συμβολοσειρές             */
-
 
 /* Τύποι δεδομένων και αποτελέσματος συναρτήσεων */
 
@@ -77,7 +63,6 @@ struct Type_tag {
     unsigned int   refCount;             /* Μετρητής αναφορών         */
 };
 
-
 /* Τύποι εγγραφών του πίνακα συμβόλων */
 
 typedef enum {            
@@ -88,14 +73,12 @@ typedef enum {
    ENTRY_TEMPORARY                       /* Προσωρινές μεταβλητές      */
 } EntryType;
 
-
 /* Τύποι περάσματος παραμετρων */
 
 typedef enum {            
    PASS_BY_VALUE,                        /* Κατ' αξία                  */
    PASS_BY_REFERENCE                     /* Κατ' αναφορά               */
 } PassMode;
-
 
 /* Τύπος εγγραφής στον πίνακα συμβόλων */
 
@@ -156,7 +139,6 @@ struct SymbolEntry_tag {
    } u;                               /* Τέλος του union               */
 };
 
-
 /* Τύπος συνόλου εγγραφών που βρίσκονται στην ίδια εμβέλεια */
 
 typedef struct Scope_tag Scope;
@@ -168,14 +150,12 @@ struct Scope_tag {
     SymbolEntry  * entries;                  /* Σύμβολα της εμβέλειας  */
 };
 
-
 /* Τύπος αναζήτησης στον πίνακα συμβόλων */
 
 typedef enum {
     LOOKUP_CURRENT_SCOPE,
     LOOKUP_ALL_SCOPES
 } LookupType;
-
 
 /* ---------------------------------------------------------------------
    ------------- Καθολικές μεταβλητές του πίνακα συμβόλων --------------
@@ -190,7 +170,6 @@ extern const Type typeInteger;
 extern const Type typeBoolean;
 extern const Type typeChar;
 extern const Type typeReal;
-
 
 /* ---------------------------------------------------------------------
    ------ Πρωτότυπα των συναρτήσεων χειρισμού του πίνακα συμβολών ------
@@ -224,6 +203,6 @@ bool          equalType          (Type type1, Type type2);
 void          printType          (Type type);
 void          printMode          (PassMode mode);
 
-void printSymbolTable            ();
+void printSymbolTable            (void);
 
 #endif

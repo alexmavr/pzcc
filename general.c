@@ -1,57 +1,28 @@
-/******************************************************************************
- *  CVS version:
- *     $Id: general.c,v 1.1 2004/05/05 22:00:08 nickie Exp $
- ******************************************************************************
+/*
+ * .: >> general.h
  *
- *  C code file : general.c
- *  Project     : PCL Compiler
- *  Version     : 1.0 alpha
- *  Written by  : Nikolaos S. Papaspyrou (nickie@softlab.ntua.gr)
- *  Date        : May 5, 2004
- *  Description : Generic symbol table in C, general variables and functions
+ * ?: Aristoteles Panaras "ale1ster"
+ *    Alexandros Mavrogiannis "afein"
+ * +: Nikolaos S. Papaspyrou (nickie@softlab.ntua.gr)
+ * @: Mon 03 Jun 2013 08:35:52 PM EEST
  *
- *  Comments: (in Greek iso-8859-7)
- *  ---------
- *  Εθνικό Μετσόβιο Πολυτεχνείο.
- *  Σχολή Ηλεκτρολόγων Μηχανικών και Μηχανικών Υπολογιστών.
- *  Τομέας Τεχνολογίας Πληροφορικής και Υπολογιστών.
- *  Εργαστήριο Τεχνολογίας Λογισμικού
  */
 
-
-/* ---------------------------------------------------------------------
-   ---------------------------- Header files ---------------------------
-   --------------------------------------------------------------------- */
-
 #include <stdlib.h>
-
 #include "general.h"
 #include "comp_lib.h"
 
+void *new (size_t size) {
+	void *result = malloc(size);
 
-/* ---------------------------------------------------------------------
-   ----------- Υλοποίηση των συναρτήσεων διαχείρισης μνήμης ------------
-   --------------------------------------------------------------------- */
-
-void * new (size_t size)
-{
-   void * result = malloc(size);
-   
-   if (result == NULL)
-      my_error(ERR_LV_CRIT, "\rOut of memory");
-   return result;
+	if (result == NULL) {
+		my_error(ERR_LV_CRIT, "\rOut of memory");
+	}
+	return result;
 }
 
-void delete (void * p)
-{
-   if (p != NULL)
-      free(p);
+void delete (void *p) {
+	if (p != NULL) {
+		free(p);
+	}
 }
-
-
-/* ---------------------------------------------------------------------
-   ------- Αρχείο εισόδου του μεταγλωττιστή και αριθμός γραμμής --------
-   --------------------------------------------------------------------- */
-
-//const char * filename;	//NOTE: We will do our own.
-int linecount;
