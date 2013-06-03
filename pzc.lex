@@ -110,7 +110,7 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 
 \"{CHAR}*\"							{
 										/* copy the string without the surrounding " chars */
-										char * tmp = (char *) new((yyleng-1) * sizeof(char));
+										char *tmp = (char *) new((yyleng-1) * sizeof(char));
 										strcpy (tmp, &yytext[1]);
 										tmp[yyleng-2] = '\0';
 										yylval.s = (const char *) tmp;
@@ -122,7 +122,7 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 									}
 	
 {SEPAR_n_OPS}						{
-										char * tmp= (char *) new(2 * sizeof(char));
+										char *tmp= (char *) new(2 * sizeof(char));
 										tmp[0] = yytext[0];
 										tmp[1] = '\0';
 										yylval.s = tmp;

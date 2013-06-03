@@ -21,6 +21,7 @@ void crit_cleanup (void) {
 	;
 }
 
+//Wrapper for interfacing with lexer's error routine.
 void yyerror (const char *msg) {
 	/* reformats the string "syntax error," */
 	my_error(ERR_LV_ERR, "Syntax error: %s", &msg[14]);
@@ -58,8 +59,8 @@ void my_error (error_lv level, const char *msg, ...) {
 	}
 }
 
-const char * verbose_type (Type t) {
-	char * res = new(35 * sizeof(char));
+const char *verbose_type (Type t) {
+	char *res = new(35 * sizeof(char));
 	if (t == typeInteger) {
 		return "Integer";
 	} else if (t == typeReal) {
@@ -81,8 +82,7 @@ const char * verbose_type (Type t) {
 	return res;
 }
 
-
-void eval_real_op (RepReal left, RepReal right, const char * op, struct ast_node * res) {
+void eval_real_op (RepReal left, RepReal right, const char *op, struct ast_node *res) {
 	if (!strcmp(op, "*")) {
 		res->type = typeReal;
 		res->value.r = left * right;
@@ -118,7 +118,7 @@ void eval_real_op (RepReal left, RepReal right, const char * op, struct ast_node
 	}
 }
 
-void eval_int_op (RepInteger left, RepInteger right, const char * op, struct ast_node * res) {
+void eval_int_op (RepInteger left, RepInteger right, const char *op, struct ast_node *res) {
 	if (!strcmp(op, "*")) {
 		res->type = typeInteger;
 		res->value.i = left * right;
@@ -157,8 +157,7 @@ void eval_int_op (RepInteger left, RepInteger right, const char * op, struct ast
 	}
 }
 
-
-void eval_bool_op (RepBoolean left, RepBoolean right, const char * op, struct ast_node * res) {
+void eval_bool_op (RepBoolean left, RepBoolean right, const char *op, struct ast_node *res) {
 	res->type = typeBoolean;
 	if (!strcmp(op, "==")) {
 		res->value.b = left == right;
@@ -173,7 +172,7 @@ void eval_bool_op (RepBoolean left, RepBoolean right, const char * op, struct as
 	}
 }
 
-void eval_const_unop(struct ast_node * operand, const char * op, struct ast_node * res) {
+void eval_const_unop(struct ast_node *operand, const char *op, struct ast_node *res) {
 	res->type = typeVoid; // could be changed to NULL
 	if (!strcmp(op, "+")) {
 		if (operand->type == typeInteger) {
@@ -207,7 +206,7 @@ void eval_const_unop(struct ast_node * operand, const char * op, struct ast_node
 	}
 }
 
-void unop_IR(struct ast_node * operand, const char * op, struct ast_node * res) {
+void unop_IR(struct ast_node *operand, const char *op, struct ast_node *res) {
 	res->type = typeVoid; // could be changed to NULL
 	if (!strcmp(op, "+")) {
 		if (operand->type == typeInteger) {
@@ -241,7 +240,7 @@ void unop_IR(struct ast_node * operand, const char * op, struct ast_node * res) 
 	}
 }
 
-void eval_const_binop(struct ast_node * left, struct ast_node * right, const char * op, struct ast_node * res) {
+void eval_const_binop(struct ast_node *left, struct ast_node *right, const char *op, struct ast_node *res) {
 	res->type = typeVoid; // could be changed to NULL
 	if ((left->type == typeInteger) && (right->type == typeReal)) {
 		eval_real_op((RepReal) left->value.i, right->value.r, op, res);
@@ -281,45 +280,35 @@ void eval_const_binop(struct ast_node * left, struct ast_node * right, const cha
 
 /* Expr Binops
  * Create IR for casting each */
-void binop_IR(struct ast_node * left, struct ast_node * right, const char * op, struct ast_node * res) {
+void binop_IR(struct ast_node *left, struct ast_node *right, const char *op, struct ast_node *res) {
 	res->type = typeVoid; // could be changed to NULL
 	if ((left->type == typeInteger) && (right->type == typeReal)) {
 		res->type = binop_type_check(op, typeReal);
-
 	} else if ((left->type == typeReal) && (right->type == typeInteger)) {
 		res->type = binop_type_check(op, typeReal);
-
 	} else if ((left->type == typeChar) && (right->type == typeReal)) {
 		res->type = binop_type_check(op, typeReal);
-
 	} else if ((left->type == typeReal) && (right->type == typeChar)) {
 		res->type = binop_type_check(op, typeReal);
-
 	} else if ((left->type == typeReal) && (right->type == typeReal)) {
 		res->type = binop_type_check(op, typeReal);
-
 	} else if ((left->type == typeInteger) && (right->type == typeInteger)) {
 		res->type = binop_type_check(op, typeInteger);
-
 	} else if ((left->type == typeChar) && (right->type == typeInteger)) {
 		res->type = binop_type_check(op, typeInteger);
-
 	} else if ((left->type == typeInteger) && (right->type == typeChar)) {
 		res->type = binop_type_check(op, typeInteger);
-
 	} else if ((left->type == typeChar) && (right->type == typeChar)) {
 		res->type = binop_type_check(op, typeInteger);
-
 	} else if ((left->type == typeBoolean) && (right->type == typeBoolean)) {
 		res->type = binop_type_check(op, typeBoolean);
-
 	} else {
 		my_error(ERR_LV_ERR, "Type mismatch on \"%s\" operator between %s and %s", \
 				 op, verbose_type(left->type), verbose_type(right->type));
 	}
 }
 
-Type binop_type_check(const char * op, Type t) {
+Type binop_type_check(const char *op, Type t) {
 	Type res = NULL;
 
 	if (t == typeReal) {
@@ -350,13 +339,14 @@ Type binop_type_check(const char * op, Type t) {
 		} else {
 			my_error(ERR_LV_ERR, "Cannot perform \"%s\" between Booleans", op);
 		}
-	} else
-		; // Internal error
+	} else {
+		; // Internal error		//TODO: Ask Alex: Why don't we call my_error(ERR_LV_CRIT, ...); ??
+	}
 
 	return res;
 }
 
-int array_index_check(struct ast_node * _) {
+int array_index_check(struct ast_node *_) {
 	int ret = 0;
 	if (!compat_types(typeInteger, _->type)) {
 		my_error(ERR_LV_ERR, "Array index cannot be %s" , verbose_type(_->type));
@@ -428,5 +418,6 @@ int main (int argc, char **argv) {
 	yyparse();
 	closeScope();
 	printf("Parsing Complete\n");
+
 	return 0;
 }
