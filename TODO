@@ -1,20 +1,18 @@
 Syntax:
-    error recovery
+	error recovery
 
 Semantics:
-    test forward function declarations
-    
+	test forward function declarations
 
 General:
-    refactor comp_lib
-    refactor error reporting
-    parser.y cleanup and polishing 
+	refactor comp_lib
+	parser.y cleanup and polishing
 
-
-
-*	break is not error. it is statement. instead we must use contexts to check for constructs that use loops, so that we can assign value to break or continue statements.
-*	real constants : atof already converts between them.
+Done:
+*	break is not error. it is statement. instead we must use contexts to check for constructs that use loops, so that we can assign value to break or continue statements
+*	real constants : atof already converts between them
 *	l_value++
-*   return statement type checking
-*   function calls
--   array sizes
+*	return statement type checking
+*	function calls
+-	array sizes
+*	refactor error reporting
