@@ -49,35 +49,35 @@ typedef const char *  RepString;          /* Συμβολοσειρές             */
 typedef struct Type_tag * Type;
 
 struct Type_tag {
-    enum {                               /***** Το είδος του τύπου ****/
-       TYPE_VOID,                        /* Κενός τύπος αποτελέσματος */
-       TYPE_INTEGER,                     /* Ακέραιοι                  */
-       TYPE_BOOLEAN,                     /* Λογικές τιμές             */
-       TYPE_CHAR,                        /* Χαρακτήρες                */
-       TYPE_REAL,                        /* Πραγματικοί               */
-       TYPE_ARRAY,                       /* Πίνακες γνωστού μεγέθους  */
-       TYPE_IARRAY,                      /* Πίνακες άγνωστου μεγέθους */
-    } kind;
-    Type           refType;              /* Τύπος αναφοράς            */
-    RepInteger     size;                 /* Μέγεθος, αν είναι πίνακας */
-    unsigned int   refCount;             /* Μετρητής αναφορών         */
+	enum {                               /***** Το είδος του τύπου ****/
+		TYPE_VOID,                        /* Κενός τύπος αποτελέσματος */
+		TYPE_INTEGER,                     /* Ακέραιοι                  */
+		TYPE_BOOLEAN,                     /* Λογικές τιμές             */
+		TYPE_CHAR,                        /* Χαρακτήρες                */
+		TYPE_REAL,                        /* Πραγματικοί               */
+		TYPE_ARRAY,                       /* Πίνακες γνωστού μεγέθους  */
+		TYPE_IARRAY,                      /* Πίνακες άγνωστου μεγέθους */
+	} kind;
+	Type           refType;              /* Τύπος αναφοράς            */
+	RepInteger     size;                 /* Μέγεθος, αν είναι πίνακας */
+	unsigned int   refCount;             /* Μετρητής αναφορών         */
 };
 
 /* Τύποι εγγραφών του πίνακα συμβόλων */
 
-typedef enum {            
-   ENTRY_VARIABLE,                       /* Μεταβλητές                 */
-   ENTRY_CONSTANT,                       /* Σταθερές                   */
-   ENTRY_FUNCTION,                       /* Συναρτήσεις                */
-   ENTRY_PARAMETER,                      /* Παράμετροι συναρτήσεων     */
-   ENTRY_TEMPORARY                       /* Προσωρινές μεταβλητές      */
+typedef enum {
+	ENTRY_VARIABLE,                       /* Μεταβλητές                 */
+	ENTRY_CONSTANT,                       /* Σταθερές                   */
+	ENTRY_FUNCTION,                       /* Συναρτήσεις                */
+	ENTRY_PARAMETER,                      /* Παράμετροι συναρτήσεων     */
+	ENTRY_TEMPORARY                       /* Προσωρινές μεταβλητές      */
 } EntryType;
 
 /* Τύποι περάσματος παραμετρων */
 
-typedef enum {            
-   PASS_BY_VALUE,                        /* Κατ' αξία                  */
-   PASS_BY_REFERENCE                     /* Κατ' αναφορά               */
+typedef enum {
+	PASS_BY_VALUE,                        /* Κατ' αξία                  */
+	PASS_BY_REFERENCE                     /* Κατ' αναφορά               */
 } PassMode;
 
 /* Τύπος εγγραφής στον πίνακα συμβόλων */
@@ -85,58 +85,58 @@ typedef enum {
 typedef struct SymbolEntry_tag SymbolEntry;
 
 struct SymbolEntry_tag {
-   const char   * id;                 /* Ονομα αναγνωριστικού          */
-   EntryType      entryType;          /* Τύπος της εγγραφής            */
-   unsigned int   nestingLevel;       /* Βάθος φωλιάσματος             */
-   unsigned int   hashValue;          /* Τιμή κατακερματισμού          */
-   SymbolEntry  * nextHash;           /* Επόμενη εγγραφή στον Π.Κ.     */
-   SymbolEntry  * nextInScope;        /* Επόμενη εγγραφή στην εμβέλεια */
+	const char   * id;                 /* Ονομα αναγνωριστικού          */
+	EntryType      entryType;          /* Τύπος της εγγραφής            */
+	unsigned int   nestingLevel;       /* Βάθος φωλιάσματος             */
+	unsigned int   hashValue;          /* Τιμή κατακερματισμού          */
+	SymbolEntry  * nextHash;           /* Επόμενη εγγραφή στον Π.Κ.     */
+	SymbolEntry  * nextInScope;        /* Επόμενη εγγραφή στην εμβέλεια */
 
-   union {                            /* Ανάλογα με τον τύπο εγγραφής: */
+	union {                            /* Ανάλογα με τον τύπο εγγραφής: */
 
-      struct {                                /******* Μεταβλητή *******/
-         Type          type;                  /* Τύπος                 */
-         int           offset;                /* Offset στο Ε.Δ.       */
-      } eVariable;
+		struct {                                /******* Μεταβλητή *******/
+			Type          type;                  /* Τύπος                 */
+			int           offset;                /* Offset στο Ε.Δ.       */
+		} eVariable;
 
-      struct {                                /******** Σταθερά ********/
-         Type          type;                  /* Τύπος                 */
-         union {                              /* Τιμή                  */
-            RepInteger vInteger;              /*    ακέραια            */
-            RepBoolean vBoolean;              /*    λογική             */
-            RepChar    vChar;                 /*    χαρακτήρας         */
-            RepReal    vReal;                 /*    πραγματική         */
-            RepString  vString;               /*    συμβολοσειρά       */
-         } value;
-      } eConstant;
+		struct {                                /******** Σταθερά ********/
+			Type          type;                  /* Τύπος                 */
+			union {                              /* Τιμή                  */
+				RepInteger vInteger;              /*    ακέραια            */
+				RepBoolean vBoolean;              /*    λογική             */
+				RepChar    vChar;                 /*    χαρακτήρας         */
+				RepReal    vReal;                 /*    πραγματική         */
+				RepString  vString;               /*    συμβολοσειρά       */
+			} value;
+		} eConstant;
 
-      struct {                                /******* Συνάρτηση *******/
-         bool          isForward;             /* Δήλωση forward        */
-         SymbolEntry * firstArgument;         /* Λίστα παραμέτρων      */
-         SymbolEntry * lastArgument;          /* Τελευταία παράμετρος  */
-         Type          resultType;            /* Τύπος αποτελέσματος   */
-         enum {                               /* Κατάσταση παραμέτρων  */
-             PARDEF_COMPLETE,                    /* Πλήρης ορισμός     */
-             PARDEF_DEFINE,                      /* Εν μέσω ορισμού    */
-             PARDEF_CHECK                        /* Εν μέσω ελέγχου    */
-         } pardef;
-         int           firstQuad;             /* Αρχική τετράδα        */
-      } eFunction;
+		struct {                                /******* Συνάρτηση *******/
+			bool          isForward;             /* Δήλωση forward        */
+			SymbolEntry * firstArgument;         /* Λίστα παραμέτρων      */
+			SymbolEntry * lastArgument;          /* Τελευταία παράμετρος  */
+			Type          resultType;            /* Τύπος αποτελέσματος   */
+			enum {                               /* Κατάσταση παραμέτρων  */
+				PARDEF_COMPLETE,                    /* Πλήρης ορισμός     */
+				PARDEF_DEFINE,                      /* Εν μέσω ορισμού    */
+				PARDEF_CHECK                        /* Εν μέσω ελέγχου    */
+			} pardef;
+			int           firstQuad;             /* Αρχική τετράδα        */
+		} eFunction;
 
-      struct {                                /****** Παράμετρος *******/
-         Type          type;                  /* Τύπος                 */
-         int           offset;                /* Offset στο Ε.Δ.       */
-         PassMode      mode;                  /* Τρόπος περάσματος     */
-         SymbolEntry * next;                  /* Επόμενη παράμετρος    */
-      } eParameter;
+		struct {                                /****** Παράμετρος *******/
+			Type          type;                  /* Τύπος                 */
+			int           offset;                /* Offset στο Ε.Δ.       */
+			PassMode      mode;                  /* Τρόπος περάσματος     */
+			SymbolEntry * next;                  /* Επόμενη παράμετρος    */
+		} eParameter;
 
-      struct {                                /** Προσωρινή μεταβλητή **/
-         Type          type;                  /* Τύπος                 */
-         int           offset;                /* Offset στο Ε.Δ.       */
-         int           number;
-      } eTemporary;
+		struct {                                /** Προσωρινή μεταβλητή **/
+			Type          type;                  /* Τύπος                 */
+			int           offset;                /* Offset στο Ε.Δ.       */
+			int           number;
+		} eTemporary;
 
-   } u;                               /* Τέλος του union               */
+	} u;                               /* Τέλος του union               */
 };
 
 /* Τύπος συνόλου εγγραφών που βρίσκονται στην ίδια εμβέλεια */
@@ -144,17 +144,17 @@ struct SymbolEntry_tag {
 typedef struct Scope_tag Scope;
 
 struct Scope_tag {
-    unsigned int   nestingLevel;             /* Βάθος φωλιάσματος      */
-    unsigned int   negOffset;                /* Τρέχον αρνητικό offset */
-    Scope        * parent;                   /* Περιβάλλουσα εμβέλεια  */
-    SymbolEntry  * entries;                  /* Σύμβολα της εμβέλειας  */
+	unsigned int   nestingLevel;             /* Βάθος φωλιάσματος      */
+	unsigned int   negOffset;                /* Τρέχον αρνητικό offset */
+	Scope        * parent;                   /* Περιβάλλουσα εμβέλεια  */
+	SymbolEntry  * entries;                  /* Σύμβολα της εμβέλειας  */
 };
 
 /* Τύπος αναζήτησης στον πίνακα συμβόλων */
 
 typedef enum {
-    LOOKUP_CURRENT_SCOPE,
-    LOOKUP_ALL_SCOPES
+	LOOKUP_CURRENT_SCOPE,
+	LOOKUP_ALL_SCOPES
 } LookupType;
 
 /* ---------------------------------------------------------------------
@@ -185,14 +185,14 @@ SymbolEntry * newVariable        (const char * name, Type type);
 SymbolEntry * newConstant        (const char * name, Type type, ...);
 SymbolEntry * newFunction        (const char * name);
 SymbolEntry * newParameter       (const char * name, Type type,
-                                  PassMode mode, SymbolEntry * f);
+									PassMode mode, SymbolEntry * f);
 SymbolEntry * newTemporary       (Type type);
 
 void          forwardFunction    (SymbolEntry * f);
 void          endFunctionHeader  (SymbolEntry * f, Type type);
 void          destroyEntry       (SymbolEntry * e);
 SymbolEntry * lookupEntry        (const char * name, LookupType type,
-                                  bool err);
+									bool err);
 
 Type          typeArray          (RepInteger size, Type refType);
 Type          typeIArray         (Type refType);
