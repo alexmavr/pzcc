@@ -26,7 +26,7 @@
 #include <stdlib.h>
 
 #include "general.h"
-#include "../comp_lib.h"
+#include "comp_lib.h"
 //#include "error.h"
 
 

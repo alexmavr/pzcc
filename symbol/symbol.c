@@ -27,7 +27,7 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include "general.h"
+#include "../general.h"
 #include "../comp_lib.h"
 //#include "error.h"
 #include "symbol.h"

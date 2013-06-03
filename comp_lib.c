@@ -14,7 +14,7 @@
 #include <assert.h>
 #include "comp_lib.h"
 #include "parser.h"
-#include "symbol/general.h"
+#include "general.h"
 
 //Cleanup on critical error.
 void crit_cleanup (void) {

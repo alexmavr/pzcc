@@ -28,5 +28,6 @@ FUNC int tocall(int hi) {
 }
 
 FUNC int tocall2(int my_name2) {
+//FUNC int tocall2(int my_name) {
 	return 32;
 }
