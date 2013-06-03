@@ -16,3 +16,4 @@ Done:
 *	function calls
 -	array sizes
 *	refactor error reporting
+*	substitute error.c functions for my_error

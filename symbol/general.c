@@ -26,7 +26,8 @@
 #include <stdlib.h>
 
 #include "general.h"
-#include "error.h"
+#include "../comp_lib.h"
+//#include "error.h"
 
 
 /* ---------------------------------------------------------------------
@@ -38,7 +39,7 @@ void * new (size_t size)
    void * result = malloc(size);
    
    if (result == NULL)
-      fatal("\rOut of memory");
+      my_error(ERR_LV_CRIT, "\rOut of memory");
    return result;
 }
 

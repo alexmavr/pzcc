@@ -28,7 +28,8 @@
 #include <stdarg.h>
 
 #include "general.h"
-#include "error.h"
+#include "../comp_lib.h"
+//#include "error.h"
 #include "symbol.h"
 
 
@@ -215,7 +216,7 @@ static SymbolEntry * newEntry (const char * name)
     
     for (e = currentScope->entries; e != NULL; e = e->nextInScope)
         if (strcmp(name, e->id) == 0) {
-            error("Duplicate identifier: %s", name);
+            my_error(ERR_LV_ERR, "Duplicate identifier: %s", name);
             return NULL;
         }
 
@@ -281,7 +282,7 @@ SymbolEntry * newConstant (const char * name, Type type, ...)
                 break;
             }
         default:
-            internal("Invalid type for constant");
+            my_error(ERR_LV_INTERN, "Invalid type for constant");
     }
     va_end(ap);
 
@@ -311,7 +312,7 @@ SymbolEntry * newConstant (const char * name, Type type, ...)
                 strAppendString(buffer, value.vString);
                 strcat(buffer, "\"");           
         default:
-            internal("Invalid type for constant");
+            my_error(ERR_LV_INTERN, "Invalid type for constant");
         }
         e = newEntry(buffer);
     }
@@ -338,7 +339,7 @@ SymbolEntry * newConstant (const char * name, Type type, ...)
             case TYPE_ARRAY:
                 e->u.eConstant.value.vString = value.vString;
             default:
-                internal("Invalid type for constant");
+                my_error(ERR_LV_INTERN, "Invalid type for constant");
         }
     }
     return e;
@@ -366,7 +367,7 @@ SymbolEntry * newFunction (const char * name)
         return e;
     }
     else {
-       error("Duplicate identifier: %s", name);
+       my_error(ERR_LV_ERR, "Duplicate identifier: %s", name);
        return NULL;
     }
 }
@@ -377,7 +378,7 @@ SymbolEntry * newParameter (const char * name, Type type,
     SymbolEntry * e;
     
     if (f->entryType != ENTRY_FUNCTION)
-        internal("Cannot add a parameter to a non-function");
+        my_error(ERR_LV_INTERN, "Cannot add a parameter to a non-function");
     switch (f->u.eFunction.pardef) {
         case PARDEF_DEFINE:
             e = newEntry(name);
@@ -402,23 +403,23 @@ SymbolEntry * newParameter (const char * name, Type type,
             else
                 e = e->u.eParameter.next;
             if (e == NULL)
-                error("More parameters than expected in redeclaration "
+                my_error(ERR_LV_ERR, "More parameters than expected in redeclaration "
                       "of function %s", f->id);
             else if (!equalType(e->u.eParameter.type, type))
-                error("Parameter type mismatch in redeclaration "
+                my_error(ERR_LV_ERR, "Parameter type mismatch in redeclaration "
                       "of function %s", f->id);
             else if (e->u.eParameter.mode != mode)
-                error("Parameter passing mode mismatch in redeclaration "
+                my_error(ERR_LV_ERR, "Parameter passing mode mismatch in redeclaration "
                       "of function %s", f->id);
             else if (strcmp(e->id, name) != 0)
-                error("Parameter name mismatch in redeclaration "
+                my_error(ERR_LV_ERR, "Parameter name mismatch in redeclaration "
                       "of function %s", f->id);
             else
                 insertEntry(e);
             f->u.eFunction.lastArgument = e;
             return e;
         case PARDEF_COMPLETE:
-            fatal("Cannot add a parameter to an already defined function");
+            my_error(ERR_LV_CRIT, "Cannot add a parameter to an already defined function");
     }
     return NULL;
 }
@@ -441,17 +442,17 @@ static unsigned int fixOffset (SymbolEntry * args)
 void forwardFunction (SymbolEntry * f)
 {
     if (f->entryType != ENTRY_FUNCTION)
-        internal("Cannot make a non-function forward");
+        my_error(ERR_LV_INTERN, "Cannot make a non-function forward");
     f->u.eFunction.isForward = true;
 }
 
 void endFunctionHeader (SymbolEntry * f, Type type)
 {
     if (f->entryType != ENTRY_FUNCTION)
-        internal("Cannot end parameters in a non-function");
+        my_error(ERR_LV_INTERN, "Cannot end parameters in a non-function");
     switch (f->u.eFunction.pardef) {
         case PARDEF_COMPLETE:
-            internal("Cannot end parameters in an already defined function");
+            my_error(ERR_LV_INTERN, "Cannot end parameters in an already defined function");
             break;
         case PARDEF_DEFINE:
             fixOffset(f->u.eFunction.firstArgument);
@@ -463,10 +464,10 @@ void endFunctionHeader (SymbolEntry * f, Type type)
                  f->u.eFunction.lastArgument->u.eParameter.next != NULL) ||
                 (f->u.eFunction.lastArgument == NULL &&
                  f->u.eFunction.firstArgument != NULL))
-                error("Fewer parameters than expected in redeclaration "
+                my_error(ERR_LV_ERR, "Fewer parameters than expected in redeclaration "
                       "of function %s", f->id);
             if (!equalType(f->u.eFunction.resultType, type))
-                error("Result type mismatch in redeclaration of function %s",
+                my_error(ERR_LV_ERR, "Result type mismatch in redeclaration of function %s",
                       f->id);
             break;
     }
@@ -551,7 +552,7 @@ SymbolEntry * lookupEntry (const char * name, LookupType type, bool err)
     }
     
     if (err)
-        error("Unknown identifier: %s", name);
+        my_error(ERR_LV_ERR, "Unknown identifier: %s", name);
     return NULL;
 }
 
@@ -599,7 +600,7 @@ unsigned int sizeOfType (Type type)
 {
     switch (type->kind) {
         case TYPE_VOID:
-            internal("Type void has no size");
+            my_error(ERR_LV_INTERN, "Type void has no size");
             break;
         case TYPE_INTEGER:
         case TYPE_IARRAY:

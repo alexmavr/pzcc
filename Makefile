@@ -5,7 +5,7 @@ CC = gcc
 CFLAGS += -Wall 
 LDFLAGS +=
 
-OBJ += pzc.lex.o comp_lib.o parser.o symbol.o error.o general.o
+OBJ += pzc.lex.o comp_lib.o parser.o symbol.o general.o
 DEPENDS += 
 
 ifndef DEBUG
@@ -24,11 +24,9 @@ all: pzc clean
 pzc: $(OBJ) 
 	$(CC) $(LDFLAGS) $(OBJ) -o $@
 
-general.o  : $(addprefix symbol/, general.c general.h error.h)
+general.o  : $(addprefix symbol/, general.c general.h)
 	$(CC) $(CFLAGS) -c $< -o $@
-error.o    : $(addprefix symbol/, error.c general.h error.h)
-	$(CC) $(CFLAGS) -c $< -o $@
-symbol.o   : $(addprefix symbol/, symbol.c symbol.h general.h error.h)
+symbol.o   : $(addprefix symbol/, symbol.c symbol.h general.h)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 parser.h: parser.c 
