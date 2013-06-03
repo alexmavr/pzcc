@@ -6,6 +6,7 @@
 #include "comp_lib.h"
 #include "symbol.h"
 #include "general.h"
+#include "error.h"
 
 extern int yylex();
 

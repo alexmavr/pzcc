@@ -8,56 +8,11 @@
  */
 
 #include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
 #include <string.h>
-#include <assert.h>
 #include "comp_lib.h"
 #include "parser.h"
 #include "general.h"
-
-//Cleanup on critical error.
-void crit_cleanup (void) {
-	;
-}
-
-//Wrapper for interfacing with lexer's error routine.
-void yyerror (const char *msg) {
-	/* reformats the string "syntax error," */
-	my_error(ERR_LV_ERR, "Syntax error: %s", &msg[14]);
-}
-
-//General error reporting function.
-void my_error (error_lv level, const char *msg, ...) {
-	va_list va;
-
-	va_start(va, msg);
-	fprintf(stderr, "[%s:%d]: ", filename, yylineno);
-	switch (level) {
-		case ERR_LV_WARN:
-			fprintf(stderr, "WARNING: ");
-			break;
-		case ERR_LV_ERR:
-			fprintf(stderr, "ERROR: ");
-			break;
-		case ERR_LV_CRIT:
-			fprintf(stderr, "CRITICAL: ");
-			break;
-		case ERR_LV_INTERN:
-			fprintf(stderr, "INTERNAL: ");
-			break;
-		default:
-			fprintf(stderr, "My mind just exploded\n");
-			exit(EXIT_FAILURE);
-	}
-	vfprintf(stderr, msg, va);
-	fprintf(stderr, "\n");
-	va_end(va);
-	if ((level == ERR_LV_CRIT) || (level == ERR_LV_INTERN)) {
-		crit_cleanup();
-		exit(EXIT_FAILURE);
-	}
-}
+#include "error.h"
 
 const char *verbose_type (Type t) {
 	char *res = new(35 * sizeof(char));
@@ -202,7 +157,8 @@ void eval_const_unop(struct ast_node *operand, const char *op, struct ast_node *
 			my_error(ERR_LV_ERR, "Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
 		}
 	} else {
-		assert(INTERNAL_ERROR);
+//		assert(INTERNAL_ERROR);
+		;
 	}
 }
 
@@ -236,7 +192,8 @@ void unop_IR(struct ast_node *operand, const char *op, struct ast_node *res) {
 			my_error(ERR_LV_ERR, "Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
 		}
 	} else {
-		assert(INTERNAL_ERROR);
+//		assert(INTERNAL_ERROR);
+		;
 	}
 }
 
@@ -397,27 +354,4 @@ bool compat_types(Type t1, Type t2) {
 			|| ((t1 == typeChar) && (t2 == typeInteger))) \
 		res = true;
 	return res;
-}
-
-//Input filename.
-char *filename = "stdin";
-extern FILE *yyin;
-
-//Main definition.
-int main (int argc, char **argv) {
-	//Open input file (if none exists, it uses the default - stdin).
-	if (argc > 1) {
-		filename=argv[1];
-		yyin = fopen(filename, "r");
-		if (yyin == NULL) {
-			my_error(ERR_LV_CRIT, "Cannot open input file %s", filename);
-			exit(EXIT_FAILURE);
-		}
-	}
-
-	yyparse();
-	closeScope();
-	printf("Parsing Complete\n");
-
-	return 0;
 }

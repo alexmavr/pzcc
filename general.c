@@ -8,9 +8,16 @@
  *
  */
 
+#include <stdio.h>
 #include <stdlib.h>
-#include "general.h"
 #include "comp_lib.h"
+#include "general.h"
+#include "error.h"
+
+//Cleanup hook.
+void cleanup (void) {
+	;
+}
 
 void *new (size_t size) {
 	void *result = malloc(size);
@@ -25,4 +32,27 @@ void delete (void *p) {
 	if (p != NULL) {
 		free(p);
 	}
+}
+
+//Input filename.
+char *filename = "stdin";
+extern FILE *yyin;
+
+//Entry point.
+int main (int argc, char **argv) {
+	//Open input file (if none exists, it uses the default - stdin).
+	if (argc > 1) {
+		filename=argv[1];
+		yyin = fopen(filename, "r");
+		if (yyin == NULL) {
+			my_error(ERR_LV_CRIT, "Cannot open input file %s", filename);
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	yyparse();
+	closeScope();
+	printf("Parsing Complete\n");
+
+	return 0;
 }

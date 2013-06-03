@@ -13,6 +13,7 @@
 #include <string.h>
 #include "symbol.h"
 #include "general.h"
+#include "error.h"
 #include "parser.h"
 #include "comp_lib.h"
 

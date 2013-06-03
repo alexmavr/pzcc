@@ -7,25 +7,17 @@
  *
  */
 
+#ifndef __COMP_LIB_H__
+#define __COMP_LIB_H__
+
+#include <stdbool.h>
 #include "symbol.h"
 #include "parser.h"
-#include "stdbool.h"
 
 #define INTERNAL_ERROR 0
 
-extern char *filename;
-extern int yylineno;
-
 //Demotion from int to char by cutting all but the 8 LSB bits.
 #define int_to_char(n) ((char) ((n) & 0xFF))
-
-/* Error Reporting */
-typedef enum { ERR_LV_WARN, ERR_LV_ERR, ERR_LV_CRIT, ERR_LV_INTERN } error_lv;
-
-void yyerror (const char *msg);
-void my_error (error_lv level, const char *msg, ...);
-
-void crit_cleanup (void);
 
 /* Type Checking */
 const char *verbose_type(Type t);
@@ -44,3 +36,5 @@ void unop_IR(struct ast_node *operand, const char *op, struct ast_node *res);
 void eval_const_binop(struct ast_node *left, struct ast_node *right, const char *op, struct ast_node *res );
 
 int array_index_check(struct ast_node *_);
+
+#endif	/* __COMP_LIB_H__ */

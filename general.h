@@ -11,7 +11,13 @@
 #ifndef __GENERAL_H__
 #define __GENERAL_H__
 
-void *new    (size_t);
-void   delete (void *);
+void *new		(size_t);
+void delete		(void *);
+void cleanup	(void);
 
-#endif
+extern char *filename;
+extern int yylineno;
+
+int main (int argc, char **argv);
+
+#endif	/* __GENERAL_H__ */

@@ -9,9 +9,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
-#include "general.h"
 #include "comp_lib.h"
 #include "symbol.h"
+#include "general.h"
+#include "error.h"
 
 /* ---------------------------------------------------------------------
    ------------- Καθολικές μεταβλητές του πίνακα συμβόλων --------------
