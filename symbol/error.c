@@ -29,6 +29,7 @@
 
 #include "general.h"
 #include "error.h"
+#include "../comp_lib.h"
 
 extern int yylineno;
 

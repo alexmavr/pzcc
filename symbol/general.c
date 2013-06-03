@@ -53,5 +53,5 @@ void delete (void * p)
    ------- Αρχείο εισόδου του μεταγλωττιστή και αριθμός γραμμής --------
    --------------------------------------------------------------------- */
 
-const char * filename;
+//const char * filename;	//NOTE: We will do our own.
 int linecount;

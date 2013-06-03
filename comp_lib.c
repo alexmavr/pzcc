@@ -16,50 +16,49 @@
 #include "parser.h"
 #include "symbol/general.h"
 
+//Input filename.
+char *filename = "hi_there";//NULL;
+
 //Cleanup on critical error.
 void crit_cleanup (void) {
 	;
 }
 
-/*  Lexical Error function  */
-void lex_error (error_lv level, const char *msg, ...) {
+void yyerror (const char *msg) {
+    /* reformats the string "syntax error," */
+	my_error(ERR_LV_ERR, "Syntax error: %s", &msg[14]);
+}
+
+//General error reporting function.
+void my_error (error_lv level, const char *msg, ...) {
 	va_list va;
 
 	va_start(va, msg);
+	fprintf(stderr, "[%s:%d]: ", filename, yylineno);
 	switch (level) {
 		case ERR_LV_WARN:
 			fprintf(stderr, "WARNING: ");
 			break;
-		case ERR_LV_CRIT:
+		case ERR_LV_ERR:
 			fprintf(stderr, "ERROR: ");
+			break;
+		case ERR_LV_CRIT:
+			fprintf(stderr, "CRITICAL: ");
+			break;
+		case ERR_LV_INTERN:
+			fprintf(stderr, "INTERNAL: ");
 			break;
 		default:
 			fprintf(stderr, "My mind just exploded\n");
 			exit(EXIT_FAILURE);
 	}
-	fprintf(stderr, "Lexical error [line %d]: ", yylineno);
 	vfprintf(stderr, msg, va);
 	fprintf(stderr, "\n");
 	va_end(va);
-	if (level == ERR_LV_CRIT) {
+	if ((level == ERR_LV_CRIT) || (level == ERR_LV_INTERN)) {
 		crit_cleanup();
 		exit(EXIT_FAILURE);
 	}
-}
-
-void yyerror (const char *msg) {
-    /* ignores the string "syntax error," */
-	fprintf(stderr, "Syntax error [line %d]: %s\n", yylineno, &msg[14]);
-}
-
-void type_error (const char *msg, ...) {
-	va_list va;
-
-	va_start(va, msg);
-	fprintf(stderr, "Semantic error [line %d]: ", yylineno);
-    vfprintf(stderr, msg, va);
-    fprintf(stderr, "\n");
-    va_end(va);
 }
 
 const char * verbose_type (Type t) {
@@ -118,7 +117,7 @@ void eval_real_op (RepReal left, RepReal right, const char * op, struct ast_node
         res->type = typeBoolean;
         res->value.b = left != right;
     } else
-        type_error("Cannot perform \"%s\" between Reals", op);
+        my_error(ERR_LV_ERR, "Cannot perform \"%s\" between Reals", op);
 }
 
 void eval_int_op (RepInteger left, RepInteger right, const char * op, struct ast_node * res) {
@@ -156,7 +155,7 @@ void eval_int_op (RepInteger left, RepInteger right, const char * op, struct ast
         res->type = typeBoolean;
         res->value.b = left != right;
     } else 
-        type_error("Cannot perform \"%s\" between Integers", op);
+        my_error(ERR_LV_ERR, "Cannot perform \"%s\" between Integers", op);
 }
 
 
@@ -171,7 +170,7 @@ void eval_bool_op (RepBoolean left, RepBoolean right, const char * op, struct as
     else if (!strcmp(op, "||") || !strcmp(op,"or")) 
         res->value.b = left || right;
     else 
-        type_error("Cannot perform \"%s\" between Booleans", op);
+        my_error(ERR_LV_ERR, "Cannot perform \"%s\" between Booleans", op);
 }
 
 void eval_const_unop(struct ast_node * operand, const char * op, struct ast_node * res) {
@@ -184,7 +183,7 @@ void eval_const_unop(struct ast_node * operand, const char * op, struct ast_node
             res->type = typeReal;
             res->value.r = operand->value.r;
         } else
-            type_error("Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
+            my_error(ERR_LV_ERR, "Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
     } else if (!strcmp(op, "-")) {
         if (operand->type == typeInteger) {
             res->type = typeInteger;
@@ -193,13 +192,13 @@ void eval_const_unop(struct ast_node * operand, const char * op, struct ast_node
             res->type = typeReal;
             res->value.r = -(operand->value.r);
         } else
-            type_error("Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
+            my_error(ERR_LV_ERR, "Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
     } else if (!strcmp(op, "!") || !strcmp(op, "not")) {
         if (operand->type == typeBoolean) {
             res->type = typeBoolean;
             res->value.b = !(operand->value.b);
         } else
-            type_error("Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
+            my_error(ERR_LV_ERR, "Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
     } else 
         assert(INTERNAL_ERROR);
 }
@@ -214,7 +213,7 @@ void unop_IR(struct ast_node * operand, const char * op, struct ast_node * res) 
             res->type = typeReal;
             // IR placeholder
         } else
-            type_error("Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
+            my_error(ERR_LV_ERR, "Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
     } else if (!strcmp(op, "-")) {
         if (operand->type == typeInteger) {
             res->type = typeInteger;
@@ -223,13 +222,13 @@ void unop_IR(struct ast_node * operand, const char * op, struct ast_node * res) 
             res->type = typeReal;
             // IR placeholder
         } else
-            type_error("Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
+            my_error(ERR_LV_ERR, "Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
     } else if (!strcmp(op, "!") || !strcmp(op, "not")) {
         if (operand->type == typeBoolean) {
             res->type = typeBoolean;
             // IR placeholder
         } else
-            type_error("Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
+            my_error(ERR_LV_ERR, "Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
     } else 
         assert(INTERNAL_ERROR);
 }
@@ -267,7 +266,7 @@ void eval_const_binop(struct ast_node * left, struct ast_node * right, const cha
         eval_bool_op(left->value.b, right->value.b, op, res);
 
     } else {
-        type_error("Type mismatch on \"%s\" operator between %s and %s", \
+        my_error(ERR_LV_ERR, "Type mismatch on \"%s\" operator between %s and %s", \
                 op, verbose_type(left->type), verbose_type(right->type));
     }   
 }
@@ -307,7 +306,7 @@ void binop_IR(struct ast_node * left, struct ast_node * right, const char * op, 
         res->type = binop_type_check(op, typeBoolean);
 
     } else {
-        type_error("Type mismatch on \"%s\" operator between %s and %s", \
+        my_error(ERR_LV_ERR, "Type mismatch on \"%s\" operator between %s and %s", \
                 op, verbose_type(left->type), verbose_type(right->type));
     }   
 }
@@ -323,7 +322,7 @@ Type binop_type_check(const char * op, Type t) {
                || (!strcmp(op, "<=")) || (!strcmp(op, "!=")))
             res = typeBoolean;
         else 
-            type_error("Cannot perform \"%s\" between Reals", op);
+            my_error(ERR_LV_ERR, "Cannot perform \"%s\" between Reals", op);
     } else if (t == typeInteger) {
         if ((!strcmp(op, "*")) || (!strcmp(op, "/")) || (!strcmp(op, "+"))  \
           || (!strcmp(op, "-")) || (!strcmp(op, "%") || !strcmp(op, "MOD")))
@@ -332,14 +331,14 @@ Type binop_type_check(const char * op, Type t) {
           || (!strcmp(op, ">=")) || (!strcmp(op, "==")) || (!strcmp(op, "!=")))
             res = typeBoolean;
         else 
-            type_error("Cannot perform \"%s\" between Integers", op);
+            my_error(ERR_LV_ERR, "Cannot perform \"%s\" between Integers", op);
     } else if (t == typeBoolean) {
         if ((!strcmp(op, "==")) || (!strcmp(op, "!=")) 
         || (!strcmp(op, "&&")) || (!strcmp(op,"and")) 
         || (!strcmp(op, "||")) || (!strcmp(op,"or")))
             res = typeBoolean;
         else
-            type_error("Cannot perform \"%s\" between Booleans", op);
+            my_error(ERR_LV_ERR, "Cannot perform \"%s\" between Booleans", op);
     } else 
         ; // Internal error
 
@@ -349,11 +348,11 @@ Type binop_type_check(const char * op, Type t) {
 int array_index_check(struct ast_node * _) {
     int ret = 0;
     if (!compat_types(typeInteger, _->type)) {
-        type_error("Array index cannot be %s" , verbose_type(_->type));
+        my_error(ERR_LV_ERR, "Array index cannot be %s" , verbose_type(_->type));
         ret = 1;
     }
     else if (_->value.i <= 0) {
-        type_error("Array index cannot be negative");
+        my_error(ERR_LV_ERR, "Array index cannot be negative");
         ret = 1;
     }
     return ret;
@@ -398,4 +397,13 @@ bool compat_types(Type t1, Type t2) {
     || ((t1 == typeChar) && (t2 == typeInteger))) \
             res = true;
     return res;
+}
+
+//Main definition.
+int main ()
+{
+    yyparse();
+    closeScope();
+    printf("Parsing Complete\n");
+    return 0;
 }

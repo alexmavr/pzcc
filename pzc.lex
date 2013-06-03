@@ -104,7 +104,7 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
                                 	}
 
 '{WARN_CHAR}'						{ 
-                                        lex_error(ERR_LV_WARN, "Wrong escape sequence: %s ", yytext);
+                                        my_error(ERR_LV_WARN, "Malformed escape sequence: %s ", yytext);
                                         return T_CONST_char;
                                 	}
 
@@ -117,7 +117,7 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
                                         return T_CONST_string;
                                 	}
 \"{WARN_CHAR}\"						{ 
-                                        lex_error(ERR_LV_WARN, "Wrong escape sequence: %s", yytext); 
+                                        my_error(ERR_LV_WARN, "Malformed escape sequence: %s", yytext); 
                                         return T_CONST_string;
                                 	}
 	
@@ -189,7 +189,7 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 {W}+								{ /* ignore whitespace */	}
 \n									{ /* line counting: yylineno */	}
 
-\"|\'							    { lex_error(ERR_LV_CRIT, "Unexpected token %s", yytext);	}
-.									{ lex_error(ERR_LV_CRIT, "Invalid token %s", yytext);	}
+\"|\'							    { my_error(ERR_LV_CRIT, "Unexpected token %s", yytext);	}
+.									{ my_error(ERR_LV_CRIT, "Invalid token %s", yytext);	}
 
 %%

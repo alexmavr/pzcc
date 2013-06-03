@@ -187,7 +187,7 @@ const_def
             else if ((currentType == typeChar) && ($6.type == typeInteger)) 
                 con->u.eConstant.value.vChar = int_to_char($6.value.i);
             else if (currentType != $6.type) 
-                type_error("Illegal assignment from %s to %s at variable \"%s\"", \
+                my_error(ERR_LV_ERR, "Illegal assignment from %s to %s on \"%s\"", \
                         verbose_type($6.type), verbose_type(currentType), $4);
             else if (currentType == typeInteger)
                 con->u.eConstant.value.vInteger = $6.value.i;
@@ -198,7 +198,7 @@ const_def
             else if (currentType == typeChar)
                 con->u.eConstant.value.vChar = $6.value.c;
             else
-                type_error("Unexpected type %s for constant declaration", \
+                my_error(ERR_LV_ERR, "Unexpected type %s for constant declaration", \
                                                                  currentType);
         }
     ;
@@ -220,7 +220,7 @@ const_def_tail
                 con->u.eConstant.value.vChar = (RepChar) $4.value.i;
 
             else if (currentType != $4.type)
-                type_error("Illegal assignment from %s to %s at variable \"%s\"", \
+                my_error(ERR_LV_ERR, "Illegal assignment from %s to %s on \"%s\"", \
                         verbose_type($4.type), verbose_type(currentType), $2);
             else if (currentType == typeInteger)
                 con->u.eConstant.value.vInteger = $4.value.i;
@@ -231,7 +231,7 @@ const_def_tail
             else if (currentType == typeChar)
                 con->u.eConstant.value.vChar = $4.value.c;
             else
-                type_error("Unexpected type %s for constant declaration", \
+                my_error(ERR_LV_ERR, "Unexpected type %s for constant declaration", \
                                                                  currentType);
         }
     ;
@@ -248,7 +248,7 @@ var_init
             if ($2.type != NULL) {
                 /* (IR) TODO: Real Promoting - Char/Int Conversions */
                 if (!compat_types(currentType, $2.type))
-                    type_error("Illegal assignment from %s to %s at \"%s\"", \
+                    my_error(ERR_LV_ERR, "Illegal assignment from %s to %s on \"%s\"", \
                         verbose_type($2.type), verbose_type(currentType), $1);  
             }
             newVariable($1, currentType);
@@ -288,7 +288,7 @@ routine_tail
     | block
         {
             if ((currentFunctionType != typeVoid) && (!functionHasReturn))
-                type_error("function without a return statement");
+                my_error(ERR_LV_ERR, "function without a return statement");
         }
     ;
 routine_header
@@ -436,7 +436,7 @@ const_expr
                 YYERROR;
 
             if (id->entryType != ENTRY_CONSTANT) {
-                type_error("Non-constant identifier \"%s\" found in constant expression", $1);
+                my_error(ERR_LV_ERR, "Non-constant identifier \"%s\" found in constant expression", $1);
                 YYERROR;
             } else {
                 $$.type = id->u.eConstant.type;
@@ -531,7 +531,7 @@ l_value
                         *  $2 is the number of dimensions following the id */
                         dims = array_dimensions(id->u.eVariable.type);
                         if ($2 > dims)
-                            type_error("\"%s\" has less dimensions than specified", id->id);
+                            my_error(ERR_LV_ERR, "\"%s\" has less dimensions than specified", id->id);
                         else 
                             $$.type = n_dimension_type(id->u.eVariable.type, $2);
                         break;
@@ -540,14 +540,14 @@ l_value
                     {
                         dims = array_dimensions(id->u.eParameter.type);
                         if ($2 > dims)
-                            type_error("\"%s\" has less dimensions than specified", id->id);
+                            my_error(ERR_LV_ERR, "\"%s\" has less dimensions than specified", id->id);
                         else 
                             $$.type = n_dimension_type(id->u.eParameter.type, $2);
                         break;
                     }
                 case ENTRY_CONSTANT:
                     if ($2)
-                        type_error("Constant \"%s\" cannot an Array",id->id);
+                        my_error(ERR_LV_ERR, "Constant \"%s\" cannot an Array",id->id);
                     $$.type = id->u.eConstant.type;
                     break;
                     
@@ -562,7 +562,7 @@ l_value_tail
         {
                 
             if (!compat_types(typeInteger, $2.type))
-               type_error("Array index cannot be %s", verbose_type($2.type));
+               my_error(ERR_LV_ERR, "Array index cannot be %s", verbose_type($2.type));
             $$ = 1 + $4;
         }
     ;
@@ -596,10 +596,10 @@ call_opt
     | expr call_opt_tail  
         {
             if (currentParam == NULL) {
-                type_error("Invalid number of parameters specified");
+                my_error(ERR_LV_ERR, "Invalid number of parameters specified");
                 YYERROR;
             } else if (!compat_types(currentParam->u.eParameter.type, $1.type))
-                type_error("Illegal parameter assignment from %s to %s", verbose_type($1.type), \
+                my_error(ERR_LV_ERR, "Illegal parameter assignment from %s to %s", verbose_type($1.type), \
                     verbose_type(currentParam->u.eParameter.type));
             currentParam = currentParam->u.eParameter.next;
         }
@@ -609,11 +609,11 @@ call_opt_tail
     | ',' expr call_opt_tail
         {
             if (currentParam == NULL) {
-                type_error("Invalid number of parameters specified");
+                my_error(ERR_LV_ERR, "Invalid number of parameters specified");
                 YYERROR;
             }
             if (!compat_types(currentParam->u.eParameter.type, $2.type))
-                type_error("Illegal parameter assignment from %s to %s", verbose_type($2.type), \
+                my_error(ERR_LV_ERR, "Illegal parameter assignment from %s to %s", verbose_type($2.type), \
                     verbose_type(currentParam->u.eParameter.type));
             currentParam = currentParam->u.eParameter.next;
         }
@@ -636,21 +636,21 @@ stmt
     | l_value assign expr ';'
         {
             if (!compat_types($1.type, $3.type)) {
-                type_error("Illegal assignment from %s to %s at \"%s\"", \
+                my_error(ERR_LV_ERR, "Illegal assignment from %s to %s on \"%s\"", \
                         verbose_type($3.type), verbose_type($1.type), $1.value.s);
             }
         }
     | l_value stmt_choice ';'
         {
             if (!compat_types(typeInteger, $1.type)) {
-                type_error("Type mismatch for \"%s\" operator", $2);
+                my_error(ERR_LV_ERR, "Type mismatch for \"%s\" operator", $2);
             }
         }
     | call ';'
     | T_if '(' expr ')' stmt stmt_opt_if 
         {
             if (!compat_types(typeBoolean, $3.type))
-                type_error("if: condition is %s instead of Boolean", \
+                my_error(ERR_LV_ERR, "if: condition is %s instead of Boolean", \
                             verbose_type($3.type));
            
         }
@@ -661,26 +661,26 @@ stmt
                     YYERROR;
                 
                 if (i->entryType != ENTRY_VARIABLE)
-                    type_error("FOR: \"%s\" is not a variable", i->id);
+                    my_error(ERR_LV_ERR, "FOR: \"%s\" is not a variable", i->id);
                 else if (!compat_types(typeInteger, i->u.eVariable.type))
-                    type_error("FOR: control variable \"%s\" is not an Integer", i->id);
+                    my_error(ERR_LV_ERR, "FOR: control variable \"%s\" is not an Integer", i->id);
         }
     | T_while { loop_counter++; } '(' expr ')' loop_stmt { loop_counter--; }
         {
             if (!compat_types(typeBoolean, $4.type))
-                type_error("while: condition is %s instead of Boolean", \
+                my_error(ERR_LV_ERR, "while: condition is %s instead of Boolean", \
                             verbose_type($4.type));
         }
     | T_do { loop_counter++; } loop_stmt T_while '(' expr ')' ';' { loop_counter--; }
         {
             if (!compat_types(typeBoolean, $6.type))
-                type_error("do..while: condition is %s instead of Boolean", \
+                my_error(ERR_LV_ERR, "do..while: condition is %s instead of Boolean", \
                             verbose_type($6.type));
         }
     | T_switch '(' expr ')' '{' {openScope();} stmt_tail stmt_opt_switch '}' {closeScope();}
         {
             if (!compat_types(typeInteger, $3.type))
-                type_error("switch: expression is %s instead of Integer", \
+                my_error(ERR_LV_ERR, "switch: expression is %s instead of Integer", \
                             verbose_type($3.type));
         }
 
@@ -689,7 +689,7 @@ stmt
             if (currentFunctionType == NULL)
                 YYERROR;
 			else if (!compat_types(currentFunctionType, $2.type))
-				type_error("return: incompatible return type: %s instead of %s", \
+				my_error(ERR_LV_ERR, "return: incompatible return type: %s instead of %s", \
                 verbose_type($2.type), verbose_type(currentFunctionType));
 
             functionHasReturn = true;
@@ -703,13 +703,13 @@ loop_stmt
     | T_break ';'  
         {
             if (loop_counter == 0) {
-                type_error("break statement outside of loop context");
+                my_error(ERR_LV_ERR, "break statement outside of loop context");
             }
         }
     | T_cont ';'
         {
             if (loop_counter == 0) {
-                type_error("continue statement outside of loop context");
+                my_error(ERR_LV_ERR, "continue statement outside of loop context");
             }
         }
     ;
@@ -733,7 +733,7 @@ stmt_tail_tail
     : T_case const_expr ':' 
         {
             if (!compat_types(typeInteger, $2.type))
-                type_error("switch: case number is %s instead of Integer", \
+                my_error(ERR_LV_ERR, "switch: case number is %s instead of Integer", \
                         verbose_type($2.type));
         }
     ;
@@ -765,10 +765,10 @@ range
     : expr range_choice expr range_opt
         {
             if (!compat_types(typeInteger, $1.type))
-                type_error("FOR: range start is %s instead of Integer", \
+                my_error(ERR_LV_ERR, "FOR: range start is %s instead of Integer", \
                                         verbose_type($1.type));
             if (!compat_types(typeInteger, $3.type))
-                type_error("FOR: range end is %s instead of Integer", \
+                my_error(ERR_LV_ERR, "FOR: range end is %s instead of Integer", \
                                         verbose_type($3.type));
         }
     ;
@@ -781,7 +781,7 @@ range_opt
     | T_step expr
         {
             if (!compat_types(typeInteger, $2.type))
-                type_error("FOR: STEP is %s instead of Integer", \
+                my_error(ERR_LV_ERR, "FOR: STEP is %s instead of Integer", \
                                         verbose_type($2.type));
         }
     ;
@@ -806,15 +806,15 @@ format
     : expr
         {
             if (($1.type->kind >= TYPE_ARRAY) && ( $1.type->refType != typeChar))
-                type_error("Cannot display an Array of type other than Char");
+                my_error(ERR_LV_ERR, "Cannot display an Array of type other than Char");
         }
     | T_form '(' expr ',' expr format_opt ')'
         {
             if (!compat_types(typeInteger, $5.type))
-                type_error("FORM: second argument is %s instead of Integer", \
+                my_error(ERR_LV_ERR, "FORM: second argument is %s instead of Integer", \
                                         verbose_type($5.type));
             if (($6 == 1) && (!compat_types(typeReal, $3.type)))
-                type_error("FORM: first argument is not Real and precision is specified", \
+                my_error(ERR_LV_ERR, "FORM: first argument is not Real and precision is specified", \
                                         verbose_type($5.type));
         }
     ;
@@ -823,7 +823,7 @@ format_opt
     | ',' expr  
         {
             if (!compat_types(typeInteger, $2.type))
-                type_error("FORM: third argument is %s instead of Integer", \
+                my_error(ERR_LV_ERR, "FORM: third argument is %s instead of Integer", \
                                         verbose_type($2.type));
             $$ = 1;
         }
@@ -831,10 +831,3 @@ format_opt
 
 %%
 
-int main ()
-{
-    yyparse();
-    closeScope();
-    printf("Parsing Complete\n");
-    return 0;
-}

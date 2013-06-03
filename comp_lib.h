@@ -1,5 +1,5 @@
 /* 
- * .: General library for brevity in lexer source file.
+ * .: General library for brevity in lexer and parser source file.
  * 
  * ?: Aristoteles Panaras "ale1ster"
  *    Alexandros Mavrogiannis "afein"
@@ -10,18 +10,19 @@
 #include "parser.h"
 #include "stdbool.h"
 
-extern int yylineno;
-
 #define INTERNAL_ERROR 0
 
+extern char *filename;
+extern int yylineno;
+
+//Demotion from int to char by cutting all but the 8 LSB bits.
 #define int_to_char(n) ((char) ((n) & 0xFF))
 
 /* Error Reporting */
-typedef enum { ERR_LV_WARN, ERR_LV_CRIT } error_lv;
+typedef enum { ERR_LV_WARN, ERR_LV_ERR, ERR_LV_CRIT, ERR_LV_INTERN } error_lv;
 
-void lex_error (error_lv level, const char *msg, ...);
 void yyerror (const char *msg);
-void type_error (const char *msg, ...);
+void my_error (error_lv level, const char *msg, ...);
 
 void crit_cleanup (void);
 
