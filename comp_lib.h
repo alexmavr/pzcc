@@ -1,10 +1,10 @@
-/* 
+/*
  * .: General library for brevity in lexer and parser source file.
- * 
+ *
  * ?: Aristoteles Panaras "ale1ster"
  *    Alexandros Mavrogiannis "afein"
  * @: Mon 18 Mar 2013 04:01:47 PM EET
- * 
+ *
  */
 #include "symbol/symbol.h"
 #include "parser.h"
@@ -27,7 +27,7 @@ void my_error (error_lv level, const char *msg, ...);
 void crit_cleanup (void);
 
 /* Type Checking */
-const char * verbose_type(Type t); 
+const char * verbose_type(Type t);
 int array_dimensions(Type t);
 Type n_dimension_type(Type t, int n);
 bool compat_types(Type t1, Type t2); // true if t2 can be converted to t1
