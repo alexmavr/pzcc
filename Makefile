@@ -24,10 +24,9 @@ all: pzc clean
 pzc: $(OBJ) 
 	$(CC) $(LDFLAGS) $(OBJ) -o $@
 
-#general.o  : $(addprefix symbol/, general.c general.h)
 general.o  : general.c general.h
 	$(CC) $(CFLAGS) -c $< -o $@
-symbol.o   : $(addprefix symbol/, symbol.c symbol.h) general.h
+symbol.o   : symbol.c symbol.h general.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 parser.h: parser.c 
@@ -35,7 +34,7 @@ parser.h: parser.c
 parser.c: parser.y comp_lib.h
 		bison ${BSN_DBG} -v -d -o $@ $<
 
-pzc.lex.o: pzc.lex.c comp_lib.h parser.h symbol/symbol.h
+pzc.lex.o: pzc.lex.c comp_lib.h parser.h symbol.h
 	$(CC) $(CFLAGS) -c -lfl $< -o $@
 
 pzc.lex.c: pzc.lex

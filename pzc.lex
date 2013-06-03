@@ -11,8 +11,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include "symbol/symbol.h"
-//#include "symbol/general.h"
+#include "symbol.h"
 #include "general.h"
 #include "parser.h"
 #include "comp_lib.h"

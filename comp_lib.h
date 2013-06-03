@@ -7,7 +7,7 @@
  *
  */
 
-#include "symbol/symbol.h"
+#include "symbol.h"
 #include "parser.h"
 #include "stdbool.h"
 

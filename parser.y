@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include "comp_lib.h"
-#include "symbol/symbol.h"
+#include "symbol.h"
 #include "general.h"
 
 extern int yylex();
