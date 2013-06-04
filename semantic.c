@@ -9,11 +9,16 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <llvm-c/Core.h>
+#include <llvm-c/Analysis.h>
 #include "semantic.h"
 #include "parser.h"
 #include "general.h"
 #include "error.h"
 
+extern LLVMBuilderRef builder;
+
+/* Returns a string representation of a type for error reporting */
 const char *verbose_type (Type t) {
 	char *res = new(35 * sizeof(char));
 	if (t == typeInteger) {
@@ -37,6 +42,7 @@ const char *verbose_type (Type t) {
 	return res;
 }
 
+/* Evaluates constant operations between Reals */
 void eval_real_op (RepReal left, RepReal right, const char *op, struct ast_node *res) {
 	if (!strcmp(op, "*")) {
 		res->type = typeReal;
@@ -73,6 +79,7 @@ void eval_real_op (RepReal left, RepReal right, const char *op, struct ast_node 
 	}
 }
 
+/* Evaluates constant operations between Integers */
 void eval_int_op (RepInteger left, RepInteger right, const char *op, struct ast_node *res) {
 	if (!strcmp(op, "*")) {
 		res->type = typeInteger;
@@ -112,6 +119,7 @@ void eval_int_op (RepInteger left, RepInteger right, const char *op, struct ast_
 	}
 }
 
+/* Evaluates constant operations between Booleans */
 void eval_bool_op (RepBoolean left, RepBoolean right, const char *op, struct ast_node *res) {
 	res->type = typeBoolean;
 	if (!strcmp(op, "==")) {
@@ -127,6 +135,7 @@ void eval_bool_op (RepBoolean left, RepBoolean right, const char *op, struct ast
 	}
 }
 
+/* Evaluates and type checks a constant unary operator */
 void eval_const_unop(struct ast_node *operand, const char *op, struct ast_node *res) {
 	res->type = typeVoid; // could be changed to NULL
 	if (!strcmp(op, "+")) {
@@ -161,6 +170,7 @@ void eval_const_unop(struct ast_node *operand, const char *op, struct ast_node *
 	}
 }
 
+/* Type checks and produces IR for a unary operation */
 void unop_IR(struct ast_node *operand, const char *op, struct ast_node *res) {
 	res->type = typeVoid; // could be changed to NULL
 	if (!strcmp(op, "+")) {
@@ -195,6 +205,7 @@ void unop_IR(struct ast_node *operand, const char *op, struct ast_node *res) {
 	}
 }
 
+/* Evaluates and Type checks a constant binop expression */
 void eval_const_binop(struct ast_node *left, struct ast_node *right, const char *op, struct ast_node *res) {
 	res->type = typeVoid; // could be changed to NULL
 	if ((left->type == typeInteger) && (right->type == typeReal)) {
@@ -263,6 +274,36 @@ void binop_IR(struct ast_node *left, struct ast_node *right, const char *op, str
 	}
 }
 
+/* Produces IR for a binary operation on a specific type of pair operands */
+void op_IR(const char * op, LLVMValueRef left, LLVMValueRef right, Type t, LLVMValueRef res) {
+    /* TODO: signed operations? */
+	if (t == typeReal) {
+        if (!strcmp(op, "+"))
+            LLVMBuildFAdd(builder, left, right, "addtmp");
+        else if (!strcmp(op, "-"))
+            LLVMBuildFSub(builder, left, right, "subtmp");
+        else if (!strcmp(op, "*"))
+            LLVMBuildFMul(builder, left, right, "multmp");
+        else if (!strcmp(op, "/"))
+            LLVMBuildFDiv(builder, left, right, "divtmp");
+    } else if (t == typeInteger) {
+        if (!strcmp(op, "+"))
+            LLVMBuildAdd(builder, left, right, "addtmp");
+        else if (!strcmp(op, "-"))
+            LLVMBuildSub(builder, left, right, "subtmp");
+        else if (!strcmp(op, "*"))
+            LLVMBuildMul(builder, left, right, "multmp");
+        else if (!strcmp(op, "/"))
+            LLVMBuildUDiv(builder, left, right, "divtmp"); 
+        else if ((!strcmp(op, "/")) || (!strcmp(op, "MOD")))
+            LLVMBuildURem(builder, left, right, "modtmp");
+    } else if (t == typeBoolean) {
+
+    } else 
+		my_error(ERR_LV_CRIT, "Internal error: invalid common operand type during binop IR");
+}
+
+/* Type checking for an operation between operands of a given type */
 Type binop_type_check(const char *op, Type t) {
 	Type res = NULL;
 
@@ -295,12 +336,13 @@ Type binop_type_check(const char *op, Type t) {
 			my_error(ERR_LV_ERR, "Cannot perform \"%s\" between Booleans", op);
 		}
 	} else {
-		; // Internal error		//TODO: Ask Alex: Why don't we call my_error(ERR_LV_CRIT, ...); ??
+		my_error(ERR_LV_CRIT, "Internal error: invalid common operand type during binop type checking");
 	}
 
 	return res;
 }
 
+/* Checks if an ast node can be used as an array index */
 int array_index_check(struct ast_node *_) {
 	int ret = 0;
 	if (!compat_types(typeInteger, _->type)) {
