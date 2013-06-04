@@ -157,8 +157,7 @@ void eval_const_unop(struct ast_node *operand, const char *op, struct ast_node *
 			my_error(ERR_LV_ERR, "Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
 		}
 	} else {
-//		assert(INTERNAL_ERROR);
-		;
+		my_error(ERR_LV_INTERN, "unreachable");
 	}
 }
 
@@ -192,8 +191,7 @@ void unop_IR(struct ast_node *operand, const char *op, struct ast_node *res) {
 			my_error(ERR_LV_ERR, "Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
 		}
 	} else {
-//		assert(INTERNAL_ERROR);
-		;
+		my_error(ERR_LV_INTERN, "unreachable");
 	}
 }
 

@@ -14,8 +14,6 @@
 #include "symbol.h"
 #include "parser.h"
 
-#define INTERNAL_ERROR 0
-
 //Demotion from int to char by cutting all but the 8 LSB bits.
 #define int_to_char(n) ((char) ((n) & 0xFF))
 
@@ -25,15 +23,15 @@ int array_dimensions(Type t);
 Type n_dimension_type(Type t, int n);
 bool compat_types(Type t1, Type t2); // true if t2 can be converted to t1
 
-void openLookScope();
-void closeLookScope();
+void openLookScope(void);
+void closeLookScope(void);
 
 void eval_const_unop(struct ast_node *operand, const char *op, struct ast_node *res);
 Type binop_type_check(const char *op, Type t);
 void binop_IR(struct ast_node *left, struct ast_node *right, const char *op, struct ast_node *res);
 void unop_IR(struct ast_node *operand, const char *op, struct ast_node *res);
 
-void eval_const_binop(struct ast_node *left, struct ast_node *right, const char *op, struct ast_node *res );
+void eval_const_binop(struct ast_node *left, struct ast_node *right, const char *op, struct ast_node *res);
 
 int array_index_check(struct ast_node *_);
 
