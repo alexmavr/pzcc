@@ -2,10 +2,12 @@
 .DEFAULT: all
 
 CC = gcc
-CFLAGS += -Wall 
+LD = g++
+LLVMFLAGS = `llvm-config --cflags`
+CFLAGS += -Wall $(LLVMFLAGS)
 LDFLAGS +=
-
-OBJ += pzc.lex.o semantic.o parser.o symbol.o general.o error.o
+LLVM_LINK_FLAGS=`llvm-config --libs --cflags --ldflags core analysis native	executionengine`
+OBJ += pzc.lex.o semantic.o parser.o symbol.o general.o error.o ir.o
 DEPENDS += 
 
 ifndef DEBUG
@@ -22,13 +24,17 @@ endif
 all: pzc clean
 
 pzc: $(OBJ) 
-	$(CC) $(LDFLAGS) $(OBJ) -o $@
+	$(LD) $(OBJ) $(LDFLAGS) $(LLVM_LINK_FLAGS) -o $@
 
 general.o: general.c general.h
+	$(CC) $(CFLAGS) -c $< -o $@
+semantic.o: semantic.c semantic.h
 	$(CC) $(CFLAGS) -c $< -o $@
 error.o: error.c error.h
 	$(CC) $(CFLAGS) -c $< -o $@
 symbol.o: symbol.c symbol.h general.h
+	$(CC) $(CFLAGS) -c $< -o $@
+parser.o: parser.c parser.h 
 	$(CC) $(CFLAGS) -c $< -o $@
 
 parser.h: parser.c 

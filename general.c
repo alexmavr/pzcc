@@ -10,6 +10,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <llvm-c/ExecutionEngine.h>
+#include <llvm-c/Target.h>
+#include <llvm-c/Core.h>
+#include <llvm-c/Analysis.h>
+#include <llvm-c/Transforms/Scalar.h>
 #include "semantic.h"
 #include "general.h"
 #include "error.h"
@@ -49,9 +54,27 @@ int main (int argc, char **argv) {
 			exit(EXIT_FAILURE);
 		}
 	}
+    
+    LLVMModuleRef module = LLVMModuleCreateWithName("pzc");
+    LLVMBuilderRef builder = LLVMCreateBuilder();
+    LLVMInitializeNativeTarget();
+
+    LLVMPassManagerRef pass_manager = LLVMCreateFunctionPassManagerForModule(module);
+    LLVMAddPromoteMemoryToRegisterPass(pass_manager);
+    LLVMAddInstructionCombiningPass(pass_manager);
+    LLVMAddReassociatePass(pass_manager);
+    LLVMAddGVNPass(pass_manager);
+    LLVMAddCFGSimplificationPass(pass_manager);
+    LLVMInitializeFunctionPassManager(pass_manager);
 
 	yyparse();
 	closeScope();
+
+    LLVMDumpModule(module);
+    LLVMDisposePassManager(pass_manager);
+    LLVMDisposeBuilder(builder);
+    LLVMDisposeModule(module);
+
 	printf("Parsing Complete\n");
 
 	return 0;
