@@ -5,7 +5,7 @@ Semantics:
 	test forward function declarations
 
 General:
-	refactor comp_lib
+	refactor comp_lib	:: Done, moved to semantic, but waiting to be commented.
 	parser.y cleanup and polishing
 
 Done:

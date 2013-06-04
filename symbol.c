@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
-#include "comp_lib.h"
+#include "semantic.h"
 #include "symbol.h"
 #include "general.h"
 #include "error.h"

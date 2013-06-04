@@ -5,7 +5,7 @@ CC = gcc
 CFLAGS += -Wall 
 LDFLAGS +=
 
-OBJ += pzc.lex.o comp_lib.o parser.o symbol.o general.o error.o
+OBJ += pzc.lex.o semantic.o parser.o symbol.o general.o error.o
 DEPENDS += 
 
 ifndef DEBUG
@@ -33,10 +33,10 @@ symbol.o: symbol.c symbol.h general.h
 
 parser.h: parser.c 
 
-parser.c: parser.y comp_lib.h
+parser.c: parser.y semantic.h
 		bison ${BSN_DBG} -v -d -o $@ $<
 
-pzc.lex.o: pzc.lex.c comp_lib.h parser.h symbol.h
+pzc.lex.o: pzc.lex.c semantic.h parser.h symbol.h
 	$(CC) $(CFLAGS) -c -lfl $< -o $@
 
 pzc.lex.c: pzc.lex

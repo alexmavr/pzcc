@@ -1,5 +1,5 @@
 /*
- * .: >> comp_lib.h
+ * .: >> semantic.h
  *
  * ?: Aristoteles Panaras "ale1ster"
  *    Alexandros Mavrogiannis "afein"
@@ -9,7 +9,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "comp_lib.h"
+#include "semantic.h"
 #include "parser.h"
 #include "general.h"
 #include "error.h"

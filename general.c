@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "comp_lib.h"
+#include "semantic.h"
 #include "general.h"
 #include "error.h"
 

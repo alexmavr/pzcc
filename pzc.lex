@@ -15,7 +15,7 @@
 #include "general.h"
 #include "error.h"
 #include "parser.h"
-#include "comp_lib.h"
+#include "semantic.h"
 
 #define YY_NO_INPUT
 
