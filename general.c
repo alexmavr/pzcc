@@ -10,7 +10,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <llvm-c/ExecutionEngine.h>
 #include <llvm-c/Target.h>
 #include <llvm-c/Core.h>
 #include <llvm-c/Analysis.h>
@@ -18,6 +17,7 @@
 #include "semantic.h"
 #include "general.h"
 #include "error.h"
+
 
 //Cleanup hook.
 void cleanup (void) {
@@ -55,8 +55,8 @@ int main (int argc, char **argv) {
 		}
 	}
     
-    LLVMModuleRef module = LLVMModuleCreateWithName("pzc");
-    LLVMBuilderRef builder = LLVMCreateBuilder();
+    module = LLVMModuleCreateWithName("pzc");
+    builder = LLVMCreateBuilder();
     LLVMInitializeNativeTarget();
 
     LLVMPassManagerRef pass_manager = LLVMCreateFunctionPassManagerForModule(module);
@@ -68,7 +68,7 @@ int main (int argc, char **argv) {
     LLVMInitializeFunctionPassManager(pass_manager);
 
 	yyparse();
-	closeScope();
+	//closeScope();
 
     LLVMDumpModule(module);
     LLVMDisposePassManager(pass_manager);

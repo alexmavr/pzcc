@@ -10,6 +10,10 @@
 #ifndef __IR_H__
 #define __IR_H__
 
+#include <llvm-c/Core.h>
+#include "symbol.h"
+
+LLVMTypeRef type_to_llvm(Type t);
 
 
 #endif	/* __IR_H__ */

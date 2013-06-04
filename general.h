@@ -11,12 +11,17 @@
 #ifndef __GENERAL_H__
 #define __GENERAL_H__
 
+#include <llvm-c/Core.h>
+
 void *new		(size_t);
 void delete		(void *);
 void cleanup	(void);
 
 extern char *filename;
 extern int yylineno;
+
+LLVMBuilderRef builder;
+LLVMModuleRef module;
 
 int main (int argc, char **argv);
 

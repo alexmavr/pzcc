@@ -11,6 +11,8 @@
 #define __COMP_LIB_H__
 
 #include <stdbool.h>
+#include <llvm-c/Core.h>
+#include <llvm-c/Analysis.h>
 #include "symbol.h"
 #include "parser.h"
 

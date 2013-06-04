@@ -6,7 +6,7 @@ LD = g++
 LLVMFLAGS = `llvm-config --cflags`
 CFLAGS += -Wall $(LLVMFLAGS)
 LDFLAGS +=
-LLVM_LINK_FLAGS=`llvm-config --libs --cflags --ldflags core analysis native	executionengine`
+LLVM_LINK_FLAGS=`llvm-config --libs --cflags --ldflags core analysis native`
 OBJ += pzc.lex.o semantic.o parser.o symbol.o general.o error.o ir.o
 DEPENDS += 
 

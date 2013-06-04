@@ -3,18 +3,24 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <llvm-c/Core.h>
+#include <llvm-c/Analysis.h>
 #include "semantic.h"
 #include "symbol.h"
 #include "general.h"
 #include "error.h"
+#include "ir.h"
 
 extern int yylex();
+extern LLVMBuilderRef builder;
+extern LLVMModuleRef module;
 
 Type currentType = NULL;				// type indicator for var_init_tail
 Type currentFunctionType = NULL;		// type indicator for function body
 Type currentCallType = NULL;			// type indicator for the return type of a func
 SymbolEntry *currentFun = NULL;			// global function indicator for parameter declaration
 SymbolEntry *currentParam = NULL;
+const char * currentName = NULL;
 bool functionHasReturn = false;
 
 unsigned long long loop_counter = 0;
@@ -34,6 +40,7 @@ unsigned long long loop_counter = 0;
 	struct ast_node {
 		val_union value;
 		Type type;
+        LLVMValueRef Valref;
 	};
 }
 
@@ -241,13 +248,18 @@ var_def_tail
 var_init
 	: T_id var_init_opt
 		{
+			SymbolEntry * var = newVariable($1, currentType);
+            if (var == NULL)
+                YYERROR;
+
 			if ($2.type != NULL) {
 				/* (IR) TODO: Real Promoting - Char/Int Conversions */
 				if (!compat_types(currentType, $2.type))
 					my_error(ERR_LV_ERR, "Illegal assignment from %s to %s on \"%s\"", \
 						verbose_type($2.type), verbose_type(currentType), $1);
+                LLVMValueRef alloc = LLVMBuildAlloca(builder, type_to_llvm(currentType), $1);
+                LLVMBuildStore(builder, $2.Valref, alloc);
 			}
-			newVariable($1, currentType);
 		}
 	| T_id var_init_tail_plus
 		{
@@ -256,7 +268,11 @@ var_init
 	;
 var_init_opt
 	: /* nothing */ {$$.type = NULL;}
-	| '=' expr  { $$.type = $2.type; }
+	| '=' expr  
+        {
+            $$.type = $2.type; 
+            $$.Valref = $2.Valref;
+        }
 	;
 var_init_tail_plus
 	: '[' const_expr ']' { array_index_check(&($2)); } var_init_tail
@@ -379,9 +395,20 @@ formal_tail
 	;
 program_header
 	: T_prog { currentFunctionType = typeVoid; } T_id '(' ')'
+        {
+            SymbolEntry * prog = newFunction($3);
+            if (prog == NULL)
+                exit(1);
+
+            LLVMTypeRef funcType = LLVMFunctionType(LLVMVoidType(), NULL, 0, 0);
+            LLVMValueRef func = LLVMAddFunction(module, $3, funcType);
+            LLVMSetLinkage(func, LLVMExternalLinkage);
+            LLVMBasicBlockRef block = LLVMAppendBasicBlock(func, "entry");
+            LLVMPositionBuilderAtEnd(builder, block);
+        }
 	;
 program
-	: program_header block
+	: program_header block { LLVMBuildRetVoid(builder); }
 	;
 type
 	: T_int		{ $$.type = typeInteger; }
@@ -395,31 +422,37 @@ const_unit
 		{
 			$$.type = typeInteger;
 			$$.value.i = $1;
+            $$.Valref = LLVMConstInt(LLVMInt32Type(), $1, false);
 		}
 	| T_CONST_real
 		{
 			$$.type = typeReal;
 			$$.value.r = $1;
+            $$.Valref = LLVMConstReal(LLVMDoubleType(), $1);
 		}
 	| T_CONST_char
 		{
 			$$.type = typeChar;
 			$$.value.c = $1;
+            $$.Valref = LLVMConstInt(LLVMInt8Type(), $1, false);
 		}
 	| T_CONST_string
 		{
 			$$.type = typeArray(strlen($1), typeChar);
 			$$.value.s = $1;
+            $$.Valref = LLVMConstString($1, strlen($1), false);
 		}
 	| T_true
 		{
 			$$.value.b = true;
 			$$.type = typeBoolean;
+            $$.Valref = LLVMConstInt(LLVMInt8Type(), 1, false);
 		}
 	| T_false
 		{
 			$$.value.b = false;
 			$$.type = typeBoolean;
+            $$.Valref = LLVMConstInt(LLVMInt8Type(), 0, false);
 		}
 	;
 const_expr
