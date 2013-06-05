@@ -3,7 +3,7 @@
 *.swo
 *.bak
 pzc.lex.c
-pzc
+pzcc
 a.out
 parser.output
 symbol/symbtest*

@@ -1,4 +1,4 @@
-.PHONY: all pzc clean
+.PHONY: all pzcc clean
 .DEFAULT: all
 
 CC = gcc
@@ -21,9 +21,9 @@ else
 	CFLAGS += -O3
 endif
 
-all: pzc clean
+all: pzcc clean
 
-pzc: $(OBJ) 
+pzcc: $(OBJ) 
 	$(LD) $(OBJ) $(LDFLAGS) $(LLVM_LINK_FLAGS) -o $@
 
 general.o: general.c general.h
@@ -50,7 +50,7 @@ pzc.lex.c: pzc.lex
 pzc.lex:;
 
 distclean: clean
-	rm -f pzc parser.output
+	rm -f pzcc parser.output
 
 clena celan lcean lcena: clean
 clean:

@@ -11,8 +11,7 @@ do
 
     for testcase in tests/$component/*.pzc;
     do echo "========== $testcase ============"
-#        ./pzc < $testcase
-        ./pzc $testcase
+        ./pzcc $testcase
     done
 done
 
