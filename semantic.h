@@ -23,7 +23,7 @@
 const char *verbose_type(Type t);
 int array_dimensions(Type t);
 Type n_dimension_type(Type t, int n);
-bool compat_types(Type t1, Type t2); // true if t2 can be converted to t1
+bool compat_types(Type t1, Type t2);	//true if t2 can be converted to t1
 
 void openLookScope(void);
 void closeLookScope(void);

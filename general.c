@@ -54,26 +54,26 @@ int main (int argc, char **argv) {
 			exit(EXIT_FAILURE);
 		}
 	}
-    
-    module = LLVMModuleCreateWithName("pzcc");
-    builder = LLVMCreateBuilder();
-    LLVMInitializeNativeTarget();
 
-    LLVMPassManagerRef pass_manager = LLVMCreateFunctionPassManagerForModule(module);
-    LLVMAddPromoteMemoryToRegisterPass(pass_manager);
-    LLVMAddInstructionCombiningPass(pass_manager);
-    LLVMAddReassociatePass(pass_manager);
-    LLVMAddGVNPass(pass_manager);
-    LLVMAddCFGSimplificationPass(pass_manager);
-    LLVMInitializeFunctionPassManager(pass_manager);
+	module = LLVMModuleCreateWithName("pzcc");
+	builder = LLVMCreateBuilder();
+	LLVMInitializeNativeTarget();
+
+	LLVMPassManagerRef pass_manager = LLVMCreateFunctionPassManagerForModule(module);
+	LLVMAddPromoteMemoryToRegisterPass(pass_manager);
+	LLVMAddInstructionCombiningPass(pass_manager);
+	LLVMAddReassociatePass(pass_manager);
+	LLVMAddGVNPass(pass_manager);
+	LLVMAddCFGSimplificationPass(pass_manager);
+	LLVMInitializeFunctionPassManager(pass_manager);
 
 	yyparse();
 	//closeScope();
 
-    LLVMDumpModule(module);
-    LLVMDisposePassManager(pass_manager);
-    LLVMDisposeBuilder(builder);
-    LLVMDisposeModule(module);
+	LLVMDumpModule(module);
+	LLVMDisposePassManager(pass_manager);
+	LLVMDisposeBuilder(builder);
+	LLVMDisposeModule(module);
 
 	printf("Parsing Complete\n");
 

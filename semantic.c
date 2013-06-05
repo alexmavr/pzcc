@@ -18,7 +18,7 @@
 
 extern LLVMBuilderRef builder;
 
-/* Returns a string representation of a type for error reporting */
+//Returns a string representation of a type for error reporting.
 const char *verbose_type (Type t) {
 	char *res = new(35 * sizeof(char));
 	if (t == typeInteger) {
@@ -42,7 +42,7 @@ const char *verbose_type (Type t) {
 	return res;
 }
 
-/* Evaluates constant operations between Reals */
+//Evaluates constant operations between Reals.
 void eval_real_op (RepReal left, RepReal right, const char *op, struct ast_node *res) {
 	if (!strcmp(op, "*")) {
 		res->type = typeReal;
@@ -79,7 +79,7 @@ void eval_real_op (RepReal left, RepReal right, const char *op, struct ast_node 
 	}
 }
 
-/* Evaluates constant operations between Integers */
+//Evaluates constant operations between Integers.
 void eval_int_op (RepInteger left, RepInteger right, const char *op, struct ast_node *res) {
 	if (!strcmp(op, "*")) {
 		res->type = typeInteger;
@@ -119,7 +119,7 @@ void eval_int_op (RepInteger left, RepInteger right, const char *op, struct ast_
 	}
 }
 
-/* Evaluates constant operations between Booleans */
+//Evaluates constant operations between Booleans.
 void eval_bool_op (RepBoolean left, RepBoolean right, const char *op, struct ast_node *res) {
 	res->type = typeBoolean;
 	if (!strcmp(op, "==")) {
@@ -135,7 +135,7 @@ void eval_bool_op (RepBoolean left, RepBoolean right, const char *op, struct ast
 	}
 }
 
-/* Evaluates and type checks a constant unary operator */
+//Evaluates and type checks a constant unary operator.
 void eval_const_unop(struct ast_node *operand, const char *op, struct ast_node *res) {
 	res->type = typeVoid; // could be changed to NULL
 	if (!strcmp(op, "+")) {
@@ -170,7 +170,7 @@ void eval_const_unop(struct ast_node *operand, const char *op, struct ast_node *
 	}
 }
 
-/* Type checks and produces IR for a unary operation */
+//Type checks and produces IR for a unary operation.
 void unop_IR(struct ast_node *operand, const char *op, struct ast_node *res) {
 	res->type = typeVoid; // could be changed to NULL
 	if (!strcmp(op, "+")) {
@@ -205,7 +205,7 @@ void unop_IR(struct ast_node *operand, const char *op, struct ast_node *res) {
 	}
 }
 
-/* Evaluates and Type checks a constant binop expression */
+//Evaluates and Type checks a constant binop expression.
 void eval_const_binop(struct ast_node *left, struct ast_node *right, const char *op, struct ast_node *res) {
 	res->type = typeVoid; // could be changed to NULL
 	if ((left->type == typeInteger) && (right->type == typeReal)) {
@@ -244,10 +244,9 @@ void eval_const_binop(struct ast_node *left, struct ast_node *right, const char 
 	}
 }
 
-/* Expr Binops
- * Create IR for casting each */
+//Expr Binops - Create IR for casting to each.
 void binop_IR(struct ast_node *left, struct ast_node *right, const char *op, struct ast_node *res) {
-	res->type = typeVoid; // could be changed to NULL
+	res->type = typeVoid;	//Could be changed to NULL
 	if ((left->type == typeInteger) && (right->type == typeReal)) {
 		res->type = binop_type_check(op, typeReal);
 	} else if ((left->type == typeReal) && (right->type == typeInteger)) {
@@ -274,36 +273,39 @@ void binop_IR(struct ast_node *left, struct ast_node *right, const char *op, str
 	}
 }
 
-/* Produces IR for a binary operation on a specific type of pair operands */
+//Produces IR for a binary operation on a specific type of pair operands.
 void op_IR(const char * op, LLVMValueRef left, LLVMValueRef right, Type t, LLVMValueRef res) {
-    /* TODO: signed operations? */
+	/* TODO: signed operations? */
 	if (t == typeReal) {
-        if (!strcmp(op, "+"))
-            LLVMBuildFAdd(builder, left, right, "addtmp");
-        else if (!strcmp(op, "-"))
-            LLVMBuildFSub(builder, left, right, "subtmp");
-        else if (!strcmp(op, "*"))
-            LLVMBuildFMul(builder, left, right, "multmp");
-        else if (!strcmp(op, "/"))
-            LLVMBuildFDiv(builder, left, right, "divtmp");
-    } else if (t == typeInteger) {
-        if (!strcmp(op, "+"))
-            LLVMBuildAdd(builder, left, right, "addtmp");
-        else if (!strcmp(op, "-"))
-            LLVMBuildSub(builder, left, right, "subtmp");
-        else if (!strcmp(op, "*"))
-            LLVMBuildMul(builder, left, right, "multmp");
-        else if (!strcmp(op, "/"))
-            LLVMBuildUDiv(builder, left, right, "divtmp"); 
-        else if ((!strcmp(op, "/")) || (!strcmp(op, "MOD")))
-            LLVMBuildURem(builder, left, right, "modtmp");
-    } else if (t == typeBoolean) {
+		if (!strcmp(op, "+")) {
+			LLVMBuildFAdd(builder, left, right, "addtmp");
+		} else if (!strcmp(op, "-")) {
+			LLVMBuildFSub(builder, left, right, "subtmp");
+		} else if (!strcmp(op, "*")) {
+			LLVMBuildFMul(builder, left, right, "multmp");
+		} else if (!strcmp(op, "/")) {
+			LLVMBuildFDiv(builder, left, right, "divtmp");
+		}
+	} else if (t == typeInteger) {
+		if (!strcmp(op, "+")) {
+			LLVMBuildAdd(builder, left, right, "addtmp");
+		} else if (!strcmp(op, "-")) {
+			LLVMBuildSub(builder, left, right, "subtmp");
+		} else if (!strcmp(op, "*")) {
+			LLVMBuildMul(builder, left, right, "multmp");
+		} else if (!strcmp(op, "/")) {
+			LLVMBuildUDiv(builder, left, right, "divtmp");
+		} else if ((!strcmp(op, "/")) || (!strcmp(op, "MOD"))) {
+			LLVMBuildURem(builder, left, right, "modtmp");
+		}
+	} else if (t == typeBoolean) {
 
-    } else 
+	} else {
 		my_error(ERR_LV_CRIT, "Internal error: invalid common operand type during binop IR");
+	}
 }
 
-/* Type checking for an operation between operands of a given type */
+//Type checking for an operation between operands of a given type.
 Type binop_type_check(const char *op, Type t) {
 	Type res = NULL;
 
@@ -342,7 +344,7 @@ Type binop_type_check(const char *op, Type t) {
 	return res;
 }
 
-/* Checks if an ast node can be used as an array index */
+//Checks if an ast node can be used as an array index.
 int array_index_check(struct ast_node *_) {
 	int ret = 0;
 	if (!compat_types(typeInteger, _->type)) {
@@ -355,8 +357,7 @@ int array_index_check(struct ast_node *_) {
 	return ret;
 }
 
-/* Returns the number of dimensions of the type t
- * If not an array, returns 0 */
+//Returns the number of dimensions of the type t - if not an array, returns 0.
 int array_dimensions(Type t) {
 	Type current = t;
 	int dimensions = 0;
@@ -368,7 +369,7 @@ int array_dimensions(Type t) {
 	return dimensions;
 }
 
-/* Calculates the type of the n-th dimension of the array */
+//Calculates the type of the n-th dimension of the array.
 Type n_dimension_type(Type t, int n) {
 	Type current = t;
 	int m = n;
@@ -380,7 +381,7 @@ Type n_dimension_type(Type t, int n) {
 	return t;
 }
 
-/* Return true if t2 can be cast to t1 */
+//Return true if t2 can be cast to t1.
 bool compat_types(Type t1, Type t2) {
 	bool res = false;
 	while ((t1->kind >= TYPE_ARRAY) && (t2->kind >= TYPE_ARRAY)) {
