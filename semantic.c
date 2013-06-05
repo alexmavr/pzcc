@@ -244,64 +244,112 @@ void eval_const_binop(struct ast_node *left, struct ast_node *right, const char 
 	}
 }
 
+
+
+// Produces IR for a binary operation on a specific type of pair operands
+void op_IR(const char * op, LLVMValueRef left, LLVMValueRef right, Type t, LLVMValueRef * res) {
+    /* TODO: signed operations? */
+	if (t == typeReal) {
+        if (!strcmp(op, "+"))
+            *res = LLVMBuildFAdd(builder, left, right, "addtmp");
+        else if (!strcmp(op, "-"))
+            *res = LLVMBuildFSub(builder, left, right, "subtmp");
+        else if (!strcmp(op, "*"))
+            *res = LLVMBuildFMul(builder, left, right, "multmp");
+        else if (!strcmp(op, "/"))
+            *res = LLVMBuildFDiv(builder, left, right, "divtmp");
+        else if (!strcmp(op, "<")) 
+            *res = LLVMBuildFCmp(builder, LLVMRealOLT, left, right, "lesstmp");
+        else if (!strcmp(op, "<=")) 
+            *res = LLVMBuildFCmp(builder, LLVMRealOLE, left, right, "leqtmp");
+        else if (!strcmp(op, ">")) 
+            *res = LLVMBuildFCmp(builder, LLVMRealOGT, left, right, "greatmp");
+        else if (!strcmp(op, ">=")) 
+            *res = LLVMBuildFCmp(builder, LLVMRealOGT, left, right, "greqtmp");
+        else if (!strcmp(op, "==")) 
+            *res = LLVMBuildFCmp(builder, LLVMRealOEQ, left, right, "eqtmp");
+        else if (!strcmp(op, "!=")) 
+            *res = LLVMBuildFCmp(builder, LLVMRealONE, left, right, "difftmp");
+    } else if (t == typeInteger) {
+        if (!strcmp(op, "+"))
+            *res = LLVMBuildAdd(builder, left, right, "addtmp");
+        else if (!strcmp(op, "-"))
+            *res = LLVMBuildSub(builder, left, right, "subtmp");
+        else if (!strcmp(op, "*"))
+            *res = LLVMBuildMul(builder, left, right, "multmp");
+        else if (!strcmp(op, "/"))
+            *res = LLVMBuildUDiv(builder, left, right, "divtmp"); 
+        else if ((!strcmp(op, "%")) || (!strcmp(op, "MOD")))
+            *res = LLVMBuildURem(builder, left, right, "modtmp");
+        else if (!strcmp(op, "<")) 
+            *res = LLVMBuildICmp(builder, LLVMIntULT, left, right, "lesstmp");
+        else if (!strcmp(op, "<=")) 
+            *res = LLVMBuildICmp(builder, LLVMIntULE, left, right, "leqtmp");
+        else if (!strcmp(op, ">")) 
+            *res = LLVMBuildICmp(builder, LLVMIntUGT, left, right, "greatmp");
+        else if (!strcmp(op, ">=")) 
+            *res = LLVMBuildICmp(builder, LLVMIntUGE, left, right, "greqtmp");
+        else if (!strcmp(op, "==")) 
+            *res = LLVMBuildICmp(builder, LLVMIntEQ, left, right, "eqtmp");
+        else if (!strcmp(op, "!=")) 
+            *res = LLVMBuildICmp(builder, LLVMIntNE, left, right, "difftmp");
+    } else if (t == typeBoolean) {
+        if (!strcmp(op, "==")) 
+            *res = LLVMBuildICmp(builder, LLVMIntEQ, left, right, "eqtmp");
+        else if (!strcmp(op, "!=")) 
+            *res = LLVMBuildICmp(builder, LLVMIntNE, left, right, "difftmp");
+        else if ((!strcmp(op, "&&")) || (!strcmp(op, "and")))
+            *res = LLVMBuildAnd(builder, left, right, "andtmp");
+        else if ((!strcmp(op, "||")) || (!strcmp(op, "or")))
+            *res = LLVMBuildOr(builder, left, right, "ortmp");
+    } else 
+		my_error(ERR_LV_CRIT, "Internal error: invalid common operand type during binop IR");
+}
+
 //Expr Binops - Create IR for casting to each.
 void binop_IR(struct ast_node *left, struct ast_node *right, const char *op, struct ast_node *res) {
-	res->type = typeVoid;	//Could be changed to NULL
+	res->type = typeVoid; // could be changed to NULL
 	if ((left->type == typeInteger) && (right->type == typeReal)) {
 		res->type = binop_type_check(op, typeReal);
+        LLVMValueRef newleft = LLVMBuildCast(builder, LLVMUIToFP, left->Valref, \
+                        LLVMDoubleType(), "casttmp");
+        op_IR(op, newleft, right->Valref, typeReal, &(res->Valref));
 	} else if ((left->type == typeReal) && (right->type == typeInteger)) {
 		res->type = binop_type_check(op, typeReal);
+        LLVMValueRef newright = LLVMBuildCast(builder, LLVMUIToFP, right->Valref, \
+                        LLVMDoubleType(), "casttmp");
+        op_IR(op, left->Valref, newright, typeReal, &(res->Valref));
 	} else if ((left->type == typeChar) && (right->type == typeReal)) {
 		res->type = binop_type_check(op, typeReal);
+        LLVMValueRef newleft = LLVMBuildCast(builder, LLVMUIToFP, left->Valref, \
+                        LLVMDoubleType(), "casttmp");
+        op_IR(op, newleft, right->Valref, typeReal, &(res->Valref));
 	} else if ((left->type == typeReal) && (right->type == typeChar)) {
 		res->type = binop_type_check(op, typeReal);
+        LLVMValueRef newright = LLVMBuildCast(builder, LLVMUIToFP, right->Valref, \
+                        LLVMDoubleType(), "casttmp");
+        op_IR(op, left->Valref, newright, typeReal, &(res->Valref));
 	} else if ((left->type == typeReal) && (right->type == typeReal)) {
 		res->type = binop_type_check(op, typeReal);
+        op_IR(op, left->Valref, right->Valref, typeReal, &(res->Valref));
 	} else if ((left->type == typeInteger) && (right->type == typeInteger)) {
 		res->type = binop_type_check(op, typeInteger);
+        op_IR(op, left->Valref, right->Valref, typeInteger, &(res->Valref));
 	} else if ((left->type == typeChar) && (right->type == typeInteger)) {
 		res->type = binop_type_check(op, typeInteger);
+        op_IR(op, left->Valref, right->Valref, typeInteger, &(res->Valref));
 	} else if ((left->type == typeInteger) && (right->type == typeChar)) {
 		res->type = binop_type_check(op, typeInteger);
+        op_IR(op, left->Valref, right->Valref, typeInteger, &(res->Valref));
 	} else if ((left->type == typeChar) && (right->type == typeChar)) {
 		res->type = binop_type_check(op, typeInteger);
+        op_IR(op, left->Valref, right->Valref, typeInteger, &(res->Valref));
 	} else if ((left->type == typeBoolean) && (right->type == typeBoolean)) {
 		res->type = binop_type_check(op, typeBoolean);
+        op_IR(op, left->Valref, right->Valref, typeBoolean, &(res->Valref));
 	} else {
 		my_error(ERR_LV_ERR, "Type mismatch on \"%s\" operator between %s and %s", \
 				 op, verbose_type(left->type), verbose_type(right->type));
-	}
-}
-
-//Produces IR for a binary operation on a specific type of pair operands.
-void op_IR(const char * op, LLVMValueRef left, LLVMValueRef right, Type t, LLVMValueRef res) {
-	/* TODO: signed operations? */
-	if (t == typeReal) {
-		if (!strcmp(op, "+")) {
-			LLVMBuildFAdd(builder, left, right, "addtmp");
-		} else if (!strcmp(op, "-")) {
-			LLVMBuildFSub(builder, left, right, "subtmp");
-		} else if (!strcmp(op, "*")) {
-			LLVMBuildFMul(builder, left, right, "multmp");
-		} else if (!strcmp(op, "/")) {
-			LLVMBuildFDiv(builder, left, right, "divtmp");
-		}
-	} else if (t == typeInteger) {
-		if (!strcmp(op, "+")) {
-			LLVMBuildAdd(builder, left, right, "addtmp");
-		} else if (!strcmp(op, "-")) {
-			LLVMBuildSub(builder, left, right, "subtmp");
-		} else if (!strcmp(op, "*")) {
-			LLVMBuildMul(builder, left, right, "multmp");
-		} else if (!strcmp(op, "/")) {
-			LLVMBuildUDiv(builder, left, right, "divtmp");
-		} else if ((!strcmp(op, "/")) || (!strcmp(op, "MOD"))) {
-			LLVMBuildURem(builder, left, right, "modtmp");
-		}
-	} else if (t == typeBoolean) {
-
-	} else {
-		my_error(ERR_LV_CRIT, "Internal error: invalid common operand type during binop IR");
 	}
 }
 
