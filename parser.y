@@ -11,6 +11,7 @@
 #include "error.h"
 #include "ir.h"
 
+
 extern int yylex();
 extern LLVMBuilderRef builder;
 extern LLVMModuleRef module;
@@ -446,13 +447,13 @@ const_unit
 		{
 			$$.value.b = true;
 			$$.type = typeBoolean;
-            $$.Valref = LLVMConstInt(LLVMInt8Type(), 1, false);
+            $$.Valref = LLVMConstInt(LLVMInt1Type(), 1, false);
 		}
 	| T_false
 		{
 			$$.value.b = false;
 			$$.type = typeBoolean;
-            $$.Valref = LLVMConstInt(LLVMInt8Type(), 0, false);
+            $$.Valref = LLVMConstInt(LLVMInt1Type(), 0, false);
 		}
 	;
 const_expr

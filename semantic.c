@@ -245,7 +245,6 @@ void eval_const_binop(struct ast_node *left, struct ast_node *right, const char 
 }
 
 
-
 // Produces IR for a binary operation on a specific type of pair operands
 void op_IR(const char * op, LLVMValueRef left, LLVMValueRef right, Type t, LLVMValueRef * res) {
     /* TODO: signed operations? */

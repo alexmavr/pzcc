@@ -22,6 +22,8 @@ LLVMTypeRef type_to_llvm(Type t) {
 			res = LLVMDoubleType();
 			break;
 		case TYPE_BOOLEAN:
+			res = LLVMInt1Type();
+			break;
 		case TYPE_CHAR:
 			res = LLVMInt8Type();
 			break;
