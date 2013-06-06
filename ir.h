@@ -14,6 +14,7 @@
 #include "symbol.h"
 
 LLVMTypeRef type_to_llvm(Type t);
+LLVMValueRef cast_compat(Type dest, Type src, LLVMValueRef src_val);
 
 
 #endif	/* __IR_H__ */

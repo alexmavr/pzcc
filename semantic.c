@@ -176,27 +176,33 @@ void unop_IR(struct ast_node *operand, const char *op, struct ast_node *res) {
 	if (!strcmp(op, "+")) {
 		if (operand->type == typeInteger) {
 			res->type = typeInteger;
-			// IR placeholder
+            res->Valref = operand->Valref;
 		} else if (operand->type == typeReal) {
 			res->type = typeReal;
-			// IR placeholder
+            res->Valref = operand->Valref;
+		} else if (operand->type == typeChar) {
+			res->type = typeInteger;
+            res->Valref = operand->Valref;
 		} else {
 			my_error(ERR_LV_ERR, "Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
 		}
 	} else if (!strcmp(op, "-")) {
 		if (operand->type == typeInteger) {
 			res->type = typeInteger;
-			// IR placeholder
+			res->Valref = LLVMBuildNeg(builder, operand->Valref, "negtmp");
 		} else if (operand->type == typeReal) {
 			res->type = typeReal;
-			// IR placeholder
+			res->Valref = LLVMBuildFNeg(builder, operand->Valref, "negtmp");
+		} else if (operand->type == typeChar) {
+			res->type = typeInteger;
+			res->Valref = LLVMBuildNeg(builder, operand->Valref, "negtmp");
 		} else {
 			my_error(ERR_LV_ERR, "Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
 		}
 	} else if (!strcmp(op, "!") || !strcmp(op, "not")) {
 		if (operand->type == typeBoolean) {
 			res->type = typeBoolean;
-			// IR placeholder
+			res->Valref = LLVMBuildNot(builder, operand->Valref, "nottmp");
 		} else {
 			my_error(ERR_LV_ERR, "Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
 		}

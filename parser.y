@@ -259,6 +259,7 @@ var_init
 					my_error(ERR_LV_ERR, "Illegal assignment from %s to %s on \"%s\"", \
 						verbose_type($2.type), verbose_type(currentType), $1);
                 LLVMValueRef alloc = LLVMBuildAlloca(builder, type_to_llvm(currentType), $1);
+                $2.Valref = cast_compat(currentType, $2.type, $2.Valref);
                 LLVMBuildStore(builder, $2.Valref, alloc);
 			}
 		}

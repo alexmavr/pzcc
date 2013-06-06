@@ -13,10 +13,10 @@ PROGRAM ops ()
     const bool asdasd2 = !true or true;
     const bool g = boon || boo;
 
-    int n = 'a';
+    char n = -258;
     REAL nr = 'a';
     REAL d = 13.0 + 1 * 'a' / 2.0 ;  // 61.5
-    bool a = true;
+    bool a = !true;
     bool b = false and true or (false or true) and false or true; // true
     char c = 's';
     char s[10];
