@@ -47,9 +47,13 @@ LLVMValueRef cast_compat(Type dest, Type src, LLVMValueRef src_val) {
 //		res = LLVMBuildAnd(builder, src_val, mask, "andtmp" );
 //		res = LLVMBuildTrunc(builder, src_val, LLVMInt8Type(), "trunctmp");
 		// problems with trunc	::	Above is try 1.
-		LLVMValueRef mask = LLVMConstInt(LLVMInt32Type(), 256, false);
-		res = LLVMBuildURem(builder, src_val, mask, "trunctmp");
+//		LLVMValueRef mask = LLVMConstInt(LLVMInt32Type(), 256, false);
+//		res = LLVMBuildURem(builder, src_val, mask, "trunctmp");
 		// problems again	::	This is the second try.
+		LLVMValueRef mask = LLVMConstInt(LLVMInt32Type(), 0xFF, false);
+		LLVMValueRef imv = LLVMBuildURem(builder, src_val, mask, "uremtmp");
+		res = LLVMBuildSub(builder, mask, imv, "subtmp");
+		// dunno	::	This is the third try. I think the chances are good that we have just a const error.
     } else if ((dest == typeInteger) && (src == typeChar)) {
         res = LLVMBuildZExt(builder, src_val, LLVMInt32Type(), "zexttmp");
     } else {
