@@ -9,7 +9,8 @@
 #include <stdlib.h>
 #include "ir.h"
 
-extern LLVMBuilderRef builder;
+LLVMBuilderRef builder;
+LLVMModuleRef module;
 
 LLVMTypeRef type_to_llvm(Type t) {
 	LLVMTypeRef res;
@@ -42,10 +43,13 @@ LLVMValueRef cast_compat(Type dest, Type src, LLVMValueRef src_val) {
     } else if ((dest == typeReal) && (src == typeChar)) {
         res = LLVMBuildCast(builder, LLVMUIToFP, src_val, LLVMDoubleType(), "casttmp");
     } else if ((dest == typeChar) && (src == typeInteger)) {
-        //LLVMValueRef mask = LLVMConstInt(LLVMInt32Type(), 255, false);
-        //res = LLVMBuildAnd(builder, src_val, mask, "andtmp" );
-        // problems with trunc
-        res = LLVMBuildTrunc(builder, src_val, LLVMInt8Type(), "trunctmp");
+//		LLVMValueRef mask = LLVMConstInt(LLVMInt32Type(), 255, false);
+//		res = LLVMBuildAnd(builder, src_val, mask, "andtmp" );
+//		res = LLVMBuildTrunc(builder, src_val, LLVMInt8Type(), "trunctmp");
+		// problems with trunc	::	Above is try 1.
+		LLVMValueRef mask = LLVMConstInt(LLVMInt32Type(), 256, false);
+		res = LLVMBuildURem(builder, src_val, mask, "trunctmp");
+		// problems again	::	This is the second try.
     } else if ((dest == typeInteger) && (src == typeChar)) {
         res = LLVMBuildZExt(builder, src_val, LLVMInt32Type(), "zexttmp");
     } else {

@@ -20,9 +20,6 @@ void cleanup	(void);
 extern char *filename;
 extern int yylineno;
 
-LLVMBuilderRef builder;
-LLVMModuleRef module;
-
 int main (int argc, char **argv);
 
 #endif	/* __GENERAL_H__ */

@@ -13,8 +13,10 @@
 #include <llvm-c/Core.h>
 #include "symbol.h"
 
+extern LLVMBuilderRef builder;
+extern LLVMModuleRef module;
+
 LLVMTypeRef type_to_llvm(Type t);
 LLVMValueRef cast_compat(Type dest, Type src, LLVMValueRef src_val);
-
 
 #endif	/* __IR_H__ */

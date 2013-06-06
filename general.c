@@ -15,9 +15,9 @@
 #include <llvm-c/Analysis.h>
 #include <llvm-c/Transforms/Scalar.h>
 #include "semantic.h"
-#include "general.h"
 #include "error.h"
-
+#include "general.h"
+#include "ir.h"
 
 //Cleanup hook.
 void cleanup (void) {
