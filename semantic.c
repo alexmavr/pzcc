@@ -182,6 +182,8 @@ void unop_IR(struct ast_node *operand, const char *op, struct ast_node *res) {
             res->Valref = operand->Valref;
 		} else if (operand->type == typeChar) {
 			res->type = typeInteger;
+            LLVMValueRef tmp = LLVMBuildZExt(builder, operand->Valref, \
+                            LLVMInt32Type(), "zexttmp");
             res->Valref = operand->Valref;
 		} else {
 			my_error(ERR_LV_ERR, "Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
@@ -189,7 +191,7 @@ void unop_IR(struct ast_node *operand, const char *op, struct ast_node *res) {
 	} else if (!strcmp(op, "-")) {
 		if (operand->type == typeInteger) {
 			res->type = typeInteger;
-			res->Valref = LLVMBuildNeg(builder, operand->Valref, "negtmp");
+			res->Valref = LLVMBuildNSWNeg(builder, operand->Valref, "negtmp");
 		} else if (operand->type == typeReal) {
 			res->type = typeReal;
 			res->Valref = LLVMBuildFNeg(builder, operand->Valref, "negtmp");
@@ -197,7 +199,7 @@ void unop_IR(struct ast_node *operand, const char *op, struct ast_node *res) {
 			res->type = typeInteger;
             LLVMValueRef tmp = LLVMBuildZExt(builder, operand->Valref, \
                             LLVMInt32Type(), "zexttmp");
-			res->Valref = LLVMBuildNeg(builder, tmp, "negtmp");
+			res->Valref = LLVMBuildNUWNeg(builder, tmp, "negtmp");
 		} else {
 			my_error(ERR_LV_ERR, "Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
 		}
