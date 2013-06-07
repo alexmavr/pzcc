@@ -195,7 +195,9 @@ void unop_IR(struct ast_node *operand, const char *op, struct ast_node *res) {
 			res->Valref = LLVMBuildFNeg(builder, operand->Valref, "negtmp");
 		} else if (operand->type == typeChar) {
 			res->type = typeInteger;
-			res->Valref = LLVMBuildNeg(builder, operand->Valref, "negtmp");
+            LLVMValueRef tmp = LLVMBuildZExt(builder, operand->Valref, \
+                            LLVMInt32Type(), "zexttmp");
+			res->Valref = LLVMBuildNeg(builder, tmp, "negtmp");
 		} else {
 			my_error(ERR_LV_ERR, "Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
 		}
