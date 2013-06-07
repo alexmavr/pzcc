@@ -4,23 +4,21 @@ FUNC int tocall() {
 
 PROGRAM exprs ()
 {
- // var_inits
+/*  var_inits */
 //    int z[10];
 //    int y[10][n], kk[n];
 //    int y2[10][10];
+//    z = y2[10];
     int l = 10;
-    REAL k = 15;
     char c = 5; 
     bool d = false || true;
     int i = 's'; 
-//    z = y2[10];
     
     i = (3 + 4) * 2 + 5 / 5;  // 15
     d = (d == d) and true == false or true;  // true
 //   i = tocall(3);
 
-    /* Lookup Cast Tests */
-
+    /* Lookup and Cast Tests */
     int j = 5;          // 5
     REAL k = j + 1.2;   // 6.2
     char t = 'a';       // 97
