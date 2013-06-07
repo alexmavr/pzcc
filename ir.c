@@ -43,17 +43,18 @@ LLVMValueRef cast_compat(Type dest, Type src, LLVMValueRef src_val) {
     } else if ((dest == typeReal) && (src == typeChar)) {
         res = LLVMBuildCast(builder, LLVMUIToFP, src_val, LLVMDoubleType(), "casttmp");
     } else if ((dest == typeChar) && (src == typeInteger)) {
-//		LLVMValueRef mask = LLVMConstInt(LLVMInt32Type(), 255, false);
-//		res = LLVMBuildAnd(builder, src_val, mask, "andtmp" );
-//		res = LLVMBuildTrunc(builder, src_val, LLVMInt8Type(), "trunctmp");
-		// problems with trunc	::	Above is try 1.
-//		LLVMValueRef mask = LLVMConstInt(LLVMInt32Type(), 256, false);
-//		res = LLVMBuildURem(builder, src_val, mask, "trunctmp");
-		// problems again	::	This is the second try.
-		LLVMValueRef mask = LLVMConstInt(LLVMInt32Type(), 256, false); 
-		LLVMValueRef imv = LLVMBuildURem(builder, src_val, mask, "uremtmp");
-		imv = LLVMBuildSub(builder, mask, imv, "subtmp");
-        res = LLVMBuildTrunc(builder, imv, LLVMInt8Type(), "trunctmp");
+        /* Our problem: negative numbers are in two's complement form and we need their positive value
+         * We could either: 
+         * a) set the highest order bit to 0 and ignore the rest, claiming this as default behavior for int-to-char conversion
+         * b) check the highest order bit for the sign and if it is 1, 
+         * perform a BuildNeg,BuildSub or BuildXor on the number,
+         * otherwise leave it as is. This requires a branch instruction.
+         * The code below performs (a), but I think we should do (b) instead.
+         *
+         * Maybe postpone it until we start doing branches?
+         */
+        LLVMValueRef imv = LLVMBuildTrunc(builder, src_val, LLVMIntType(7), "trunctmp");
+        res = LLVMBuildZExt(builder, imv, LLVMInt8Type(), "zexttmp");
     } else if ((dest == typeInteger) && (src == typeChar)) {
         res = LLVMBuildZExt(builder, src_val, LLVMInt32Type(), "zexttmp");
     } else {
