@@ -3,7 +3,7 @@ const int lk = 'j';
 
 PROGRAM ops ()
 {
-    // All booleans should be true
+    /* Constant expression evaluations */
     const char kk = 54;    
     const bool jk = ('4' + '6') == 'j' ;
     const bool jj = l == lk;
@@ -13,17 +13,37 @@ PROGRAM ops ()
     const bool asdasd2 = !true or true;
     const bool g = boon || boo;
 
-    /* Testing signed casts */
-    char n = 'a';
-    char p = -'a';
-    char pp = -(-'a');
-    char ppp = -(-(-'a'));
-    char pppp = -(-(-(-'a')));
-    int p = -'c';
-    REAL nr = 'a';
-    REAL d = 13.0 + 1 * 'a' / 2.0 ;  // 61.5
-    bool a = !true;
-    bool b = false and true or (false or true) and false or true; // true
+    /* Expressions with constants */
+    // casts and unops*/
+    char n = 'a';                   // 97
+    char p = -'a';                  // 97
+    char pp = -(-'a');              // 97
+    char ppp = -(-(-'a'));          // 97
+    char pppp = -(-(-(-'a')));      // 97
+    
+    bool a = !false;                // true
+    bool pk = not not true;         // true
+    bool pkk = not ! not true;      // false
+    bool b = not (false and true or (false or true) and false or true); // false
+
+    // signed binops and casts
+    REAL k = -3 + 2;                // -1
+    REAL k0 = 3 - (-2);             // 5
+    REAL ka = -3 * 2;               // -6
+    REAL kb = 4 * 3 / -2 ;          // -6
+    REAL kc = 44 + (-2);            // 42
+    REAL d = 13.0 + 1 * 'a' / 2.0 ; // 61.5
+
+    bool ddk = -2 < 15;             // true
+    bool ddj = -152 < -151;         // true
+    bool ddl = -152 <= -152;        // true
+    bool ddr = 152 > -152;          // true
+    bool ddp = -23.1 < 11.5432;     // true
+    bool ddq = 1 == 1;              // true
+    bool ddo = -152 >= -152;        // true
+    bool ddz = -152 > -152;         // false
+    bool ddx = -152 != -152;        // false
+
     char c = 's';
     char s[10];
     s  = "stringy";

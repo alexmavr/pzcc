@@ -1,22 +1,22 @@
 Syntax:
 	improve error recovery
 
-Semantics:
-    signed operations handling?
-
 IR:
-    binops - signed operations
-    unops
+    assignments
     array initializations and assignments
     constant expression assignments
     globals
+    statements:
+        if, for, while, do..until, switch, WRITE
     function declarations and calls
-    statements
 
 General:
     compiler arguments and llvm backend invocation
 
 Done:
+*   IR - binops + signed operations
+*    signed operations handling
+*   IR - unops
 *	parser.y cleanup and polishing
 *	refactor comp_lib	:: Done, moved to semantic
 *	test forward function declarations

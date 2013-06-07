@@ -279,23 +279,23 @@ void op_IR(const char * op, LLVMValueRef left, LLVMValueRef right, Type t, LLVMV
             *res = LLVMBuildFCmp(builder, LLVMRealONE, left, right, "difftmp");
     } else if (t == typeInteger) {
         if (!strcmp(op, "+"))
-            *res = LLVMBuildAdd(builder, left, right, "addtmp");
+            *res = LLVMBuildNSWAdd(builder, left, right, "addtmp");
         else if (!strcmp(op, "-"))
-            *res = LLVMBuildSub(builder, left, right, "subtmp");
+            *res = LLVMBuildNSWSub(builder, left, right, "subtmp");
         else if (!strcmp(op, "*"))
             *res = LLVMBuildMul(builder, left, right, "multmp");
         else if (!strcmp(op, "/"))
-            *res = LLVMBuildUDiv(builder, left, right, "divtmp"); 
+            *res = LLVMBuildSDiv(builder, left, right, "divtmp"); 
         else if ((!strcmp(op, "%")) || (!strcmp(op, "MOD")))
-            *res = LLVMBuildURem(builder, left, right, "modtmp");
+            *res = LLVMBuildSRem(builder, left, right, "modtmp");
         else if (!strcmp(op, "<")) 
-            *res = LLVMBuildICmp(builder, LLVMIntULT, left, right, "lesstmp");
+            *res = LLVMBuildICmp(builder, LLVMIntSLT, left, right, "lesstmp");
         else if (!strcmp(op, "<=")) 
-            *res = LLVMBuildICmp(builder, LLVMIntULE, left, right, "leqtmp");
+            *res = LLVMBuildICmp(builder, LLVMIntSLE, left, right, "leqtmp");
         else if (!strcmp(op, ">")) 
-            *res = LLVMBuildICmp(builder, LLVMIntUGT, left, right, "greatmp");
+            *res = LLVMBuildICmp(builder, LLVMIntSGT, left, right, "greatmp");
         else if (!strcmp(op, ">=")) 
-            *res = LLVMBuildICmp(builder, LLVMIntUGE, left, right, "greqtmp");
+            *res = LLVMBuildICmp(builder, LLVMIntSGE, left, right, "greqtmp");
         else if (!strcmp(op, "==")) 
             *res = LLVMBuildICmp(builder, LLVMIntEQ, left, right, "eqtmp");
         else if (!strcmp(op, "!=")) 
