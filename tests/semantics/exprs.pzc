@@ -1,24 +1,29 @@
-const int n = 10;
-
 FUNC int tocall() {
     return 1;
 }
 
 PROGRAM exprs ()
 {
-    // var_inits
-    int z[10];
-    int y[10][n], kk[n];
-    int y2[10][10];
-    int l = n;
+ // var_inits
+//    int z[10];
+//    int y[10][n], kk[n];
+//    int y2[10][10];
+    int l = 10;
     REAL k = 15;
     char c = 5; 
     bool d = false || true;
     int i = 's'; 
-    z = y2[10];
+//    z = y2[10];
     
     i = (3 + 4) * 2 + 5 / 5;  // 15
     d = (d == d) and true == false or true;  // true
-    i = tocall(3);
+//   i = tocall(3);
+
+    /* Lookup Cast Tests */
+
+    int j = 5;          // 5
+    REAL k = j + 1.2;   // 6.2
+    char t = 'a';       // 97
+    k = k + 120.3 - t;  
     
 }

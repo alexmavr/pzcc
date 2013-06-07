@@ -2,10 +2,10 @@ Syntax:
 	improve error recovery
 
 IR:
-    assignments
-    array initializations and assignments
+    array initializations 
+    array assignments assignments
     constant expression assignments
-    globals
+    global constants and variables
     statements:
         if, for, while, do..until, switch, WRITE
     function declarations and calls
@@ -14,9 +14,10 @@ General:
     compiler arguments and llvm backend invocation
 
 Done:
+*   IR - assignments
 *   IR - binops + signed operations
-*    signed operations handling
 *   IR - unops
+*   signed operations handling
 *	parser.y cleanup and polishing
 *	refactor comp_lib	:: Done, moved to semantic
 *	test forward function declarations

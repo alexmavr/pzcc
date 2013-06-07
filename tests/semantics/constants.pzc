@@ -44,7 +44,11 @@ PROGRAM ops ()
     bool ddz = -152 > -152;         // false
     bool ddx = -152 != -152;        // false
 
+    // Boolean operations with lookups
+    
+    ddx = ddj and ddr and ddk and ddl or ddz; // true
+    
     char c = 's';
     char s[10];
-    s  = "stringy";
+  //  s  = "stringy";
 }

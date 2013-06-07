@@ -261,6 +261,7 @@ var_init
                 LLVMValueRef alloc = LLVMBuildAlloca(builder, type_to_llvm(currentType), $1);
                 $2.Valref = cast_compat(currentType, $2.type, $2.Valref);
                 LLVMBuildStore(builder, $2.Valref, alloc);
+                var->Valref = alloc;
 			}
 		}
 	| T_id var_init_tail_plus
@@ -547,10 +548,12 @@ expr
 l_value
 	: T_id l_value_tail
 		{
-			SymbolEntry *id = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
 			int dims;
+			SymbolEntry * id = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
 			if (id == NULL)
 				YYERROR;
+
+            $$.Valref = id->Valref;
 			switch (id->entryType) {
 				case ENTRY_VARIABLE:
 					{
@@ -664,6 +667,8 @@ stmt
 				my_error(ERR_LV_ERR, "Illegal assignment from %s to %s on \"%s\"", \
 						verbose_type($3.type), verbose_type($1.type), $1.value.s);
 			}
+            LLVMValueRef tmp = cast_compat($1.type, $3.type, $3.Valref);
+            LLVMBuildStore(builder, tmp, $1.Valref);
 		}
 	| l_value stmt_choice ';'
 		{

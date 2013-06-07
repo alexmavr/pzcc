@@ -14,7 +14,8 @@
    --------------------------------------------------------------------- */
 
 #include <stdbool.h>
-
+#include <llvm-c/Core.h>
+#include <llvm-c/Analysis.h>
 /*
  *  Αν το παραπάνω include δεν υποστηρίζεται από την υλοποίηση
  *  της C που χρησιμοποιείτε, αντικαταστήστε το με το ακόλουθο:
@@ -91,6 +92,7 @@ struct SymbolEntry_tag {
 	unsigned int   hashValue;          /* Τιμή κατακερματισμού          */
 	SymbolEntry  * nextHash;           /* Επόμενη εγγραφή στον Π.Κ.     */
 	SymbolEntry  * nextInScope;        /* Επόμενη εγγραφή στην εμβέλεια */
+    LLVMValueRef   Valref;             /* The allocated space */
 
 	union {                            /* Ανάλογα με τον τύπο εγγραφής: */
 
