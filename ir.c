@@ -7,21 +7,35 @@
  *
  */
 #include <stdlib.h>
+#include <stdio.h>
 #include "ir.h"
 
 LLVMBuilderRef builder;
 LLVMModuleRef module;
 
+/* Adds an element to the back of a list. 
+ * Creates a new list if head is NULL */
 struct list_node * add_to_list(struct list_node * head, LLVMValueRef val) {
     struct list_node * newnode = (struct list_node *) new(sizeof(struct list_node));
 
     newnode->Valref = val;
-    if (head == NULL) {
-        newnode->next = NULL;
-    } else {
-        head->next = newnode;
-    }
+    newnode->next = head; 
     return newnode;
+}
+
+/* Creates an array of ValueRefs from a given list. 
+ * The first item of the array is the constant 0 */
+LLVMValueRef * array_from_list(struct list_node * head, unsigned int size) {
+    int i=1;
+    LLVMValueRef * res = malloc(size * sizeof(LLVMValueRef));
+    res[0] = LLVMConstInt(LLVMInt32Type(), 0, false);
+
+     while (head != NULL) {
+        res[i] = head->Valref;
+        head = head->next;
+        i++;
+    }
+    return res;
 }
 
 LLVMTypeRef type_to_llvm(Type t) {

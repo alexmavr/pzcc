@@ -575,15 +575,8 @@ l_value
 			if (id == NULL)
 				YYERROR;
 
-            $$.Valref = id->Valref;
-
-            while ($2.v_list != NULL) {
-                fprintf(stderr, "hello\n");
-                $$.Valref = LLVMBuildExtractValue(builder, $$.Valref, \
-                                    $2.v_list->Valref, "extrtmp");
-                list_move_to_next($2.v_list);
-            }
-
+            
+            /* Type Checking for array dimensions */
 			switch (id->entryType) {
 				case ENTRY_VARIABLE:
 					{
@@ -612,6 +605,16 @@ l_value
 					break;
 				default: ;
 			}
+
+            /* Code generation */
+            if ($2.v_list == NULL) 
+                $$.Valref = id->Valref; // No dimensions specified
+            else {
+                LLVMValueRef * dim_array = array_from_list($2.v_list, $2.value.i);
+                $$.Valref = LLVMBuildGEP(builder, id->Valref, \
+                                     dim_array, $2.value.i + 1, "geptmp");
+            }
+
 			$$.value.s = id->id;
 		}
 	;
@@ -627,8 +630,6 @@ l_value_tail
 			   my_error(ERR_LV_ERR, "Array index cannot be %s", verbose_type($2.type));
             
             $$.v_list = add_to_list($4.v_list, $2.Valref);
-            if ($$.v_list == NULL)
-                fprintf(stderr, "is null my friend\n");
 			$$.value.i = 1 + $4.value.i;
 		}
 	;
