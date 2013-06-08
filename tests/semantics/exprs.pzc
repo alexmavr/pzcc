@@ -20,7 +20,7 @@ PROGRAM exprs ()
     /* Lookup and Cast Tests */
     int y2[25][11][10];
     int j = 5;          // 5
-//    j = j + y2[1];
+    j = j + y2[22][5][2];
     REAL k = j + 1.2;   // 6.2
     char t = 'a';       // 97
     k = k + 120.3 - t;  

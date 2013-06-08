@@ -12,9 +12,19 @@
 
 #include <llvm-c/Core.h>
 #include "symbol.h"
+#include "general.h"
 
 extern LLVMBuilderRef builder;
 extern LLVMModuleRef module;
+
+struct list_node {
+    LLVMValueRef Valref;
+    struct list_node * next;
+};
+
+struct list_node * add_to_list(struct list_node * head, LLVMValueRef val);
+
+#define list_move_to_next(_) ({_ = _->next;})
 
 LLVMTypeRef type_to_llvm(Type t);
 LLVMValueRef cast_compat(Type dest, Type src, LLVMValueRef src_val);

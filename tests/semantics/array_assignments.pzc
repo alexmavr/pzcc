@@ -8,7 +8,7 @@ PROGRAM array_assignments ()
     int y[15], zoo = 125, z[12], opop = 2;
     char y[15.6];
     int k[1-2];
-    int k[1 + 3 * 2 - 6];
+    int l[1 + 3 * 2 - 6];
     int a[5][2+1];
     char r['c'];
     int d[b*2];

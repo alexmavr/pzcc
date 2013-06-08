@@ -12,6 +12,18 @@
 LLVMBuilderRef builder;
 LLVMModuleRef module;
 
+struct list_node * add_to_list(struct list_node * head, LLVMValueRef val) {
+    struct list_node * newnode = (struct list_node *) new(sizeof(struct list_node));
+
+    newnode->Valref = val;
+    if (head == NULL) {
+        newnode->next = NULL;
+    } else {
+        head->next = newnode;
+    }
+    return newnode;
+}
+
 LLVMTypeRef type_to_llvm(Type t) {
 	LLVMTypeRef res;
 	switch (t->kind) {

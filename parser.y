@@ -44,6 +44,7 @@ unsigned long long loop_counter = 0;
 		val_union value;
 		Type type;
         LLVMValueRef Valref;
+        struct list_node * v_list; // general-purpose ValueRef list
 	};
 }
 
@@ -133,7 +134,7 @@ unsigned long long loop_counter = 0;
 %type <node> routine_header_head
 %type <node> const_expr_opt
 
-%type <i> l_value_tail
+%type <node> l_value_tail
 %type <i> format_opt
 
 %type <s> binop1
@@ -292,8 +293,6 @@ var_init_tail_plus
                 array_last = false;
             }
             currentLLVMType = LLVMArrayType(currentLLVMType, $2.value.i);
-
-            fprintf(stderr, "%d", $2.value.i);
 		}
 	;
 var_init_tail
@@ -310,8 +309,6 @@ var_init_tail
                 array_last = false;
             }
             currentLLVMType = LLVMArrayType(currentLLVMType, $2.value.i);
-
-            fprintf(stderr, "%d", $2.value.i);
 		}
 	;
 routine
@@ -579,29 +576,37 @@ l_value
 				YYERROR;
 
             $$.Valref = id->Valref;
+
+            while ($2.v_list != NULL) {
+                fprintf(stderr, "hello\n");
+                $$.Valref = LLVMBuildExtractValue(builder, $$.Valref, \
+                                    $2.v_list->Valref, "extrtmp");
+                list_move_to_next($2.v_list);
+            }
+
 			switch (id->entryType) {
 				case ENTRY_VARIABLE:
 					{
 						/* Return the appropriate type if it's an array
 					 	 * :: $2 is the number of dimensions following the id */
 						dims = array_dimensions(id->u.eVariable.type);
-						if ($2 > dims)
+						if ($2.value.i > dims)
 							my_error(ERR_LV_ERR, "\"%s\" has less dimensions than specified", id->id);
 						else
-							$$.type = n_dimension_type(id->u.eVariable.type, $2);
+							$$.type = n_dimension_type(id->u.eVariable.type, $2.value.i);
 						break;
 					}
 				case ENTRY_PARAMETER:
 					{
 						dims = array_dimensions(id->u.eParameter.type);
-						if ($2 > dims)
+						if ($2.value.i > dims)
 							my_error(ERR_LV_ERR, "\"%s\" has less dimensions than specified", id->id);
 						else
-							$$.type = n_dimension_type(id->u.eParameter.type, $2);
+							$$.type = n_dimension_type(id->u.eParameter.type, $2.value.i);
 						break;
 					}
 				case ENTRY_CONSTANT:
-					if ($2)
+					if ($2.value.i)
 						my_error(ERR_LV_ERR, "Constant \"%s\" cannot an Array",id->id);
 					$$.type = id->u.eConstant.type;
 					break;
@@ -611,12 +616,20 @@ l_value
 		}
 	;
 l_value_tail
-	: /* Nothing */ { $$ = 0; }
-	| '[' expr ']' l_value_tail
+	: /* Nothing */ 
+        { 
+            $$.value.i = 0; 
+            $$.v_list = NULL;
+        }
+	| '[' expr ']'  l_value_tail
 		{
 			if (!compat_types(typeInteger, $2.type))
 			   my_error(ERR_LV_ERR, "Array index cannot be %s", verbose_type($2.type));
-			$$ = 1 + $4;
+            
+            $$.v_list = add_to_list($4.v_list, $2.Valref);
+            if ($$.v_list == NULL)
+                fprintf(stderr, "is null my friend\n");
+			$$.value.i = 1 + $4.value.i;
 		}
 	;
 unop
