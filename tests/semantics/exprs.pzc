@@ -7,7 +7,6 @@ PROGRAM exprs ()
 /*  var_inits */
 //    int z[10];
 //    int y[10][n], kk[n];
-//    int y2[10][10];
 //    z = y2[10];
     int l = 10;
     char c = 5; 
@@ -19,7 +18,9 @@ PROGRAM exprs ()
 //   i = tocall(3);
 
     /* Lookup and Cast Tests */
+    int y2[25][11][10];
     int j = 5;          // 5
+//    j = j + y2[1];
     REAL k = j + 1.2;   // 6.2
     char t = 'a';       // 97
     k = k + 120.3 - t;  

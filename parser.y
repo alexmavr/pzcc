@@ -17,12 +17,14 @@ extern LLVMBuilderRef builder;
 extern LLVMModuleRef module;
 
 Type currentType = NULL;				// type indicator for var_init_tail
+LLVMTypeRef currentLLVMType = NULL;	    // type indicator for llvm types
 Type currentFunctionType = NULL;		// type indicator for function body
 Type currentCallType = NULL;			// type indicator for the return type of a func
 SymbolEntry *currentFun = NULL;			// global function indicator for parameter declaration
 SymbolEntry *currentParam = NULL;
 const char * currentName = NULL;
 bool functionHasReturn = false;
+bool array_last = false;
 
 unsigned long long loop_counter = 0;
 
@@ -266,7 +268,11 @@ var_init
 		}
 	| T_id var_init_tail_plus
 		{
-			newVariable($1, $2.type);
+			SymbolEntry * array = newVariable($1, $2.type);
+            if (array == NULL)
+                YYERROR;
+            
+            array->Valref = LLVMBuildAlloca(builder, currentLLVMType, $1);
 		}
 	;
 var_init_opt
@@ -281,13 +287,31 @@ var_init_tail_plus
 	: '[' const_expr ']' { array_index_check(&($2)); } var_init_tail
 		{
 			$$.type = typeArray($2.value.i, $5.type);
+            if (array_last) {
+                currentLLVMType = type_to_llvm(currentType);
+                array_last = false;
+            }
+            currentLLVMType = LLVMArrayType(currentLLVMType, $2.value.i);
+
+            fprintf(stderr, "%d", $2.value.i);
 		}
 	;
 var_init_tail
-	: /* nothing */  { $$.type = currentType; }
+	: /* nothing */  
+        { 
+            $$.type = currentType; 
+            array_last = true;
+        }
 	| '[' const_expr ']' { array_index_check(&($2)); } var_init_tail
 		{
 			$$.type = typeArray($2.value.i, $5.type);
+            if (array_last) {
+                currentLLVMType = type_to_llvm(currentType);
+                array_last = false;
+            }
+            currentLLVMType = LLVMArrayType(currentLLVMType, $2.value.i);
+
+            fprintf(stderr, "%d", $2.value.i);
 		}
 	;
 routine
@@ -404,7 +428,7 @@ program_header
                 exit(1);
 
             LLVMTypeRef funcType = LLVMFunctionType(LLVMVoidType(), NULL, 0, 0);
-            LLVMValueRef func = LLVMAddFunction(module, $3, funcType);
+            LLVMValueRef func = LLVMAddFunction(module, "main", funcType);
             LLVMSetLinkage(func, LLVMExternalLinkage);
             LLVMBasicBlockRef block = LLVMAppendBasicBlock(func, "entry");
             LLVMPositionBuilderAtEnd(builder, block);
@@ -513,7 +537,8 @@ expr
 	| '(' error ')' { $$.type = typeVoid; }
 	| l_value
 		{
-			 $$ = $1;
+			 $$.type = $1.type;
+             $$.Valref = LLVMBuildLoad(builder, $1.Valref, "loadtmp");
 		}
 	| call { $$ = $1; }
 	| expr binop1 expr %prec '*'

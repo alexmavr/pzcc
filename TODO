@@ -2,8 +2,7 @@ Syntax:
 	improve error recovery
 
 IR:
-    array initializations 
-    array assignments assignments
+    array assignments
     constant expression assignments
     global constants and variables
     statements:
@@ -14,6 +13,7 @@ General:
     compiler arguments and llvm backend invocation
 
 Done:
+*   array initializations 
 *   IR - assignments
 *   IR - binops + signed operations
 *   IR - unops
