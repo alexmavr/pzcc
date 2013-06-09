@@ -37,8 +37,8 @@ void free_list(struct list_node * head) {
 /* Returns a ValueRef that represents zero for a given type */
 LLVMValueRef zero(Type t) {
     LLVMValueRef res;
-    while (t->kind >= TYPE_ARRAY)
-            t = t->refType;
+    if (t->kind >= TYPE_ARRAY)
+            ; // figure out default behavior for array inits
 
     switch (t->kind) {
         case TYPE_INTEGER:
