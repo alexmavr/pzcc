@@ -22,9 +22,8 @@ PROGRAM ops ()
     // lookups
     bool ndk = jj or boo and boon ; // true
     ndk = ndk; // true
-    jjjj = jjjj;
-    ndk = jjje[0][1];
-    ndk = ndk;
+    jjjj = jjjj +1;
+    jjjj = jjjj ;
 
     char n = 'a';                   // 97
     char p = -'a';                  // 97

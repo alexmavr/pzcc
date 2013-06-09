@@ -230,6 +230,7 @@ const_def
                 /* Set the const as global */
                 con->Valref = LLVMAddGlobal(module, type_to_llvm(currentType), $4);
                 LLVMSetInitializer(con->Valref, res);
+                LLVMSetGlobalConstant(con->Valref, true);
             } else {
                 /* Allocate the constant and store the const value*/
                 con->Valref = LLVMBuildAlloca(builder, type_to_llvm(currentType), $4);
@@ -286,6 +287,7 @@ const_def_tail
                 /* Set the const as global */
                 con->Valref = LLVMAddGlobal(module, type_to_llvm(currentType), $2);
                 LLVMSetInitializer(con->Valref, res);
+                LLVMSetGlobalConstant(con->Valref, true);
             } else {
                 /* Allocate the constant and store the const value*/
                 con->Valref = LLVMBuildAlloca(builder, type_to_llvm(currentType), $2);
@@ -316,9 +318,15 @@ var_init
                 res = cast_compat(currentType, $2.type, $2.Valref);
 			} 
 
-            /* Allocate the variable and store the initial value */
-            var->Valref = LLVMBuildAlloca(builder, type_to_llvm(currentType), $1);
-            LLVMBuildStore(builder, res, var->Valref);
+            if (global_scope) {
+                /* Set the var as global */
+                var->Valref = LLVMAddGlobal(module, type_to_llvm(currentType), $1);
+                LLVMSetInitializer(var->Valref, res);
+            } else {
+                /* Allocate the variable and store the const value*/
+                var->Valref = LLVMBuildAlloca(builder, type_to_llvm(currentType), $1);
+                LLVMBuildStore(builder, res, var->Valref);
+            }
 		}
 	| T_id var_init_tail_plus
 		{
@@ -326,6 +334,7 @@ var_init
             if (array == NULL)
                 YYERROR;
             
+            /* TODO: global array declarations and zero-initialization */
             array->Valref = LLVMBuildAlloca(builder, currentLLVMType, $1);
 		}
 	;

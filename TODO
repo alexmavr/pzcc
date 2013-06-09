@@ -2,8 +2,7 @@ Syntax:
 	improve error recovery
 
 IR:
-    array assignments uninitialized ? currently they throw garbage
-    global variables
+    global + local array initializations 
     statements:
         if, for, while, do..until, switch, WRITE, FORMAT
     function declarations and calls
@@ -12,9 +11,10 @@ General:
     compiler arguments and llvm backend invocation (build together?)
 
 Done:
-*   global constants
-*   constant expression assignments
-*   array initializations 
+*   IR - global variables
+*   IR - global constants
+*   IR - constant expression assignments
+*   IR - array initializations 
 *   IR - assignments
 *   IR - binops + signed operations
 *   IR - unops
