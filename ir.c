@@ -23,11 +23,22 @@ struct list_node * add_to_list(struct list_node * head, LLVMValueRef val) {
     return newnode;
 }
 
+void free_list(struct list_node * head) {
+    struct list_node * current = head;
+    struct list_node * next;
+    while (current != NULL) {
+       next = current->next;
+       free(current);
+       current = next;
+    }
+}
+
 /* Creates an array of ValueRefs from a given list. 
- * The first item of the array is the constant 0 */
+ * The first item of the array is the constant 0, following the usage
+ * of the BuildGEP command */
 LLVMValueRef * array_from_list(struct list_node * head, unsigned int size) {
     int i=1;
-    LLVMValueRef * res = malloc(size * sizeof(LLVMValueRef));
+    LLVMValueRef * res = malloc((size + 1) * sizeof(LLVMValueRef));
     res[0] = LLVMConstInt(LLVMInt32Type(), 0, false);
 
      while (head != NULL) {
@@ -38,6 +49,9 @@ LLVMValueRef * array_from_list(struct list_node * head, unsigned int size) {
     return res;
 }
 
+
+
+/* Converts a type from the symbol table format to the corresponding LLVM one */
 LLVMTypeRef type_to_llvm(Type t) {
 	LLVMTypeRef res;
 	switch (t->kind) {
@@ -62,6 +76,7 @@ LLVMTypeRef type_to_llvm(Type t) {
 	return res;
 }
 
+/* Cast an LLVM Value from one type to another */
 LLVMValueRef cast_compat(Type dest, Type src, LLVMValueRef src_val) {
     LLVMValueRef res;
     if ((dest == typeReal) && (src == typeInteger)) {
@@ -69,17 +84,17 @@ LLVMValueRef cast_compat(Type dest, Type src, LLVMValueRef src_val) {
     } else if ((dest == typeReal) && (src == typeChar)) {
         res = LLVMBuildCast(builder, LLVMUIToFP, src_val, LLVMDoubleType(), "casttmp");
     } else if ((dest == typeChar) && (src == typeInteger)) {
-        /* Take the Highest order bit (8th bit) of the integer by shifting right 7 times
-         * and truncating to 1 bit.
-         * Using the select operator, use that value to determine the sign.
-         * If that bit is 1, the integer was negative and a Neg operation is performed
-         * If it was 0, the integer was positive.
-         * Finally, truncate the corrent integer to 8 bits */
+        /* Take the Highest order bit (8th bit) of the integer by shifting right
+         * 7 times and truncating to 1 bit.
+         * If that bit is 1, the integer was negative and a Neg operation 
+         * is performed
+         * If it was 0, the integer was positive and no action is taken.
+         * Finally, truncate the integer to 8 bits */
 
         LLVMValueRef shift_amm = LLVMConstInt(LLVMInt8Type(), 7, false);
         LLVMValueRef imv = LLVMBuildLShr(builder, src_val, shift_amm, "lshrtmp"); 
-        imv = LLVMBuildTrunc(builder, imv, LLVMInt1Type(), "trunctmp"); // 1-bit condition
-        LLVMValueRef neg = LLVMBuildNeg(builder, src_val, "negtmp"); // negative branch
+        imv = LLVMBuildTrunc(builder, imv, LLVMInt1Type(), "trunctmp"); 
+        LLVMValueRef neg = LLVMBuildNeg(builder, src_val, "negtmp"); 
         imv = LLVMBuildSelect(builder, imv, neg, src_val, "selecttmp");
         res = LLVMBuildTrunc(builder, imv, LLVMInt8Type(), "trunctmp");
 

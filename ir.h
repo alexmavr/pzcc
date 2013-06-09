@@ -24,6 +24,7 @@ struct list_node {
 
 struct list_node * add_to_list(struct list_node * head, LLVMValueRef val);
 LLVMValueRef * array_from_list(struct list_node * head, unsigned int size);
+void free_list(struct list_node * head);
 
 #define list_move_to_next(_) ({_ = _->next;})
 

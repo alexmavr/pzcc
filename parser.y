@@ -613,6 +613,7 @@ l_value
                 LLVMValueRef * dim_array = array_from_list($2.v_list, $2.value.i);
                 $$.Valref = LLVMBuildGEP(builder, id->Valref, \
                                      dim_array, $2.value.i + 1, "geptmp");
+               free_list($2.v_list);
             }
 
 			$$.value.s = id->id;
@@ -653,6 +654,7 @@ call
 			SymbolEntry *fun = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
 			if (fun == NULL)
 				YYERROR;
+            /* TODO: Doesnt support a(b(d), ..), remove the global */
 			currentCallType = fun->u.eFunction.resultType;
 			currentParam = fun->u.eFunction.firstArgument;
 		} call_opt ')' { $$.type = currentCallType; }
@@ -680,8 +682,8 @@ call_opt_tail
 				YYERROR;
 			}
 			if (!compat_types(currentParam->u.eParameter.type, $2.type))
-				my_error(ERR_LV_ERR, "Illegal parameter assignment from %s to %s", verbose_type($2.type), \
-					verbose_type(currentParam->u.eParameter.type));
+				my_error(ERR_LV_ERR, "Illegal parameter assignment from %s to %s",\
+        verbose_type($2.type), verbose_type(currentParam->u.eParameter.type));
 			currentParam = currentParam->u.eParameter.next;
 		}
 	;
@@ -712,7 +714,7 @@ stmt
 	| l_value stmt_choice ';'
 		{
 			if (!compat_types(typeInteger, $1.type)) {
-				my_error(ERR_LV_ERR, "Type mismatch for \"%s\" operator", $2);
+				my_error(ERR_LV_ERR, "Type mismatch on \"%s\" operator", $2);
 			}
 		}
 	| call ';'
