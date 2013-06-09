@@ -23,6 +23,7 @@ struct list_node * add_to_list(struct list_node * head, LLVMValueRef val) {
     return newnode;
 }
 
+/* Frees a list */
 void free_list(struct list_node * head) {
     struct list_node * current = head;
     struct list_node * next;
@@ -31,6 +32,30 @@ void free_list(struct list_node * head) {
        free(current);
        current = next;
     }
+}
+
+/* Returns a ValueRef that represents zero for a given type */
+LLVMValueRef zero(Type t) {
+    LLVMValueRef res;
+    while (t->kind >= TYPE_ARRAY)
+            t = t->refType;
+
+    switch (t->kind) {
+        case TYPE_INTEGER:
+            res = LLVMConstInt(LLVMInt32Type(), 0, false);
+            break;
+        case TYPE_BOOLEAN:
+            res = LLVMConstInt(LLVMInt1Type(), 0, false);
+            break;
+        case TYPE_CHAR:
+            res = LLVMConstInt(LLVMInt8Type(), 0, false);
+            break;
+        case TYPE_REAL:
+            res = LLVMConstReal(LLVMDoubleType(), 0.0);
+            break;
+        default: ;
+    }
+    return res;
 }
 
 /* Creates an array of ValueRefs from a given list. 

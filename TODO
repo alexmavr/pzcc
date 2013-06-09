@@ -2,17 +2,18 @@ Syntax:
 	improve error recovery
 
 IR:
-    array assignments
-    constant expression assignments
-    global constants and variables
+    array assignments uninitialized ? currently they throw garbage
+    global variables
     statements:
-        if, for, while, do..until, switch, WRITE
+        if, for, while, do..until, switch, WRITE, FORMAT
     function declarations and calls
 
 General:
-    compiler arguments and llvm backend invocation
+    compiler arguments and llvm backend invocation (build together?)
 
 Done:
+*   global constants
+*   constant expression assignments
 *   array initializations 
 *   IR - assignments
 *   IR - binops + signed operations

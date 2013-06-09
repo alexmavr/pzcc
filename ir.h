@@ -22,13 +22,15 @@ struct list_node {
     struct list_node * next;
 };
 
+#define list_move_to_next(_) ({_ = _->next;})
+
 struct list_node * add_to_list(struct list_node * head, LLVMValueRef val);
 LLVMValueRef * array_from_list(struct list_node * head, unsigned int size);
 void free_list(struct list_node * head);
 
-#define list_move_to_next(_) ({_ = _->next;})
 
 LLVMTypeRef type_to_llvm(Type t);
+LLVMValueRef zero(Type t);
 LLVMValueRef cast_compat(Type dest, Type src, LLVMValueRef src_val);
 
 #endif	/* __IR_H__ */

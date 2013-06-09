@@ -22,9 +22,9 @@ Type currentFunctionType = NULL;		// type indicator for function body
 Type currentCallType = NULL;			// type indicator for the return type of a func
 SymbolEntry *currentFun = NULL;			// global function indicator for parameter declaration
 SymbolEntry *currentParam = NULL;
-const char * currentName = NULL;
 bool functionHasReturn = false;
 bool array_last = false;
+bool global_scope = true;
 
 unsigned long long loop_counter = 0;
 
@@ -187,28 +187,54 @@ const_def
 			SymbolEntry *con = newConstant($4, currentType);
 			if (con == NULL)
 				YYERROR;
-			if ((currentType == typeReal) && ($6.type == typeInteger))
+
+            /* cast the evaluated const_expr and create the resulting ValueRef*/
+            LLVMValueRef res;
+			if ((currentType == typeReal) && ($6.type == typeInteger)) {
 				con->u.eConstant.value.vReal = (RepReal) $6.value.i;
-			else if ((currentType == typeReal) && ($6.type == typeChar))
+                res = LLVMConstReal(LLVMDoubleType(), con->u.eConstant.value.vReal);
+			} else if ((currentType == typeReal) && ($6.type == typeChar)) {
 				con->u.eConstant.value.vReal = (RepReal) $6.value.c;
-			else if ((currentType == typeInteger) && ($6.type == typeChar))
+                res = LLVMConstReal(LLVMDoubleType(), con->u.eConstant.value.vReal);
+			} else if ((currentType == typeInteger) && ($6.type == typeChar)) {
 				con->u.eConstant.value.vInteger = (RepInteger) $6.value.c;
-			else if ((currentType == typeChar) && ($6.type == typeInteger))
+                res = LLVMConstInt(LLVMInt32Type(), \
+                            con->u.eConstant.value.vInteger, false);
+			} else if ((currentType == typeChar) && ($6.type == typeInteger)) {
 				con->u.eConstant.value.vChar = int_to_char($6.value.i);
-			else if (currentType != $6.type)
+                res = LLVMConstInt(LLVMInt8Type(), \
+                            con->u.eConstant.value.vChar, false);
+			} else if (currentType != $6.type)
 				my_error(ERR_LV_ERR, "Illegal assignment from %s to %s on \"%s\"", \
 						verbose_type($6.type), verbose_type(currentType), $4);
-			else if (currentType == typeInteger)
+			else if (currentType == typeInteger) {
 				con->u.eConstant.value.vInteger = $6.value.i;
-			else if (currentType == typeReal)
+                res = LLVMConstInt(LLVMInt32Type(), \
+                        con->u.eConstant.value.vInteger, false);
+			} else if (currentType == typeReal) {
 				con->u.eConstant.value.vReal = $6.value.r;
-			else if (currentType == typeBoolean)
+                res = LLVMConstReal(LLVMDoubleType(), con->u.eConstant.value.vReal);
+			} else if (currentType == typeBoolean) {
 				con->u.eConstant.value.vBoolean = $6.value.b;
-			else if (currentType == typeChar)
+                res = LLVMConstInt(LLVMInt1Type(), \
+                        con->u.eConstant.value.vBoolean, false);
+			} else if (currentType == typeChar) {
 				con->u.eConstant.value.vChar = $6.value.c;
-			else
+                res = LLVMConstInt(LLVMInt8Type(), \
+                        con->u.eConstant.value.vChar, false);
+			} else
 				my_error(ERR_LV_ERR, "Unexpected type %s for constant declaration", \
 																 currentType);
+
+            if (global_scope) {
+                /* Set the const as global */
+                con->Valref = LLVMAddGlobal(module, type_to_llvm(currentType), $4);
+                LLVMSetInitializer(con->Valref, res);
+            } else {
+                /* Allocate the constant and store the const value*/
+                con->Valref = LLVMBuildAlloca(builder, type_to_llvm(currentType), $4);
+                LLVMBuildStore(builder, res, con->Valref);
+            }
 		}
 	;
 const_def_tail
@@ -218,28 +244,53 @@ const_def_tail
 			SymbolEntry *con = newConstant($2, currentType);
 			if (con == NULL)
 				YYERROR;
-			if ((currentType == typeReal) && ($4.type == typeInteger))
+
+            /* cast the evaluated const_expr and create the resulting ValueRef*/
+            LLVMValueRef res;
+			if ((currentType == typeReal) && ($4.type == typeInteger)) {
 				con->u.eConstant.value.vReal = (RepReal) $4.value.i;
-			else if ((currentType == typeReal) && ($4.type == typeChar))
+                res = LLVMConstReal(LLVMDoubleType(), con->u.eConstant.value.vReal);
+			} else if ((currentType == typeReal) && ($4.type == typeChar)) {
 				con->u.eConstant.value.vReal = (RepReal) $4.value.c;
-			else if ((currentType == typeInteger) && ($4.type == typeChar))
+                res = LLVMConstReal(LLVMDoubleType(), con->u.eConstant.value.vReal);
+			} else if ((currentType == typeInteger) && ($4.type == typeChar)) {
 				con->u.eConstant.value.vInteger = (RepInteger) $4.value.c;
-			else if ((currentType == typeChar) && ($4.type == typeInteger))
-				con->u.eConstant.value.vChar = (RepChar) $4.value.i;
-			else if (currentType != $4.type)
+                res = LLVMConstInt(LLVMInt32Type(), \
+                            con->u.eConstant.value.vInteger, false);
+			} else if ((currentType == typeChar) && ($4.type == typeInteger)) {
+				con->u.eConstant.value.vChar = int_to_char($4.value.i);
+                res = LLVMConstInt(LLVMInt8Type(), \
+                            con->u.eConstant.value.vChar, false);
+			} else if (currentType != $4.type)
 				my_error(ERR_LV_ERR, "Illegal assignment from %s to %s on \"%s\"", \
-						verbose_type($4.type), verbose_type(currentType), $2);
-			else if (currentType == typeInteger)
+						verbose_type($4.type), verbose_type(currentType), $4);
+			else if (currentType == typeInteger) {
 				con->u.eConstant.value.vInteger = $4.value.i;
-			else if (currentType == typeReal)
+                res = LLVMConstInt(LLVMInt32Type(), \
+                        con->u.eConstant.value.vInteger, false);
+			} else if (currentType == typeReal) {
 				con->u.eConstant.value.vReal = $4.value.r;
-			else if (currentType == typeBoolean)
+                res = LLVMConstReal(LLVMDoubleType(), con->u.eConstant.value.vReal);
+			} else if (currentType == typeBoolean) {
 				con->u.eConstant.value.vBoolean = $4.value.b;
-			else if (currentType == typeChar)
+                res = LLVMConstInt(LLVMInt1Type(), \
+                        con->u.eConstant.value.vBoolean, false);
+			} else if (currentType == typeChar) {
 				con->u.eConstant.value.vChar = $4.value.c;
-			else
+                res = LLVMConstInt(LLVMInt8Type(), \
+                        con->u.eConstant.value.vChar, false);
+			} else
 				my_error(ERR_LV_ERR, "Unexpected type %s for constant declaration", \
 																 currentType);
+            if (global_scope) {
+                /* Set the const as global */
+                con->Valref = LLVMAddGlobal(module, type_to_llvm(currentType), $2);
+                LLVMSetInitializer(con->Valref, res);
+            } else {
+                /* Allocate the constant and store the const value*/
+                con->Valref = LLVMBuildAlloca(builder, type_to_llvm(currentType), $2);
+                LLVMBuildStore(builder, res, con->Valref);
+            }
 		}
 	;
 var_def
@@ -256,16 +307,18 @@ var_init
             if (var == NULL)
                 YYERROR;
 
+            /* If initialized, cast correctly */
+            LLVMValueRef res = zero(currentType);
 			if ($2.type != NULL) {
-				/* (IR) TODO: Real Promoting - Char/Int Conversions */
 				if (!compat_types(currentType, $2.type))
 					my_error(ERR_LV_ERR, "Illegal assignment from %s to %s on \"%s\"", \
 						verbose_type($2.type), verbose_type(currentType), $1);
-                LLVMValueRef alloc = LLVMBuildAlloca(builder, type_to_llvm(currentType), $1);
-                $2.Valref = cast_compat(currentType, $2.type, $2.Valref);
-                LLVMBuildStore(builder, $2.Valref, alloc);
-                var->Valref = alloc;
-			}
+                res = cast_compat(currentType, $2.type, $2.Valref);
+			} 
+
+            /* Allocate the variable and store the initial value */
+            var->Valref = LLVMBuildAlloca(builder, type_to_llvm(currentType), $1);
+            LLVMBuildStore(builder, res, var->Valref);
 		}
 	| T_id var_init_tail_plus
 		{
@@ -317,6 +370,7 @@ routine
 			closeScope();
 			currentFunctionType = NULL;
 			functionHasReturn = false;
+            global_scope = true;
 		}
 	;
 routine_tail
@@ -332,6 +386,7 @@ routine_header
 		{
 			currentFun = newFunction($2);
 			openScope();
+            global_scope = false;
 		} routine_header_opt ')'
 		{
 			endFunctionHeader(currentFun, $1.type);
@@ -424,15 +479,24 @@ program_header
             if (prog == NULL)
                 exit(1);
 
+            openScope();
+            global_scope = false;
+
             LLVMTypeRef funcType = LLVMFunctionType(LLVMVoidType(), NULL, 0, 0);
             LLVMValueRef func = LLVMAddFunction(module, "main", funcType);
             LLVMSetLinkage(func, LLVMExternalLinkage);
             LLVMBasicBlockRef block = LLVMAppendBasicBlock(func, "entry");
             LLVMPositionBuilderAtEnd(builder, block);
+
         }
 	;
 program
-	: program_header block { LLVMBuildRetVoid(builder); }
+	: program_header block 
+        { 
+            LLVMBuildRetVoid(builder); 
+            closeScope();
+            global_scope = true;
+        }
 	;
 type
 	: T_int		{ $$.type = typeInteger; }
@@ -574,8 +638,9 @@ l_value
 			SymbolEntry * id = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
 			if (id == NULL)
 				YYERROR;
-
             
+			$$.value.i = 0; // if 1, then the l_value is constant
+
             /* Type Checking for array dimensions */
 			switch (id->entryType) {
 				case ENTRY_VARIABLE:
@@ -584,7 +649,10 @@ l_value
 					 	 * :: $2 is the number of dimensions following the id */
 						dims = array_dimensions(id->u.eVariable.type);
 						if ($2.value.i > dims)
-							my_error(ERR_LV_ERR, "\"%s\" has less dimensions than specified", id->id);
+                            if (dims == 0) 
+                                my_error(ERR_LV_ERR, "\"%s\" is not an Array", id->id);
+                            else
+                                my_error(ERR_LV_ERR, "\"%s\" has less dimensions than specified", id->id);
 						else
 							$$.type = n_dimension_type(id->u.eVariable.type, $2.value.i);
 						break;
@@ -593,7 +661,11 @@ l_value
 					{
 						dims = array_dimensions(id->u.eParameter.type);
 						if ($2.value.i > dims)
-							my_error(ERR_LV_ERR, "\"%s\" has less dimensions than specified", id->id);
+                            if (dims == 0) 
+                                my_error(ERR_LV_ERR, "\"%s\" is not an Array", id->id);
+                            else
+                                my_error(ERR_LV_ERR, "\"%s\" has less dimensions than specified", id->id);
+
 						else
 							$$.type = n_dimension_type(id->u.eParameter.type, $2.value.i);
 						break;
@@ -602,6 +674,7 @@ l_value
 					if ($2.value.i)
 						my_error(ERR_LV_ERR, "Constant \"%s\" cannot an Array",id->id);
 					$$.type = id->u.eConstant.type;
+                    $$.value.i = 1;
 					break;
 				default: ;
 			}
@@ -613,10 +686,9 @@ l_value
                 LLVMValueRef * dim_array = array_from_list($2.v_list, $2.value.i);
                 $$.Valref = LLVMBuildGEP(builder, id->Valref, \
                                      dim_array, $2.value.i + 1, "geptmp");
-               free_list($2.v_list);
+                free_list($2.v_list);
             }
 
-			$$.value.s = id->id;
 		}
 	;
 l_value_tail
@@ -704,10 +776,11 @@ stmt
 	: ';'
 	| l_value assign expr ';'
 		{
-			if (!compat_types($1.type, $3.type)) {
-				my_error(ERR_LV_ERR, "Illegal assignment from %s to %s on \"%s\"", \
-						verbose_type($3.type), verbose_type($1.type), $1.value.s);
-			}
+			if (!compat_types($1.type, $3.type))
+				my_error(ERR_LV_ERR, "Illegal assignment from %s to %s ", \
+						verbose_type($3.type), verbose_type($1.type));
+            if ($1.value.i == 1)
+                my_error(ERR_LV_ERR, "Illegal assignment to constant variable");
             LLVMValueRef tmp = cast_compat($1.type, $3.type, $3.Valref);
             LLVMBuildStore(builder, tmp, $1.Valref);
 		}
@@ -799,7 +872,7 @@ stmt_tail_tail
 	: T_case const_expr ':'
 		{
 			if (!compat_types(typeInteger, $2.type))
-				my_error(ERR_LV_ERR, "switch: case number is %s instead of Integer", \
+				my_error(ERR_LV_ERR, "switch: case is %s instead of Integer", \
 						verbose_type($2.type));
 		}
 	;

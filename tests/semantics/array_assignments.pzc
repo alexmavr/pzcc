@@ -1,15 +1,17 @@
 const int b = 5 ;
 const REAL c = b;
-const REAL d = c + 1;
-const REAL e = d;
+const REAL d = b + 1, e = c;
+const REAL p = d;
 
 PROGRAM array_assignments ()
 {
     int y[15], zoo = 125, z[12], opop = 2;
-    char y[15.6];
-    int k[1-2];
-    int l[1 + 3 * 2 - 6];
-    int a[5][2+1];
-    char r['c'];
-    int d[b*2];
+    int zp = b;
+    zp = zp;
+    char yl[15 % 4];        // 0 x i8
+    int k[-(1-2)];          // 1 x i32
+    int l[1 + 3 * 2 - 6];   // 1 x i32
+    int a[5][2+1];          // 5 x [3 x i32]
+    char r['a'];            // 97 x i8
+    int d[b*2];             // 10 x i32
 }

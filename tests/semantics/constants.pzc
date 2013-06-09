@@ -1,9 +1,15 @@
 const int l = '4' + '6'; 
 const int lk = 'j'; 
+int jjjj;
+REAL jjjk;
+char jjjl;
+bool jjjp;
+bool jjje[5][13];
 
 PROGRAM ops ()
 {
     /* Constant expression evaluations */
+
     const char kk = 54;    
     const bool jk = ('4' + '6') == 'j' ;
     const bool jj = l == lk;
@@ -13,8 +19,13 @@ PROGRAM ops ()
     const bool asdasd2 = !true or true;
     const bool g = boon || boo;
 
-    /* Expressions with constants */
-    // casts and unops*/
+    // lookups
+    bool ndk = jj or boo and boon ; // true
+    ndk = ndk; // true
+    jjjj = jjjj;
+    ndk = jjje[0][1];
+    ndk = ndk;
+
     char n = 'a';                   // 97
     char p = -'a';                  // 97
     char pp = -(-'a');              // 97

@@ -402,13 +402,19 @@ Type binop_type_check(const char *op, Type t) {
 //Checks if an ast node can be used as an array index.
 int array_index_check(struct ast_node *_) {
 	int ret = 0;
+    if  (_->type == typeChar)
+        _->value.i = (RepInteger) _->value.c;  // cast the node from char to int
+
 	if (!compat_types(typeInteger, _->type)) {
 		my_error(ERR_LV_ERR, "Array index cannot be %s" , verbose_type(_->type));
 		ret = 1;
-	} else if (_->value.i <= 0) {
+	} else if (_->value.i < 0) {
 		my_error(ERR_LV_ERR, "Array index cannot be negative");
 		ret = 1;
-	}
+	} else if (_->value.i == 0) {
+		my_error(ERR_LV_ERR, "Array index cannot be zero");
+		ret = 1;
+    }
 	return ret;
 }
 
