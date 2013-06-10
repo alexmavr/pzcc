@@ -34,30 +34,6 @@ void free_list(struct list_node * head) {
     }
 }
 
-/* Returns a ValueRef that represents zero for a given type */
-LLVMValueRef zero(Type t) {
-    LLVMValueRef res;
-    if (t->kind >= TYPE_ARRAY)
-            ; // figure out default behavior for array inits
-
-    switch (t->kind) {
-        case TYPE_INTEGER:
-            res = LLVMConstInt(LLVMInt32Type(), 0, false);
-            break;
-        case TYPE_BOOLEAN:
-            res = LLVMConstInt(LLVMInt1Type(), 0, false);
-            break;
-        case TYPE_CHAR:
-            res = LLVMConstInt(LLVMInt8Type(), 0, false);
-            break;
-        case TYPE_REAL:
-            res = LLVMConstReal(LLVMDoubleType(), 0.0);
-            break;
-        default: ;
-    }
-    return res;
-}
-
 /* Creates an array of ValueRefs from a given list. 
  * The first item of the array is the constant 0, following the usage
  * of the BuildGEP command */

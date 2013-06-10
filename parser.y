@@ -189,7 +189,7 @@ const_def
 				YYERROR;
 
             /* cast the evaluated const_expr and create the resulting ValueRef*/
-            LLVMValueRef res;
+            LLVMValueRef res = NULL;
 			if ((currentType == typeReal) && ($6.type == typeInteger)) {
 				con->u.eConstant.value.vReal = (RepReal) $6.value.i;
                 res = LLVMConstReal(LLVMDoubleType(), con->u.eConstant.value.vReal);
@@ -247,7 +247,7 @@ const_def_tail
 				YYERROR;
 
             /* cast the evaluated const_expr and create the resulting ValueRef*/
-            LLVMValueRef res;
+            LLVMValueRef res = NULL;
 			if ((currentType == typeReal) && ($4.type == typeInteger)) {
 				con->u.eConstant.value.vReal = (RepReal) $4.value.i;
                 res = LLVMConstReal(LLVMDoubleType(), con->u.eConstant.value.vReal);
@@ -310,7 +310,7 @@ var_init
                 YYERROR;
 
             /* If initialized, cast correctly */
-            LLVMValueRef res = zero(currentType);
+            LLVMValueRef res = LLVMConstNull(type_to_llvm(currentType));
 			if ($2.type != NULL) {
 				if (!compat_types(currentType, $2.type))
 					my_error(ERR_LV_ERR, "Illegal assignment from %s to %s on \"%s\"", \
@@ -335,7 +335,15 @@ var_init
                 YYERROR;
             
             /* TODO: global array declarations and zero-initialization */
-            array->Valref = LLVMBuildAlloca(builder, currentLLVMType, $1);
+            if (global_scope) {
+                /* Set the var as global */
+                array->Valref = LLVMAddGlobal(module, currentLLVMType, $1);
+                LLVMSetInitializer(array->Valref, LLVMConstNull(currentLLVMType));
+            } else {
+                /* Allocate the variable and store the const value*/
+                array->Valref = LLVMBuildAlloca(builder, currentLLVMType, $1);
+            }
+
 		}
 	;
 var_init_opt

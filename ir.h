@@ -30,7 +30,6 @@ void free_list(struct list_node * head);
 
 
 LLVMTypeRef type_to_llvm(Type t);
-LLVMValueRef zero(Type t);
 LLVMValueRef cast_compat(Type dest, Type src, LLVMValueRef src_val);
 
 #endif	/* __IR_H__ */

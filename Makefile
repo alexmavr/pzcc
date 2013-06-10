@@ -3,15 +3,15 @@
 
 CC = gcc
 LD = g++
-LLVMFLAGS = `llvm-config --cflags`
+LLVMFLAGS = $(shell llvm-config --cflags)
 CFLAGS += -Wall $(LLVMFLAGS)
 LDFLAGS +=
-LLVM_LINK_FLAGS=`llvm-config --libs --cflags --ldflags core analysis native`
+LLVM_LINK_FLAGS=$(shell llvm-config --libs --cflags --ldflags core analysis native)
 OBJ += pzc.lex.o semantic.o parser.o symbol.o general.o error.o ir.o
 DEPENDS += 
 
 ifndef DEBUG
-       DEBUG = y
+       DEBUG = n
 endif
 
 ifeq ($(DEBUG),y)

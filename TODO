@@ -2,7 +2,7 @@ Syntax:
 	improve error recovery
 
 IR:
-    global + local array initializations 
+    local array initializations?
     statements:
         if, for, while, do..until, switch, WRITE, FORMAT
     function declarations and calls
@@ -11,6 +11,7 @@ General:
     compiler arguments and llvm backend invocation (build together?)
 
 Done:
+*   global array initializations 
 *   IR - global variables
 *   IR - global constants
 *   IR - constant expression assignments
