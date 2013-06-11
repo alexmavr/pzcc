@@ -50,10 +50,10 @@ int main (void) {
 	// 8. Position ourselves after the merge block.
 	LLVMPositionBuilderAtEnd(builder, merge_ref);
 	// 9. Build the phi node.
-	LLVMValueRef phi = LLVMBuildPhi(builder, LLVMDoubleType(), "phi");
+//	LLVMValueRef phi = LLVMBuildPhi(builder, LLVMDoubleType(), "phi");
 	// 10. Add incoming edges.
-	LLVMAddIncoming(phi, &hi1, &then_ref, 1);
-	LLVMAddIncoming(phi, &hi2, &else_ref, 1);
+//	LLVMAddIncoming(phi, &hi1, &then_ref, 1);
+//	LLVMAddIncoming(phi, &hi2, &else_ref, 1);
 
 	LLVMDumpModule(module);
 	LLVMDisposeBuilder(builder);
