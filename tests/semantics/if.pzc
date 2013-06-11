@@ -11,5 +11,5 @@ PROGRAM hi () {
 //		hi2();
 		no = 1;
 	}
-	ok = 43;
+	ok = no;
 }

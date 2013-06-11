@@ -46,6 +46,13 @@ unsigned long long loop_counter = 0;
         LLVMValueRef Valref;
         struct list_node * v_list; // general-purpose ValueRef list
 	};
+    
+    struct for_node {
+        LLVMValueRef from;
+        LLVMValueRef to;
+        LLVMValueRef step;
+        char direction;         // '+' if TO, '-' if DOWNTO
+    };
 }
 
 %union {
@@ -56,6 +63,7 @@ unsigned long long loop_counter = 0;
 	const char *s;
 
 	struct ast_node node;
+	struct for_node for_node;
 }
 
 %token T_bool				"bool"
@@ -135,8 +143,12 @@ unsigned long long loop_counter = 0;
 %type <node> const_expr_opt
 %type <node> stmt
 %type <node> stmt_opt_if
-
 %type <node> l_value_tail
+%type <node> range_choice
+%type <node> range_opt
+
+%type <for_node> range
+
 %type <i> format_opt
 
 %type <s> binop1
@@ -803,10 +815,8 @@ stmt
             if ($1.value.i == 1)
                 my_error(ERR_LV_ERR, "Illegal assignment to constant variable");
             LLVMValueRef tmp = cast_compat($1.type, $3.type, $3.Valref);
-//			LLVMBuildStore(builder, tmp, $1.Valref);
 
 			$$.Valref = LLVMBuildStore(builder, tmp, $1.Valref);
-//			$$.Valref = NULL;
 		}
 	| l_value stmt_choice ';'
 		{
@@ -824,14 +834,11 @@ stmt
 
 			new_conditional_scope();
 
-			// Code for phi node generation here.
 			// 1. Generate condition value.
 			LLVMValueRef cond = LLVMBuildICmp(builder, LLVMIntNE, $3.Valref, \
-									LLVMConstInt(LLVMInt1Type(), 1, false), "ifcond");
-//NO:			LLVMValueRef function = LLVMGetBasicBlockParent(LLVMGetInsertBlock(builder));	//TODO: This must be wrong
-//			LLVMValueRef function = LLVMGetBasicBlockParent(LLVMGetEntryBlock(builder));	//TODO: This must be wrong
-//POSSIBLE-NO:			LLVMValueRef function = LLVMBasicBlockAsValue(LLVMGetPreviousBasicBlock(LLVMGetInsertBlock(builder)));
-			LLVMValueRef function = LLVMBasicBlockAsValue(LLVMGetPreviousBasicBlock(LLVMGetInsertBlock(builder)));
+									LLVMConstInt(LLVMInt1Type(), 0, false), "ifcond");
+			LLVMValueRef function = LLVMGetBasicBlockParent(LLVMGetInsertBlock(builder));
+
 			// 2. Generate new blocks for cases.
 			LLVMBasicBlockRef then_ref = LLVMAppendBasicBlock(function, "then");
 			LLVMBasicBlockRef else_ref = LLVMAppendBasicBlock(function, "else");
@@ -841,64 +848,88 @@ stmt
 
 			// 3. Branch conditionally on then or else.
 			LLVMBuildCondBr(builder, cond, then_ref, else_ref);
+
 			// 4. Build then branch prologue.
 			LLVMPositionBuilderAtEnd(builder, then_ref);
 		} stmt {
-fprintf(stderr, "Found then\n");
-if ($6.Valref == NULL)
-	fprintf(stderr, "Found NULL in then\n");
-else
-	fprintf(stderr, "Found non-NULL in then\n");
-
-			LLVMBasicBlockRef __attribute__((unused)) then_ref, else_ref, merge_ref;
-			then_ref = conditional_scope_get(first);
+			LLVMBasicBlockRef else_ref, merge_ref;
 			else_ref = conditional_scope_get(second);
 			merge_ref = conditional_scope_get(third);
+
 			// 5. Connect then branch to merge block.
-			LLVMBuildBr(builder, then_ref);
-			then_ref = LLVMGetInsertBlock(builder);
+			LLVMBuildBr(builder, merge_ref);
 			// 6. Build else branch prologue.
 			LLVMPositionBuilderAtEnd(builder, else_ref);
 		} stmt_opt_if {
-fprintf(stderr, "Found else\n");
-if ($6.Valref == NULL)
-	fprintf(stderr, "Found NULL in else\n");
-else
-	fprintf(stderr, "Found non-NULL in else\n");
 
-			LLVMBasicBlockRef then_ref, else_ref, merge_ref;
-			then_ref = conditional_scope_get(first);
-			else_ref = conditional_scope_get(second);
+            LLVMBasicBlockRef merge_ref;
 			merge_ref = conditional_scope_get(third);
 			// 7. Connect else branch to merge block.
 			LLVMBuildBr(builder, merge_ref);
-			else_ref = LLVMGetInsertBlock(builder);
+
 			// 8. Position ourselves after the merge block.
 			LLVMPositionBuilderAtEnd(builder, merge_ref);
-			// 9. Build the phi node.
-			LLVMValueRef phi = LLVMBuildPhi(builder, LLVMDoubleType(), "phi");
-			// 10. Add incoming edges.
+
+			/* 9. Build the phi node.
+            LLVMValueRef phi = LLVMBuildPhi(builder, LLVMDoubleType(), "phi");
+			10. Add incoming edges.
 			LLVMValueRef llvmtmp = LLVMBasicBlockAsValue(then_ref);
 			LLVMAddIncoming(phi, &llvmtmp, &then_ref, 1);
-			llvmtmp = LLVMBasicBlockAsValue(else_ref);
 			LLVMAddIncoming(phi, &llvmtmp, &else_ref, 1);
-
-			$$.Valref = phi;
+			$$.Valref = phi; */
 
 			delete_conditional_scope();
-//			$$.Valref = NULL;
-		}
-	| T_for { loop_counter++; } '(' T_id ',' range ')' loop_stmt { loop_counter--; }
-		{
-				SymbolEntry *i = lookupEntry($4, LOOKUP_ALL_SCOPES, true);
-				if (i == NULL)
-					YYERROR;
-				if (i->entryType != ENTRY_VARIABLE)
-					my_error(ERR_LV_ERR, "FOR: \"%s\" is not a variable", i->id);
-				else if (!compat_types(typeInteger, i->u.eVariable.type))
-					my_error(ERR_LV_ERR, "FOR: control variable \"%s\" is not an Integer", i->id);
 			$$.Valref = NULL;
 		}
+	| T_for { loop_counter++; } '(' T_id ',' range ')' 
+		{
+            SymbolEntry * i = lookupEntry($4, LOOKUP_ALL_SCOPES, true);
+            if (i == NULL)
+                YYERROR;
+            if (i->entryType != ENTRY_VARIABLE)
+                my_error(ERR_LV_ERR, "FOR: \"%s\" is not a variable", i->id);
+            else if (!compat_types(typeInteger, i->u.eVariable.type))
+                my_error(ERR_LV_ERR, "FOR: control variable \"%s\" is not an Integer", i->id);
+            new_conditional_scope();
+
+            LLVMBuildStore(builder, $6.from , i->Valref);
+			LLVMValueRef function = LLVMGetBasicBlockParent(LLVMGetInsertBlock(builder));
+
+			LLVMBasicBlockRef for_ref = LLVMAppendBasicBlock(function, "for");
+			LLVMBasicBlockRef forbody_ref = LLVMAppendBasicBlock(function, "forbody");
+			LLVMBasicBlockRef endfor_ref = LLVMAppendBasicBlock(function, "endfor");
+            conditional_scope_save(for_ref, forbody_ref, endfor_ref);
+
+            LLVMBuildBr(builder, for_ref);
+			LLVMPositionBuilderAtEnd(builder, for_ref);
+
+            LLVMValueRef ival = LLVMBuildLoad(builder, i->Valref, "loadtmp");
+			LLVMValueRef cond = LLVMBuildICmp(builder, LLVMIntSGE, ival, \
+                            $6.to, "forcond");
+            LLVMBuildCondBr(builder, cond, endfor_ref, forbody_ref);
+
+			LLVMPositionBuilderAtEnd(builder, forbody_ref);
+		} loop_stmt 
+        {
+            LLVMBasicBlockRef for_ref = conditional_scope_get(first);
+            LLVMBasicBlockRef endfor_ref = conditional_scope_get(third);
+            
+            SymbolEntry * i = lookupEntry($4, LOOKUP_ALL_SCOPES, true);
+            LLVMValueRef ival = LLVMBuildLoad(builder, i->Valref, "loadtmp");
+            
+            if ($6.direction == '+')
+                ival = LLVMBuildNSWAdd(builder, ival, $6.step, "addtmp");
+            else
+                ival = LLVMBuildNSWSub(builder, ival, $6.step, "addtmp");
+            LLVMBuildStore(builder, ival, i->Valref);
+            LLVMBuildBr(builder, for_ref);
+
+			LLVMPositionBuilderAtEnd(builder, endfor_ref);
+            
+            loop_counter--; 
+            delete_conditional_scope();
+			$$.Valref = NULL;
+        } 
 	| T_while { loop_counter++; } '(' expr ')' loop_stmt { loop_counter--; }
 		{
 			if (!compat_types(typeBoolean, $4.type))
@@ -1005,19 +1036,24 @@ range
 			if (!compat_types(typeInteger, $3.type))
 				my_error(ERR_LV_ERR, "FOR: range end is %s instead of Integer", \
 										verbose_type($3.type));
+            $$.from = $1.Valref;
+            $$.to = $3.Valref;
+            $$.step = $4.Valref;
+            $$.direction = $2.value.c;
 		}
 	;
 range_choice
-	: T_to
-	| T_downto
+	: T_to      {$$.value.c = '+';}
+	| T_downto  {$$.value.c = '-';}
 	;
 range_opt
-	: /* Nothing */
+	: /* Nothing */ { $$.Valref = LLVMConstInt(LLVMInt32Type(), 1, false); }
 	| T_step expr
 		{
 			if (!compat_types(typeInteger, $2.type))
 				my_error(ERR_LV_ERR, "FOR: STEP is %s instead of Integer", \
 										verbose_type($2.type));
+            $$.Valref = cast_compat(typeInteger, $2.type, $2.Valref);
 		}
 	;
 clause
