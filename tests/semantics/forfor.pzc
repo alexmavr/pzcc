@@ -1,8 +1,9 @@
 PROGRAM hi () {
 	int i, j = 6, k = 255;
-	FOR (i, 0 TO 14 STEP 3) {
-		FOR (j, 32 to 64)
-			k -= 1;
-	}
+	FOR (i, 0 TO 14) {
+		FOR (j, 64 DOWNTO 32) 
+			k = k + 1;
+	} // 703
+
 	i = 54;
 }

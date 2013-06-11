@@ -814,8 +814,8 @@ stmt
 						verbose_type($3.type), verbose_type($1.type));
             if ($1.value.i == 1)
                 my_error(ERR_LV_ERR, "Illegal assignment to constant variable");
-            LLVMValueRef tmp = cast_compat($1.type, $3.type, $3.Valref);
 
+            LLVMValueRef tmp = cast_compat($1.type, $3.type, $3.Valref);
 			$$.Valref = LLVMBuildStore(builder, tmp, $1.Valref);
 		}
 	| l_value stmt_choice ';'
@@ -904,8 +904,15 @@ stmt
 			LLVMPositionBuilderAtEnd(builder, for_ref);
 
             LLVMValueRef ival = LLVMBuildLoad(builder, i->Valref, "loadtmp");
-			LLVMValueRef cond = LLVMBuildICmp(builder, LLVMIntSGE, ival, \
+
+            LLVMValueRef cond;
+            if ($6.direction == '+')
+                cond = LLVMBuildICmp(builder, LLVMIntSGE, ival, \
                             $6.to, "forcond");
+            else 
+                cond = LLVMBuildICmp(builder, LLVMIntSLE, ival, \
+                            $6.to, "forcond");
+
             LLVMBuildCondBr(builder, cond, endfor_ref, forbody_ref);
 
 			LLVMPositionBuilderAtEnd(builder, forbody_ref);
