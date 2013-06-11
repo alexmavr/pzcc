@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "ir.h"
+#include "error.h"
 
 LLVMBuilderRef builder;
 LLVMModuleRef module;
@@ -50,6 +51,38 @@ LLVMValueRef * array_from_list(struct list_node * head, unsigned int size) {
     return res;
 }
 
+
+/* Global variable for list of conditional statements (ofc loops included). */
+struct cond_scope *current_cond_scope_list = NULL;
+
+/* Creates and holds a new scope. */
+void new_conditional_scope (void) {
+	struct cond_scope *temp_scope;
+
+	temp_scope = new(sizeof(struct cond_scope));
+	temp_scope->prev = current_cond_scope_list;
+	current_cond_scope_list = temp_scope;
+}
+
+/* Deletes a scope from the scope list. */
+void delete_conditional_scope (void) {
+	struct cond_scope *temp_scope;
+
+	if (current_cond_scope_list == NULL)
+		my_error(ERR_LV_INTERN, "Conditional scope close");
+	temp_scope = current_cond_scope_list->prev;
+	delete(current_cond_scope_list);
+	current_cond_scope_list = temp_scope;
+}
+
+/* Puts the passed values in the current conditional scope. */
+void conditional_scope_save (LLVMBasicBlockRef first, LLVMBasicBlockRef second, LLVMBasicBlockRef third) {
+	if (current_cond_scope_list == NULL)
+		my_error(ERR_LV_INTERN, "Conditional scope undefined");
+	current_cond_scope_list->first = first;
+	current_cond_scope_list->second = second;
+	current_cond_scope_list->third = third;
+}
 
 
 /* Converts a type from the symbol table format to the corresponding LLVM one */

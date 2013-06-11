@@ -59,6 +59,7 @@ int main (int argc, char **argv) {
 	builder = LLVMCreateBuilder();
 	LLVMInitializeNativeTarget();
 
+/*
 	LLVMPassManagerRef pass_manager = LLVMCreateFunctionPassManagerForModule(module);
 	LLVMAddPromoteMemoryToRegisterPass(pass_manager);
 	LLVMAddInstructionCombiningPass(pass_manager);
@@ -66,12 +67,13 @@ int main (int argc, char **argv) {
 	LLVMAddGVNPass(pass_manager);
 	LLVMAddCFGSimplificationPass(pass_manager);
 	LLVMInitializeFunctionPassManager(pass_manager);
+*/
 
 	yyparse();
 	//closeScope();
 
 	LLVMDumpModule(module);
-	LLVMDisposePassManager(pass_manager);
+//	LLVMDisposePassManager(pass_manager);
 	LLVMDisposeBuilder(builder);
 	LLVMDisposeModule(module);
 

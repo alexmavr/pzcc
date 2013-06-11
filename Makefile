@@ -1,7 +1,7 @@
 .PHONY: all pzcc clean
 .DEFAULT: all
 
-CC = gcc
+CC = gcc -g 
 LD = g++
 LLVMFLAGS = $(shell llvm-config --cflags)
 CFLAGS += -Wall $(LLVMFLAGS)

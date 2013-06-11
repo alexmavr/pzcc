@@ -1,0 +1,12 @@
+FUNC int proc(int i) {
+	int i = 0;
+	i = i+3;
+	return i+4;
+}
+
+PROGRAM my_main () {
+	int j = 9;
+	int k = 96;
+	j = j + k;
+	return proc(5);
+}

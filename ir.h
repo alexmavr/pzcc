@@ -24,10 +24,23 @@ struct list_node {
 
 #define list_move_to_next(_) ({_ = _->next;})
 
-struct list_node * add_to_list(struct list_node * head, LLVMValueRef val);
-LLVMValueRef * array_from_list(struct list_node * head, unsigned int size);
+struct list_node *add_to_list(struct list_node * head, LLVMValueRef val);
+LLVMValueRef *array_from_list(struct list_node * head, unsigned int size);
 void free_list(struct list_node * head);
 
+struct cond_scope {
+	LLVMBasicBlockRef first;
+	LLVMBasicBlockRef second;
+	LLVMBasicBlockRef third;
+	struct cond_scope *prev;
+};
+
+extern struct cond_scope *current_cond_scope_list;
+void new_conditional_scope (void);
+void delete_conditional_scope (void);
+LLVMBasicBlockRef conditional_scope_get (int num);
+#define conditional_scope_get(field) (current_cond_scope_list->field)
+void conditional_scope_save (LLVMBasicBlockRef first, LLVMBasicBlockRef second, LLVMBasicBlockRef third);
 
 LLVMTypeRef type_to_llvm(Type t);
 LLVMValueRef cast_compat(Type dest, Type src, LLVMValueRef src_val);

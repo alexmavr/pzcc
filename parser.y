@@ -18,7 +18,7 @@ extern LLVMModuleRef module;
 
 Type currentType = NULL;				// type indicator for var_init_tail
 LLVMTypeRef currentLLVMType = NULL;	    // type indicator for llvm types
-Type currentFunctionType = NULL;		// type indicator for function body
+Type currentFunctionType = NULL;		// type indicator for function return
 Type currentCallType = NULL;			// type indicator for the return type of a func
 SymbolEntry *currentFun = NULL;			// global function indicator for parameter declaration
 SymbolEntry *currentParam = NULL;
@@ -133,6 +133,8 @@ unsigned long long loop_counter = 0;
 %type <node> formal_tail
 %type <node> routine_header_head
 %type <node> const_expr_opt
+%type <node> stmt
+%type <node> stmt_opt_if
 
 %type <node> l_value_tail
 %type <i> format_opt
@@ -384,6 +386,7 @@ var_init_tail
 routine
 	: routine_header routine_tail
 		{
+			// Actions for when a function is closing (be it a forward declaration or a definition).
 			closeScope();
 			currentFunctionType = NULL;
 			functionHasReturn = false;
@@ -396,6 +399,7 @@ routine_tail
 		{
 			if ((currentFunctionType != typeVoid) && (!functionHasReturn))
 				my_error(ERR_LV_ERR, "function without a return statement");
+			//TODO: Insert body definition code here
 		}
 	;
 routine_header
@@ -480,7 +484,7 @@ const_expr_opt
 		}
 	;
 formal_tail
-	: /* nothing */ { $$.type = typeVoid;}
+	: /* nothing */ { $$.type = typeVoid; }
 	| '[' const_expr ']' formal_tail
 		{
 			if (array_index_check(&($2)))
@@ -710,7 +714,7 @@ l_value
 	;
 l_value_tail
 	: /* Nothing */ 
-        { 
+        {
             $$.value.i = 0; 
             $$.v_list = NULL;
         }
@@ -790,7 +794,7 @@ local_def
 	| var_def
 	;
 stmt
-	: ';'
+	: ';' { $$.Valref = NULL; }
 	| l_value assign expr ';'
 		{
 			if (!compat_types($1.type, $3.type))
@@ -799,20 +803,90 @@ stmt
             if ($1.value.i == 1)
                 my_error(ERR_LV_ERR, "Illegal assignment to constant variable");
             LLVMValueRef tmp = cast_compat($1.type, $3.type, $3.Valref);
-            LLVMBuildStore(builder, tmp, $1.Valref);
+//			LLVMBuildStore(builder, tmp, $1.Valref);
+
+			$$.Valref = LLVMBuildStore(builder, tmp, $1.Valref);
+//			$$.Valref = NULL;
 		}
 	| l_value stmt_choice ';'
 		{
 			if (!compat_types(typeInteger, $1.type)) {
 				my_error(ERR_LV_ERR, "Type mismatch on \"%s\" operator", $2);
 			}
+			$$.Valref = NULL;
 		}
-	| call ';'
-	| T_if '(' expr ')' stmt stmt_opt_if
+	| call ';' { $$.Valref = NULL; }
+	| T_if '(' expr ')'
 		{
 			if (!compat_types(typeBoolean, $3.type))
 				my_error(ERR_LV_ERR, "if: condition is %s instead of Boolean", \
 							verbose_type($3.type));
+
+			new_conditional_scope();
+
+			// Code for phi node generation here.
+			// 1. Generate condition value.
+			LLVMValueRef cond = LLVMBuildICmp(builder, LLVMIntNE, $3.Valref, \
+									LLVMConstInt(LLVMInt1Type(), 1, false), "ifcond");
+//NO:			LLVMValueRef function = LLVMGetBasicBlockParent(LLVMGetInsertBlock(builder));	//TODO: This must be wrong
+//			LLVMValueRef function = LLVMGetBasicBlockParent(LLVMGetEntryBlock(builder));	//TODO: This must be wrong
+//POSSIBLE-NO:			LLVMValueRef function = LLVMBasicBlockAsValue(LLVMGetPreviousBasicBlock(LLVMGetInsertBlock(builder)));
+			LLVMValueRef function = LLVMBasicBlockAsValue(LLVMGetPreviousBasicBlock(LLVMGetInsertBlock(builder)));
+			// 2. Generate new blocks for cases.
+			LLVMBasicBlockRef then_ref = LLVMAppendBasicBlock(function, "then");
+			LLVMBasicBlockRef else_ref = LLVMAppendBasicBlock(function, "else");
+			LLVMBasicBlockRef merge_ref = LLVMAppendBasicBlock(function, "ifmerge");
+
+			conditional_scope_save(then_ref, else_ref, merge_ref);
+
+			// 3. Branch conditionally on then or else.
+			LLVMBuildCondBr(builder, cond, then_ref, else_ref);
+			// 4. Build then branch prologue.
+			LLVMPositionBuilderAtEnd(builder, then_ref);
+		} stmt {
+fprintf(stderr, "Found then\n");
+if ($6.Valref == NULL)
+	fprintf(stderr, "Found NULL in then\n");
+else
+	fprintf(stderr, "Found non-NULL in then\n");
+
+			LLVMBasicBlockRef __attribute__((unused)) then_ref, else_ref, merge_ref;
+			then_ref = conditional_scope_get(first);
+			else_ref = conditional_scope_get(second);
+			merge_ref = conditional_scope_get(third);
+			// 5. Connect then branch to merge block.
+			LLVMBuildBr(builder, then_ref);
+			then_ref = LLVMGetInsertBlock(builder);
+			// 6. Build else branch prologue.
+			LLVMPositionBuilderAtEnd(builder, else_ref);
+		} stmt_opt_if {
+fprintf(stderr, "Found else\n");
+if ($6.Valref == NULL)
+	fprintf(stderr, "Found NULL in else\n");
+else
+	fprintf(stderr, "Found non-NULL in else\n");
+
+			LLVMBasicBlockRef then_ref, else_ref, merge_ref;
+			then_ref = conditional_scope_get(first);
+			else_ref = conditional_scope_get(second);
+			merge_ref = conditional_scope_get(third);
+			// 7. Connect else branch to merge block.
+			LLVMBuildBr(builder, merge_ref);
+			else_ref = LLVMGetInsertBlock(builder);
+			// 8. Position ourselves after the merge block.
+			LLVMPositionBuilderAtEnd(builder, merge_ref);
+			// 9. Build the phi node.
+			LLVMValueRef phi = LLVMBuildPhi(builder, LLVMDoubleType(), "phi");
+			// 10. Add incoming edges.
+			LLVMValueRef llvmtmp = LLVMBasicBlockAsValue(then_ref);
+			LLVMAddIncoming(phi, &llvmtmp, &then_ref, 1);
+			llvmtmp = LLVMBasicBlockAsValue(else_ref);
+			LLVMAddIncoming(phi, &llvmtmp, &else_ref, 1);
+
+			$$.Valref = phi;
+
+			delete_conditional_scope();
+//			$$.Valref = NULL;
 		}
 	| T_for { loop_counter++; } '(' T_id ',' range ')' loop_stmt { loop_counter--; }
 		{
@@ -823,24 +897,28 @@ stmt
 					my_error(ERR_LV_ERR, "FOR: \"%s\" is not a variable", i->id);
 				else if (!compat_types(typeInteger, i->u.eVariable.type))
 					my_error(ERR_LV_ERR, "FOR: control variable \"%s\" is not an Integer", i->id);
+			$$.Valref = NULL;
 		}
 	| T_while { loop_counter++; } '(' expr ')' loop_stmt { loop_counter--; }
 		{
 			if (!compat_types(typeBoolean, $4.type))
 				my_error(ERR_LV_ERR, "while: condition is %s instead of Boolean", \
 							verbose_type($4.type));
+			$$.Valref = NULL;
 		}
 	| T_do { loop_counter++; } loop_stmt T_while '(' expr ')' ';' { loop_counter--; }
 		{
 			if (!compat_types(typeBoolean, $6.type))
 				my_error(ERR_LV_ERR, "do..while: condition is %s instead of Boolean", \
 							verbose_type($6.type));
+			$$.Valref = NULL;
 		}
 	| T_switch '(' expr ')' '{' {openScope();} stmt_tail stmt_opt_switch '}' {closeScope();}
 		{
 			if (!compat_types(typeInteger, $3.type))
 				my_error(ERR_LV_ERR, "switch: expression is %s instead of Integer", \
 							verbose_type($3.type));
+			$$.Valref = NULL;
 		}
 
 	| T_ret stmt_opt_ret ';'
@@ -851,10 +929,11 @@ stmt
 				my_error(ERR_LV_ERR, "return: incompatible return type: %s instead of %s", \
 				verbose_type($2.type), verbose_type(currentFunctionType));
 			functionHasReturn = true;
+			$$.Valref = NULL;
 		}
-	| write '(' stmt_opt_write ')' ';'
-	| block
-	| error ';'
+	| write '(' stmt_opt_write ')' ';' { $$.Valref = NULL; }
+	| block { $$.Valref = NULL; }
+	| error ';' { $$.Valref = NULL; }
 	;
 loop_stmt
 	: stmt
@@ -874,8 +953,8 @@ stmt_choice
 	| T_mm { $$ = "--"; }
 	;
 stmt_opt_if
-	: /* Nothing */
-	| T_else stmt
+	: /* Nothing */ { $$.Valref = NULL; }
+	| T_else stmt { $$.Valref = NULL; }
 	;
 stmt_tail
 	: /* Nothing */
