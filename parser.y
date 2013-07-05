@@ -912,11 +912,11 @@ base_stmt
             new_conditional_scope(FOR_COND);
 
             LLVMBuildStore(builder, $6.from , i->Valref);
-			LLVMValueRef function = LLVMGetBasicBlockParent(LLVMGetInsertBlock(builder));
+			LLVMValueRef fun= LLVMGetBasicBlockParent(LLVMGetInsertBlock(builder));
 
-			LLVMBasicBlockRef for_ref = LLVMAppendBasicBlock(function, "for");
-			LLVMBasicBlockRef forbody_ref = LLVMAppendBasicBlock(function, "forbody");
-			LLVMBasicBlockRef endfor_ref = LLVMAppendBasicBlock(function, "endfor");
+			LLVMBasicBlockRef for_ref = LLVMAppendBasicBlock(fun, "for");
+			LLVMBasicBlockRef forbody_ref = LLVMAppendBasicBlock(fun, "forbody");
+			LLVMBasicBlockRef endfor_ref = LLVMAppendBasicBlock(fun, "endfor");
             conditional_scope_save(for_ref, forbody_ref, endfor_ref);
 
             LLVMBuildBr(builder, for_ref);
@@ -955,12 +955,40 @@ base_stmt
             loop_counter--; 
             delete_conditional_scope();
         } 
-	| T_while { loop_counter++; } '(' expr ')' loop_stmt { loop_counter--; }
-		{
-			if (!compat_types(typeBoolean, $4.type))
+	| T_while 
+        { 
+            loop_counter++;
+            new_conditional_scope(WHILE_COND);
+			LLVMValueRef fun = LLVMGetBasicBlockParent(LLVMGetInsertBlock(builder));
+            LLVMBasicBlockRef while_ref = LLVMAppendBasicBlock(fun, "while");
+			LLVMBasicBlockRef whilebody_ref = LLVMAppendBasicBlock(fun, "whilebody");
+			LLVMBasicBlockRef endwhile_ref = LLVMAppendBasicBlock(fun, "endwhile");
+            conditional_scope_save(while_ref, whilebody_ref, endwhile_ref);
+            
+            LLVMBuildBr(builder, while_ref);
+			LLVMPositionBuilderAtEnd(builder, while_ref);
+
+        } '(' expr ')'
+        { 
+            if (!compat_types(typeBoolean, $4.type))
 				my_error(ERR_LV_ERR, "while: condition is %s instead of Boolean", \
 							verbose_type($4.type));
-		}
+
+            LLVMBasicBlockRef whilebody_ref = conditional_scope_get(second);
+            LLVMBasicBlockRef endwhile_ref = conditional_scope_get(third);
+            LLVMValueRef cond = LLVMBuildICmp(builder, LLVMIntNE, $4.Valref, \
+                            LLVMConstInt(LLVMInt1Type(), 0, false), "whilecond");
+            LLVMBuildCondBr(builder, cond, whilebody_ref, endwhile_ref);
+			LLVMPositionBuilderAtEnd(builder, whilebody_ref);
+        } loop_stmt 
+        { 
+            LLVMBasicBlockRef while_ref = conditional_scope_get(first);
+            LLVMBasicBlockRef endwhile_ref = conditional_scope_get(third);
+            LLVMBuildBr(builder, while_ref);
+			LLVMPositionBuilderAtEnd(builder, endwhile_ref);
+            loop_counter--; 
+            delete_conditional_scope();
+        }
 	| T_do { loop_counter++; } loop_stmt T_while '(' expr ')' ';' { loop_counter--; }
 		{
 			if (!compat_types(typeBoolean, $6.type))
