@@ -1,0 +1,48 @@
+PROGRAM hi () {
+	int no;
+	int hi[3];
+	if ((no == 8) && (no == 4) || (hi[2] == 0)) {
+		no = 0;
+	} else {
+		no = 1;
+	}
+
+	switch (no) {
+		case 1:
+			break;
+		default:
+//			continue;
+			break;
+	}
+
+//	continue;
+
+	while (true) {
+//		continue;
+//		break;
+	}
+
+	while (true)
+		break;
+
+	while (true)
+		continue;
+
+///*
+	while (true) {
+//		continue;
+		switch (no) {
+			case 1:
+				
+//				break;
+				NEXT;
+			default:
+//				continue;
+				NEXT;
+		}
+		no = 1;
+	}
+//*/
+
+	no = hi[0];
+}

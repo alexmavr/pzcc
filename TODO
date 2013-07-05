@@ -7,18 +7,7 @@ IR:
         if, for, while, do..until, switch, WRITE, FORMAT
     function declarations and calls
 	nested function calls do not work. we need a stack
-
-break_is_legal algorithm:
-	cond_scope_delete
-		-
-	if
-		INHERITS
-	for
-	while
-	do
-		SET
-	switch
-		~(PREVIOUS==SET)
+	if loop_counter is not needed for anything else than checking if continue and break statements are legal, remove it. We have break_is_legal, but atm it doesn't function with continue statements.	-> %s/break_is_legal/control_flow_flags/gc' ed.
 
 General:
     compiler arguments and llvm backend invocation (build together?)
@@ -44,3 +33,11 @@ Done:
 -	array sizes
 *	refactor error reporting
 *	substitute error.c functions for my_error
+*	control_flow_flags inheritance schema:
+		if(X)		->	X
+		while(X)	->	X | 01
+		do(X)		->	X | 01
+		for(X)		->	X | 01
+		switch(X)	->	X | 10
+	>>
+		switch break is indicated by 1X bit, and while control flow is indicated by X1 bit.

@@ -31,9 +31,9 @@ void free_list(struct list_node * head);
 typedef enum { IF_COND, FOR_COND, WHILE_COND, DO_COND, SWITCH_COND } cond_type;
 struct cond_scope {
 	cond_type type;
-	bool break_is_legal;
 	//TODO: What did we say we would do with switches? Was it an array of BBRefs or inlining the condition checks?
 	//TODO: If we want switches (or whatever that was) inside whiles not to have breaks, we can do a flag inheritance scheme like with curses.
+	bool control_flow_flags;
 	LLVMBasicBlockRef first;
 	LLVMBasicBlockRef second;
 	LLVMBasicBlockRef third;

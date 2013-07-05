@@ -58,26 +58,40 @@ struct cond_scope *current_cond_scope_list = NULL;
 /* Creates and holds a new scope. */
 void new_conditional_scope (cond_type type) {
 	struct cond_scope *temp_scope;
+	uint8_t prev_cond_flags;
 
 	temp_scope = new(sizeof(struct cond_scope));
 	temp_scope->prev = current_cond_scope_list;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 * control_flow_flags algorithm:
+	 *	cond_scope_delete			:	.pop()
+	 *	if(X)						:	X
+	 *	for(X) | while(X) | do(X)	:	X | 01
+	 *	switch(X)					:	X | 10
+	 * operational semantics:
+	 *	1X	:	enveloped by break
+	 *	X1	:	enveloped by loop statement (for/while/do-while)
+	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	temp_scope->type = type;
-	if ((type == FOR_COND) || (type == WHILE_COND) || (type == DO_COND)) {
-		temp_scope->break_is_legal = 1;
-	} else {
-		switch (type) {
-			case IF_COND		:
-				temp_scope->break_is_legal = 
-					(current_cond_scope_list == NULL) ? 0 : current_cond_scope_list->break_is_legal;
-				break;
-			case SWITCH_COND	:
-				temp_scope->break_is_legal = 
-					(current_cond_scope_list == NULL) ? 1 : (1 - (current_cond_scope_list->break_is_legal));
-				break;
-			default:
-				my_error(ERR_LV_INTERN, "illegal conditional block type");
-		}
+
+	prev_cond_flags = (current_cond_scope_list == NULL) ? 0x00 : current_cond_scope_list->control_flow_flags;
+	switch (type) {
+		case IF_COND		:
+			temp_scope->control_flow_flags = prev_cond_flags;
+			break;
+		case FOR_COND		:
+		case WHILE_COND		:
+		case DO_COND		:
+			temp_scope->control_flow_flags = (prev_cond_flags | 0x01);
+			break;
+		case SWITCH_COND	:
+			temp_scope->control_flow_flags = (prev_cond_flags | 0x02);
+			break;
+		default:
+			my_error(ERR_LV_INTERN, "illegal conditional block type");
 	}
+
 	current_cond_scope_list = temp_scope;
 }
 
