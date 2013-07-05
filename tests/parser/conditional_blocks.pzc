@@ -18,7 +18,7 @@ PROGRAM hi () {
 //	continue;
 
 	while (true) {
-//		continue;
+		continue;
 //		break;
 	}
 

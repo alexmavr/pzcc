@@ -141,7 +141,9 @@ unsigned long long loop_counter = 0;
 %type <node> formal_tail
 %type <node> routine_header_head
 %type <node> const_expr_opt
+%type <node> base_stmt
 %type <node> stmt
+%type <node> loop_stmt
 %type <node> stmt_opt_if
 %type <node> l_value_tail
 %type <node> range_choice
@@ -805,7 +807,7 @@ local_def
 	: const_def
 	| var_def
 	;
-stmt
+base_stmt
 	: ';' { $$.Valref = NULL; }
 	| l_value assign expr ';'
 		{
@@ -970,11 +972,15 @@ stmt
 			$$.Valref = NULL;
 		}
 	| write '(' stmt_opt_write ')' ';' { $$.Valref = NULL; }
-	| block { $$.Valref = NULL; }
 	| error ';' { $$.Valref = NULL; }
 	;
+stmt
+	: base_stmt
+	| block { $$.Valref = NULL; }
+	;
 loop_stmt
-	: stmt
+	: base_stmt
+	| loop_block { $$.Valref = NULL; }
 	| T_break ';'
 		{
 			if (loop_counter == 0)
@@ -985,6 +991,15 @@ loop_stmt
 			if (loop_counter == 0)
 				my_error(ERR_LV_ERR, "continue statement outside of loop context");
 		}
+	;
+loop_block
+	: '{' {openScope();} loop_block_tail '}' {closeScope();}
+	;
+loop_block_tail
+	: /* Nothing */
+	| local_def loop_block_tail
+	| loop_stmt loop_block_tail
+	| error
 	;
 stmt_choice
 	: T_pp { $$ = "++"; }
