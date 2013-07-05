@@ -6,6 +6,19 @@ IR:
     statements:
         if, for, while, do..until, switch, WRITE, FORMAT
     function declarations and calls
+	nested function calls do not work. we need a stack
+
+break_is_legal algorithm:
+	cond_scope_delete
+		-
+	if
+		INHERITS
+	for
+	while
+	do
+		SET
+	switch
+		~(PREVIOUS==SET)
 
 General:
     compiler arguments and llvm backend invocation (build together?)

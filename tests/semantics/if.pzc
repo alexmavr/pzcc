@@ -5,11 +5,23 @@ FUNC int hi2 () {
 PROGRAM hi () {
 	int ok = 9;
 	int no;
-	if (no == 8) {
+	int hi[3];
+	if ((no == 8) && (no == 4) || (hi[2] == 0)) {
 		no = 0;
 	} else {
 //		hi2();
 		no = 1;
 	}
+/*
+	while (1) {
+		switch (no) {
+			case 1:
+				break;
+			default:
+				;
+		}
+		no = 1;
+	}
+*/
 	ok = no;
 }

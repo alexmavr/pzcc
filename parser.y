@@ -832,7 +832,7 @@ stmt
 				my_error(ERR_LV_ERR, "if: condition is %s instead of Boolean", \
 							verbose_type($3.type));
 
-			new_conditional_scope();
+			new_conditional_scope(IF_COND);
 
 			// 1. Generate condition value.
 			LLVMValueRef cond = LLVMBuildICmp(builder, LLVMIntNE, $3.Valref, \
@@ -890,7 +890,7 @@ stmt
                 my_error(ERR_LV_ERR, "FOR: \"%s\" is not a variable", i->id);
             else if (!compat_types(typeInteger, i->u.eVariable.type))
                 my_error(ERR_LV_ERR, "FOR: control variable \"%s\" is not an Integer", i->id);
-            new_conditional_scope();
+            new_conditional_scope(FOR_COND);
 
             LLVMBuildStore(builder, $6.from , i->Valref);
 			LLVMValueRef function = LLVMGetBasicBlockParent(LLVMGetInsertBlock(builder));

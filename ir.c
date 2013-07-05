@@ -56,11 +56,28 @@ LLVMValueRef * array_from_list(struct list_node * head, unsigned int size) {
 struct cond_scope *current_cond_scope_list = NULL;
 
 /* Creates and holds a new scope. */
-void new_conditional_scope (void) {
+void new_conditional_scope (cond_type type) {
 	struct cond_scope *temp_scope;
 
 	temp_scope = new(sizeof(struct cond_scope));
 	temp_scope->prev = current_cond_scope_list;
+	temp_scope->type = type;
+	if ((type == FOR_COND) || (type == WHILE_COND) || (type == DO_COND)) {
+		temp_scope->break_is_legal = 1;
+	} else {
+		switch (type) {
+			case IF_COND		:
+				temp_scope->break_is_legal = 
+					(current_cond_scope_list == NULL) ? 0 : current_cond_scope_list->break_is_legal;
+				break;
+			case SWITCH_COND	:
+				temp_scope->break_is_legal = 
+					(current_cond_scope_list == NULL) ? 1 : (1 - (current_cond_scope_list->break_is_legal));
+				break;
+			default:
+				my_error(ERR_LV_INTERN, "illegal conditional block type");
+		}
+	}
 	current_cond_scope_list = temp_scope;
 }
 

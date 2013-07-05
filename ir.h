@@ -28,7 +28,12 @@ struct list_node *add_to_list(struct list_node * head, LLVMValueRef val);
 LLVMValueRef *array_from_list(struct list_node * head, unsigned int size);
 void free_list(struct list_node * head);
 
+typedef enum { IF_COND, FOR_COND, WHILE_COND, DO_COND, SWITCH_COND } cond_type;
 struct cond_scope {
+	cond_type type;
+	bool break_is_legal;
+	//TODO: What did we say we would do with switches? Was it an array of BBRefs or inlining the condition checks?
+	//TODO: If we want switches (or whatever that was) inside whiles not to have breaks, we can do a flag inheritance scheme like with curses.
 	LLVMBasicBlockRef first;
 	LLVMBasicBlockRef second;
 	LLVMBasicBlockRef third;
@@ -36,9 +41,9 @@ struct cond_scope {
 };
 
 extern struct cond_scope *current_cond_scope_list;
-void new_conditional_scope (void);
+void new_conditional_scope (cond_type type);
 void delete_conditional_scope (void);
-LLVMBasicBlockRef conditional_scope_get (int num);
+//LLVMBasicBlockRef conditional_scope_get (int num);	//Why did I keep this?
 #define conditional_scope_get(field) (current_cond_scope_list->field)
 void conditional_scope_save (LLVMBasicBlockRef first, LLVMBasicBlockRef second, LLVMBasicBlockRef third);
 
