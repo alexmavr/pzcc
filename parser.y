@@ -835,11 +835,23 @@ base_stmt
 		}
 	| l_value stmt_choice ';'
 		{
-			if (!compat_types(typeInteger, $1.type)) {
-				my_error(ERR_LV_ERR, "Type mismatch on \"%s\" operator", $2);
+			if (!compat_types($1.type, typeInteger)) {
+				my_error(ERR_LV_ERR, "Type mismatch on \"%s\" operator: lvalue can be %s, %s or %s", $2, verbose_type(typeReal), verbose_type(typeInteger), \
+                        verbose_type(typeChar));
 			}
-            LLVMValueRef tmp = cast_compat(typeInteger, $1.type, $1.Valref);
-            //LLVMValueRef res = LLVMBuildAdd
+
+            struct ast_node tmp, one, res;
+            tmp.Valref = LLVMBuildLoad(builder, $1.Valref, "loadtmp");
+            tmp.type = $1.type;
+            one.Valref = LLVMConstInt(LLVMInt32Type(), 1, false);
+            one.type = typeInteger;
+
+            if (!strcmp($2, "++"))
+                binop_IR(&tmp, &one, "+", &res);
+            else if (!strcmp($2, "--"))
+                binop_IR(&tmp, &one, "-", &res);
+
+            LLVMBuildStore(builder, res.Valref, $1.Valref);
 		}
 	| call ';' 
 	| T_if '(' expr ')'
