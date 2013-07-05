@@ -4,13 +4,12 @@ FUNC int hi2 () {
 
 PROGRAM hi () {
 	int ok = 9;
-	int no;
+	int no = 0;
 	int hi[3];
 	if ((no == 8) && (no == 4) || (hi[2] == 0)) {
-		no = 0;
+		no += 0;
 	} else {
-//		hi2();
-		no = 1;
+		no %= 4;
 	}
 /*
 	while (1) {
@@ -23,5 +22,4 @@ PROGRAM hi () {
 		no = 1;
 	}
 */
-	ok = no;
 }

@@ -369,7 +369,8 @@ Type binop_type_check(const char *op, Type t) {
 				|| (!strcmp(op, "-"))) {
 			res = typeReal;
 		} else if ((!strcmp(op, "<")) || (!strcmp(op, ">")) || (!strcmp(op, ">=")) \
-				   || (!strcmp(op, "<=")) || (!strcmp(op, "!="))) {
+				   || (!strcmp(op, "<=")) || (!strcmp(op, "==")) \
+                   || (!strcmp(op, "!="))) {
 			res = typeBoolean;
 		} else {
 			my_error(ERR_LV_ERR, "Cannot perform \"%s\" between Reals", op);
@@ -379,7 +380,8 @@ Type binop_type_check(const char *op, Type t) {
 				|| (!strcmp(op, "-")) || (!strcmp(op, "%") || !strcmp(op, "MOD"))) {
 			res = typeInteger;
 		} else if ((!strcmp(op, "<")) || (!strcmp(op, ">")) || (!strcmp(op, "<="))
-				   || (!strcmp(op, ">=")) || (!strcmp(op, "==")) || (!strcmp(op, "!="))) {
+				   || (!strcmp(op, ">=")) || (!strcmp(op, "==")) \
+                   || (!strcmp(op, "!="))) {
 			res = typeBoolean;
 		} else {
 			my_error(ERR_LV_ERR, "Cannot perform \"%s\" between Integers", op);

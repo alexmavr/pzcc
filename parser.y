@@ -16,8 +16,8 @@ extern int yylex();
 extern LLVMBuilderRef builder;
 extern LLVMModuleRef module;
 
-Type currentType = NULL;				// type indicator for var_init_tail
-LLVMTypeRef currentLLVMType = NULL;	    // type indicator for llvm types
+Type currentType = NULL;				// Type indicator for var_init
+LLVMTypeRef currentLLVMType = NULL;	    // LLVMType indicator var_init
 Type currentFunctionType = NULL;		// type indicator for function return
 Type currentCallType = NULL;			// type indicator for the return type of a func
 SymbolEntry *currentFun = NULL;			// global function indicator for parameter declaration
@@ -141,10 +141,6 @@ unsigned long long loop_counter = 0;
 %type <node> formal_tail
 %type <node> routine_header_head
 %type <node> const_expr_opt
-%type <node> base_stmt
-%type <node> stmt
-%type <node> loop_stmt
-%type <node> stmt_opt_if
 %type <node> l_value_tail
 %type <node> range_choice
 %type <node> range_opt
@@ -153,6 +149,7 @@ unsigned long long loop_counter = 0;
 
 %type <i> format_opt
 
+%type <s> assign
 %type <s> binop1
 %type <s> binop2
 %type <s> binop3
@@ -350,7 +347,6 @@ var_init
             if (array == NULL)
                 YYERROR;
             
-            /* TODO: global array declarations and zero-initialization */
             if (global_scope) {
                 /* Set the var as global */
                 array->Valref = LLVMAddGlobal(module, currentLLVMType, $1);
@@ -808,7 +804,7 @@ local_def
 	| var_def
 	;
 base_stmt
-	: ';' { $$.Valref = NULL; }
+	: ';' 
 	| l_value assign expr ';'
 		{
 			if (!compat_types($1.type, $3.type))
@@ -817,17 +813,35 @@ base_stmt
             if ($1.value.i == 1)
                 my_error(ERR_LV_ERR, "Illegal assignment to constant variable");
 
-            LLVMValueRef tmp = cast_compat($1.type, $3.type, $3.Valref);
-			$$.Valref = LLVMBuildStore(builder, tmp, $1.Valref);
+            struct ast_node res = $3;
+            if (strcmp($2, "=")) {
+                struct ast_node tmp;
+                tmp.Valref = LLVMBuildLoad(builder, $1.Valref, "loadtmp");
+                tmp.type = $1.type;
+                if (!strcmp($2, "+="))
+                    binop_IR(&tmp, &$3, "+", &res);
+                else if (!strcmp($2, "-="))
+                    binop_IR(&tmp, &$3, "-", &res);
+                else if (!strcmp($2, "*="))
+                    binop_IR(&tmp, &$3, "*", &res);
+                else if (!strcmp($2, "/="))
+                    binop_IR(&tmp, &$3, "/", &res);
+                else if (!strcmp($2, "%="))
+                    binop_IR(&tmp, &$3, "%", &res);   
+            }
+
+            res.Valref = cast_compat($1.type, res.type, res.Valref);
+			LLVMBuildStore(builder, res.Valref, $1.Valref);
 		}
 	| l_value stmt_choice ';'
 		{
 			if (!compat_types(typeInteger, $1.type)) {
 				my_error(ERR_LV_ERR, "Type mismatch on \"%s\" operator", $2);
 			}
-			$$.Valref = NULL;
+            LLVMValueRef tmp = cast_compat(typeInteger, $1.type, $1.Valref);
+            //LLVMValueRef res = LLVMBuildAdd
 		}
-	| call ';' { $$.Valref = NULL; }
+	| call ';' 
 	| T_if '(' expr ')'
 		{
 			if (!compat_types(typeBoolean, $3.type))
@@ -863,25 +877,16 @@ base_stmt
 			// 6. Build else branch prologue.
 			LLVMPositionBuilderAtEnd(builder, else_ref);
 		} stmt_opt_if {
-
             LLVMBasicBlockRef merge_ref;
 			merge_ref = conditional_scope_get(third);
+
 			// 7. Connect else branch to merge block.
 			LLVMBuildBr(builder, merge_ref);
 
 			// 8. Position ourselves after the merge block.
 			LLVMPositionBuilderAtEnd(builder, merge_ref);
 
-			/* 9. Build the phi node.
-            LLVMValueRef phi = LLVMBuildPhi(builder, LLVMDoubleType(), "phi");
-			10. Add incoming edges.
-			LLVMValueRef llvmtmp = LLVMBasicBlockAsValue(then_ref);
-			LLVMAddIncoming(phi, &llvmtmp, &then_ref, 1);
-			LLVMAddIncoming(phi, &llvmtmp, &else_ref, 1);
-			$$.Valref = phi; */
-
 			delete_conditional_scope();
-			$$.Valref = NULL;
 		}
 	| T_for { loop_counter++; } '(' T_id ',' range ')' 
 		{
@@ -937,28 +942,24 @@ base_stmt
             
             loop_counter--; 
             delete_conditional_scope();
-			$$.Valref = NULL;
         } 
 	| T_while { loop_counter++; } '(' expr ')' loop_stmt { loop_counter--; }
 		{
 			if (!compat_types(typeBoolean, $4.type))
 				my_error(ERR_LV_ERR, "while: condition is %s instead of Boolean", \
 							verbose_type($4.type));
-			$$.Valref = NULL;
 		}
 	| T_do { loop_counter++; } loop_stmt T_while '(' expr ')' ';' { loop_counter--; }
 		{
 			if (!compat_types(typeBoolean, $6.type))
 				my_error(ERR_LV_ERR, "do..while: condition is %s instead of Boolean", \
 							verbose_type($6.type));
-			$$.Valref = NULL;
 		}
 	| T_switch '(' expr ')' '{' {openScope();} stmt_tail stmt_opt_switch '}' {closeScope();}
 		{
 			if (!compat_types(typeInteger, $3.type))
 				my_error(ERR_LV_ERR, "switch: expression is %s instead of Integer", \
 							verbose_type($3.type));
-			$$.Valref = NULL;
 		}
 
 	| T_ret stmt_opt_ret ';'
@@ -969,18 +970,17 @@ base_stmt
 				my_error(ERR_LV_ERR, "return: incompatible return type: %s instead of %s", \
 				verbose_type($2.type), verbose_type(currentFunctionType));
 			functionHasReturn = true;
-			$$.Valref = NULL;
 		}
-	| write '(' stmt_opt_write ')' ';' { $$.Valref = NULL; }
-	| error ';' { $$.Valref = NULL; }
+	| write '(' stmt_opt_write ')' ';' 
+	| error ';' 
 	;
 stmt
 	: base_stmt
-	| block { $$.Valref = NULL; }
+	| block 
 	;
 loop_stmt
 	: base_stmt
-	| loop_block { $$.Valref = NULL; }
+	| loop_block 
 	| T_break ';'
 		{
 			if (loop_counter == 0)
@@ -1006,8 +1006,8 @@ stmt_choice
 	| T_mm { $$ = "--"; }
 	;
 stmt_opt_if
-	: /* Nothing */ { $$.Valref = NULL; }
-	| T_else stmt { $$.Valref = NULL; }
+	: /* Nothing */ 
+	| T_else stmt 
 	;
 stmt_tail
 	: /* Nothing */
@@ -1042,12 +1042,12 @@ stmt_opt_write_tail
 	| ',' format stmt_opt_write_tail
 	;
 assign
-	: '='
-	| T_inc
-	| T_dec
-	| T_mul
-	| T_div
-	| T_opmod
+	: '='     { $$ = "="; }
+	| T_inc   { $$ = "+="; }
+	| T_dec   { $$ = "-="; }
+	| T_mul   { $$ = "*="; }
+	| T_div   { $$ = "/="; }
+	| T_opmod { $$ = "%="; }
 	;
 range
 	: expr range_choice expr range_opt
