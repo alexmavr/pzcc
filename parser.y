@@ -900,9 +900,9 @@ base_stmt
 
 			delete_conditional_scope();
 		}
-	| T_for { loop_counter++; } '(' T_id ',' range ')' 
+	| T_for '(' T_id ',' range ')' 
 		{
-            SymbolEntry * i = lookupEntry($4, LOOKUP_ALL_SCOPES, true);
+            SymbolEntry * i = lookupEntry($3, LOOKUP_ALL_SCOPES, true);
             if (i == NULL)
                 YYERROR;
             if (i->entryType != ENTRY_VARIABLE)
@@ -911,26 +911,38 @@ base_stmt
                 my_error(ERR_LV_ERR, "FOR: control variable \"%s\" is not an Integer", i->id);
             new_conditional_scope(FOR_COND);
 
-            LLVMBuildStore(builder, $6.from , i->Valref);
+            LLVMBuildStore(builder, $5.from , i->Valref);
 			LLVMValueRef fun= LLVMGetBasicBlockParent(LLVMGetInsertBlock(builder));
 
 			LLVMBasicBlockRef for_ref = LLVMAppendBasicBlock(fun, "for");
+			LLVMBasicBlockRef forcond_ref = LLVMAppendBasicBlock(fun, "forcond");
 			LLVMBasicBlockRef forbody_ref = LLVMAppendBasicBlock(fun, "forbody");
 			LLVMBasicBlockRef endfor_ref = LLVMAppendBasicBlock(fun, "endfor");
             conditional_scope_save(for_ref, forbody_ref, endfor_ref);
 
-            LLVMBuildBr(builder, for_ref);
-			LLVMPositionBuilderAtEnd(builder, for_ref);
+            LLVMBuildBr(builder, forcond_ref);
 
+            /* Change step */
+			LLVMPositionBuilderAtEnd(builder, for_ref);
             LLVMValueRef ival = LLVMBuildLoad(builder, i->Valref, "loadtmp");
+            
+            if ($5.direction == '+')
+                ival = LLVMBuildNSWAdd(builder, ival, $5.step, "addtmp");
+            else
+                ival = LLVMBuildNSWSub(builder, ival, $5.step, "addtmp");
+            LLVMBuildStore(builder, ival, i->Valref);
+            LLVMBuildBr(builder, forcond_ref);
+
+			LLVMPositionBuilderAtEnd(builder, forcond_ref);
+            ival = LLVMBuildLoad(builder, i->Valref, "loadtmp");
 
             LLVMValueRef cond;
-            if ($6.direction == '+')
+            if ($5.direction == '+')
                 cond = LLVMBuildICmp(builder, LLVMIntSGE, ival, \
-                            $6.to, "forcond");
+                            $5.to, "forcond");
             else 
                 cond = LLVMBuildICmp(builder, LLVMIntSLE, ival, \
-                            $6.to, "forcond");
+                            $5.to, "forcond");
 
             LLVMBuildCondBr(builder, cond, endfor_ref, forbody_ref);
 
@@ -938,21 +950,11 @@ base_stmt
 		} loop_stmt 
         {
             LLVMBasicBlockRef for_ref = conditional_scope_get(first);
-            LLVMBasicBlockRef endfor_ref = conditional_scope_get(third);
-            
-            SymbolEntry * i = lookupEntry($4, LOOKUP_ALL_SCOPES, true);
-            LLVMValueRef ival = LLVMBuildLoad(builder, i->Valref, "loadtmp");
-            
-            if ($6.direction == '+')
-                ival = LLVMBuildNSWAdd(builder, ival, $6.step, "addtmp");
-            else
-                ival = LLVMBuildNSWSub(builder, ival, $6.step, "addtmp");
-            LLVMBuildStore(builder, ival, i->Valref);
             LLVMBuildBr(builder, for_ref);
 
-			LLVMPositionBuilderAtEnd(builder, endfor_ref);
-            
-            loop_counter--; 
+            LLVMBasicBlockRef endfor_ref = conditional_scope_get(third);
+            LLVMPositionBuilderAtEnd(builder, endfor_ref);
+
             delete_conditional_scope();
         } 
 	| T_while 
@@ -1079,13 +1081,17 @@ loop_stmt
 	| loop_block 
 	| T_break ';'
 		{
-			if (loop_counter == 0)
-				my_error(ERR_LV_ERR, "break statement outside of loop context");
+            LLVMBasicBlockRef dest = conditional_scope_lastloop_get(third);
+			if (dest == NULL) 
+                my_error(ERR_LV_ERR, "break statement outside of loop context");
+            LLVMBuildBr(builder, dest);
 		}
 	| T_cont ';'
 		{
-			if (loop_counter == 0)
+            LLVMBasicBlockRef dest = conditional_scope_lastloop_get(first);
+			if (dest == NULL)
 				my_error(ERR_LV_ERR, "continue statement outside of loop context");
+            LLVMBuildBr(builder, dest);
 		}
 	;
 loop_block

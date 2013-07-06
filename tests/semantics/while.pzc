@@ -2,11 +2,7 @@ PROGRAM testwhile () {
 	int no;
 	int k=7;
 
-	while (false)
-		continue;
-//		break;
-
-	while (true) {
+    while (true) {
 		break;
 	}
 
@@ -17,6 +13,6 @@ PROGRAM testwhile () {
         no++;
         k++;
 		continue;
-        no++;
+        k++;
     }
 }
