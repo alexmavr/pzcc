@@ -1,0 +1,6 @@
+PROGRAM emptyswitch () {
+	int k=7;
+
+	switch (k) {
+	}
+}

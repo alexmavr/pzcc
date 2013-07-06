@@ -11,11 +11,8 @@ PROGRAM testswitch () {
 		case 54:
 			NEXT;
 		default:
-//			if (k == 77)
-//				break;
-			k = 5454;
+            if (true)
+                k = 1;
 			break;
 	}
-
-	k = 8;
 }

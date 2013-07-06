@@ -879,7 +879,7 @@ base_stmt
 
 			// 4. Build then branch prologue.
 			LLVMPositionBuilderAtEnd(builder, then_ref);
-		} stmt {
+		} loop_stmt {
 			LLVMBasicBlockRef else_ref, merge_ref;
 			else_ref = conditional_scope_get(second);
 			merge_ref = conditional_scope_get(third);
@@ -1033,26 +1033,29 @@ base_stmt
 				my_error(ERR_LV_ERR, "switch: expression is %s instead of Integer", \
 							verbose_type($3.type));
 
-			loop_counter++;
 			new_conditional_scope(SWITCH_COND);
 			conditional_scope_valset($3.Valref);
 
 			LLVMValueRef fun = LLVMGetBasicBlockParent(LLVMGetInsertBlock(builder));
 			LLVMBasicBlockRef switchcond_ref = LLVMAppendBasicBlock(fun, "switch");
-			LLVMBasicBlockRef switchbody_ref = LLVMAppendBasicBlock(fun, "switchbody");
 			LLVMBasicBlockRef endswitch_ref = LLVMAppendBasicBlock(fun, "endswitch");
-			conditional_scope_save(switchcond_ref, switchbody_ref, endswitch_ref);
-//FOCUS:	conditional_scope_save(switchcond_ref, switchbody_ref, endswitch_ref);
+			conditional_scope_save(switchcond_ref, NULL, endswitch_ref);
 
 			LLVMBuildBr(builder, switchcond_ref);
 			LLVMPositionBuilderAtEnd(builder, switchcond_ref);
 		} stmt_tail
 		stmt_opt_switch '}'
 		{
+            LLVMBasicBlockRef switchbody_ref = conditional_scope_get(second);
+            LLVMBasicBlockRef switchlast_ref = conditional_scope_get(first);
+            if (switchbody_ref != NULL) {
+                LLVMPositionBuilderAtEnd(builder, switchbody_ref);
+                LLVMBuildBr(builder, switchlast_ref);
+            }
+
 			LLVMBasicBlockRef endswitch_ref = conditional_scope_get(third);
 			LLVMPositionBuilderAtEnd(builder, endswitch_ref);
 
-			loop_counter--;
 			delete_conditional_scope();
 		}
 	| T_ret stmt_opt_ret ';'
@@ -1100,7 +1103,7 @@ stmt_choice
 	;
 stmt_opt_if
 	: /* Nothing */ 
-	| T_else stmt 
+	| T_else loop_stmt
 	;
 stmt_tail
 	: /* Nothing */
@@ -1117,30 +1120,46 @@ stmt_tail_tail
 				my_error(ERR_LV_ERR, "switch: case is %s instead of Integer", \
 						verbose_type($2.type));
 
-			//Basically:
-			//	Append a new basic block in the conditions for the next case (jump if false),
-			//	Append a new basic block in the body for this case,
-			//	Do an evaluation and a conditional branch to (current_body, next_case (next instruction))
-			//	Position builder at end of currect body
-
-
 			LLVMBasicBlockRef switchcond_ref = conditional_scope_get(first);
 			LLVMPositionBuilderAtEnd(builder, switchcond_ref);
-			//...		::	Might BE wrong.!!
-			LLVMValueRef fun = LLVMGetBasicBlockParent(LLVMGetInsertBlock(builder));
-			conditional_scope_resave(first, LLVMAppendBasicBlock(fun, "switch_case"));
-			
-			//...
-			LLVMValueRef switchval = conditional_scope_valget();
-			LLVMValueRef caseval = LLVMBuildICmp(builder, LLVMIntNE, switchval, \
-							$2.Valref, "switchcase");
-//			LVMBuildCondBr(builder, caseval
 
+            // Generate condition block for the next case and overwrite scope
+			LLVMValueRef fun = LLVMGetBasicBlockParent(LLVMGetInsertBlock(builder));
+            LLVMBasicBlockRef new_switchcond_ref = LLVMAppendBasicBlock(fun, "case_cond");
+			conditional_scope_resave(first, new_switchcond_ref);
+    
+            // Generate new body, branch from the previous one and overwrite scope
+			LLVMBasicBlockRef switchbody_ref = conditional_scope_get(second);
+            LLVMBasicBlockRef new_switchbody_ref = LLVMAppendBasicBlock(fun, "case_body");
+			conditional_scope_resave(second, new_switchbody_ref);
+            if (switchbody_ref != NULL) {
+                LLVMPositionBuilderAtEnd(builder, switchbody_ref);
+                LLVMBuildBr(builder, new_switchbody_ref);
+            }
+
+            // Create case condition check for current case
+			LLVMPositionBuilderAtEnd(builder, switchcond_ref);
+            LLVMValueRef switchval = conditional_scope_valget();
+			LLVMValueRef caseval = LLVMBuildICmp(builder, LLVMIntNE, switchval, \
+							$2.Valref, "case_cond_val");
+			LLVMBuildCondBr(builder, caseval, new_switchcond_ref, new_switchbody_ref);
+
+			LLVMPositionBuilderAtEnd(builder, new_switchbody_ref);
 		}
 	;
 stmt_opt_switch
 	: /* Nothing */
-	| T_def ':' clause
+        {
+			LLVMBasicBlockRef switchlast_ref = conditional_scope_get(first);
+			LLVMBasicBlockRef endswitch_ref = conditional_scope_get(third);
+            LLVMPositionBuilderAtEnd(builder, switchlast_ref);
+            LLVMBuildBr(builder, endswitch_ref);
+        }
+	| T_def ':'
+        {
+			LLVMBasicBlockRef switchlast_ref = conditional_scope_get(first);
+            LLVMPositionBuilderAtEnd(builder, switchlast_ref);
+        } clause
 	;
 stmt_opt_ret
 	: /* Nothing */	{ $$.type = typeVoid; }
@@ -1199,8 +1218,14 @@ clause_tail
 	| stmt clause_tail
 	;
 clause_choice
-	: T_break ';' { /*TODO: Find the end of the switch block and go there*/ }
-	| T_next ';' { /* No action. */ }
+	: T_break ';'
+        {
+            LLVMBasicBlockRef endswitch_ref = conditional_scope_get(third);
+            LLVMBuildBr(builder, endswitch_ref);
+            LLVMPositionBuilderAtEnd(builder, endswitch_ref);
+        }
+	| T_next ';' 
+        { /* No action */ }
 	;
 write
 	: T_write
