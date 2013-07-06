@@ -12,7 +12,8 @@ PROGRAM testswitch () {
 			NEXT;
 		default:
             if (true)
-                k = 1;
+                break;
+            k = 1;
 			break;
 	}
 }

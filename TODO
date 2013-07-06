@@ -1,19 +1,20 @@
 Syntax:
-	improve error recovery
+	improve error recovery and messages
 
 IR:
-    local array initializations?
     statements:
-        while, do..until, switch, WRITE, FORMAT
+        WRITE, FORMAT
+    refactor parser.y
     function declarations and calls
 	replace currentCallType and currentParam with CallTypeStack and ParamStack
-	if loop_counter is not needed for anything else than checking if continue and break statements are legal, remove it. We have break_is_legal, but atm it doesn't function with continue statements.	-> %s/break_is_legal/control_flow_flags/gc' ed.
 
 General:
-    compiler arguments and llvm backend invocation (build together?)
+    compiler arguments and llvm backend invocation (link together?)
+    refactor parser.y
 
 Done:
-*   statemets: if, for
+*	loop_counter is not needed for anything else than checking if continue and break statements are legal, remove it. We have break_is_legal, but atm it doesn't function with continue statements.	-> %s/break_is_legal/control_flow_flags/gc' ed.
+*   statemets: if, for, while, do..until, switch
 *   global array initializations 
 *   IR - global variables
 *   IR - global constants

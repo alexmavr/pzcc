@@ -26,8 +26,6 @@ bool functionHasReturn = false;
 bool array_last = false;
 bool global_scope = true;
 
-unsigned long long loop_counter = 0;
-
 %}
 
 %code requires {
@@ -905,6 +903,7 @@ base_stmt
             SymbolEntry * i = lookupEntry($3, LOOKUP_ALL_SCOPES, true);
             if (i == NULL)
                 YYERROR;
+
             if (i->entryType != ENTRY_VARIABLE)
                 my_error(ERR_LV_ERR, "FOR: \"%s\" is not a variable", i->id);
             else if (!compat_types(typeInteger, i->u.eVariable.type))
@@ -959,7 +958,6 @@ base_stmt
         } 
 	| T_while 
         { 
-            loop_counter++;
             new_conditional_scope(WHILE_COND);
 
 			LLVMValueRef fun = LLVMGetBasicBlockParent(LLVMGetInsertBlock(builder));
@@ -990,12 +988,10 @@ base_stmt
             LLVMBuildBr(builder, while_ref);
 			LLVMPositionBuilderAtEnd(builder, endwhile_ref);
 
-			loop_counter--; 
             delete_conditional_scope();
         }
 	| T_do
 		{ 
-			loop_counter++;
 			new_conditional_scope(DO_COND);
 
 			LLVMValueRef fun = LLVMGetBasicBlockParent(LLVMGetInsertBlock(builder));
@@ -1025,7 +1021,6 @@ base_stmt
 			LLVMBuildCondBr(builder, cond, do_ref, enddo_ref);
 			LLVMPositionBuilderAtEnd(builder, enddo_ref);
 
-			loop_counter--;
 			delete_conditional_scope();
 		}
 	| T_switch
@@ -1082,15 +1077,19 @@ loop_stmt
 	| T_break ';'
 		{
             LLVMBasicBlockRef dest = conditional_scope_lastloop_get(third);
-			if (dest == NULL) 
+			if (dest == NULL) {
                 my_error(ERR_LV_ERR, "break statement outside of loop context");
+                YYERROR;
+            }
             LLVMBuildBr(builder, dest);
 		}
 	| T_cont ';'
 		{
             LLVMBasicBlockRef dest = conditional_scope_lastloop_get(first);
-			if (dest == NULL)
+			if (dest == NULL) {
 				my_error(ERR_LV_ERR, "continue statement outside of loop context");
+                YYERROR;
+            }
             LLVMBuildBr(builder, dest);
 		}
 	;
@@ -1267,4 +1266,3 @@ format_opt
 	;
 
 %%
-
