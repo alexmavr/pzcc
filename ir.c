@@ -58,6 +58,7 @@ struct cond_scope *current_cond_scope_list = NULL;
 /* Creates and holds a new scope. */
 void new_conditional_scope (cond_type type) {
 	struct cond_scope *temp_scope;
+	struct cond_scope *prev_loop_scope;
 	uint8_t prev_cond_flags;
 
 	temp_scope = new(sizeof(struct cond_scope));
@@ -76,16 +77,20 @@ void new_conditional_scope (cond_type type) {
 	temp_scope->type = type;
 
 	prev_cond_flags = (current_cond_scope_list == NULL) ? 0x00 : current_cond_scope_list->control_flow_flags;
+	prev_loop_scope = (current_cond_scope_list == NULL) ? NULL : current_cond_scope_list->last_visible_loop;
 	switch (type) {
 		case IF_COND		:
+			temp_scope->last_visible_loop = prev_loop_scope;
 			temp_scope->control_flow_flags = prev_cond_flags;
 			break;
 		case FOR_COND		:
 		case WHILE_COND		:
 		case DO_COND		:
+			temp_scope->last_visible_loop = temp_scope;
 			temp_scope->control_flow_flags = (prev_cond_flags | 0x01);
 			break;
 		case SWITCH_COND	:
+			temp_scope->last_visible_loop = NULL;
 			temp_scope->control_flow_flags = (prev_cond_flags | 0x02);
 			break;
 		default:

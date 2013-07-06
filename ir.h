@@ -41,6 +41,8 @@ struct cond_scope {
 
 	LLVMValueRef val;
 
+	struct cond_scope *last_visible_loop;
+
 	struct cond_scope *prev;
 };
 
@@ -52,6 +54,8 @@ void conditional_scope_save (LLVMBasicBlockRef first, LLVMBasicBlockRef second, 
 //LLVMBasicBlockRef conditional_scope_get (int num);	//Why did I keep this?
 #define conditional_scope_get(field)	(current_cond_scope_list->field)
 #define conditional_scope_resave(field, ref) (current_cond_scope_list->field = ref)
+
+#define conditional_scope_lastloop_get(field)	(((current_cond_scope_list->last_visible_loop) == NULL) ? NULL : (current_cond_scope_list->last_visible_loop->field))
 
 void conditional_scope_valset (LLVMValueRef vr);
 LLVMValueRef conditional_scope_valget (void);
