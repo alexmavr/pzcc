@@ -959,6 +959,7 @@ base_stmt
         { 
             loop_counter++;
             new_conditional_scope(WHILE_COND);
+
 			LLVMValueRef fun = LLVMGetBasicBlockParent(LLVMGetInsertBlock(builder));
             LLVMBasicBlockRef while_ref = LLVMAppendBasicBlock(fun, "while");
 			LLVMBasicBlockRef whilebody_ref = LLVMAppendBasicBlock(fun, "whilebody");
@@ -986,14 +987,45 @@ base_stmt
             LLVMBasicBlockRef endwhile_ref = conditional_scope_get(third);
             LLVMBuildBr(builder, while_ref);
 			LLVMPositionBuilderAtEnd(builder, endwhile_ref);
-            loop_counter--; 
+
+			loop_counter--; 
             delete_conditional_scope();
         }
-	| T_do { loop_counter++; } loop_stmt T_while '(' expr ')' ';' { loop_counter--; }
+	| T_do
+		{ 
+			loop_counter++;
+			new_conditional_scope(DO_COND);
+
+			LLVMValueRef fun = LLVMGetBasicBlockParent(LLVMGetInsertBlock(builder));
+			LLVMBasicBlockRef do_ref = LLVMAppendBasicBlock(fun, "do");
+			LLVMBasicBlockRef docond_ref = LLVMAppendBasicBlock(fun, "docond");
+			LLVMBasicBlockRef enddo_ref = LLVMAppendBasicBlock(fun, "enddo");
+			conditional_scope_save(do_ref, docond_ref, enddo_ref);
+
+			LLVMBuildBr(builder, do_ref);
+			LLVMPositionBuilderAtEnd(builder, do_ref);
+		} loop_stmt
 		{
-			if (!compat_types(typeBoolean, $6.type))
+			LLVMBasicBlockRef do_ref = conditional_scope_get(first);
+			LLVMBasicBlockRef docond_ref = conditional_scope_get(second);
+			LLVMBuildBr(builder, docond_ref);
+			LLVMPositionBuilderAtEnd(builder, docond_ref);
+		}
+		T_while '(' expr ')' ';'
+		{
+			if (!compat_types(typeBoolean, $7.type))
 				my_error(ERR_LV_ERR, "do..while: condition is %s instead of Boolean", \
-							verbose_type($6.type));
+							verbose_type($7.type));
+
+			LLVMBasicBlockRef do_ref = conditional_scope_get(first);
+			LLVMBasicBlockRef enddo_ref = conditional_scope_get(third);
+			LLVMValueRef cond = LLVMBuildICmp(builder, LLVMIntNE, $7.Valref, \
+							LLVMConstInt(LLVMInt1Type(), 0, false), "docondval");
+			LLVMBuildCondBr(builder, cond, do_ref, enddo_ref);
+			LLVMPositionBuilderAtEnd(builder, enddo_ref);
+
+			loop_counter--;
+			delete_conditional_scope();
 		}
 	| T_switch '(' expr ')' '{' {openScope();} stmt_tail stmt_opt_switch '}' {closeScope();}
 		{

@@ -1,0 +1,18 @@
+PROGRAM testwhile () {
+	int k=7;
+
+//*
+	do
+		continue;
+//		break;
+	while (false);
+//*/
+
+	do {
+		continue;
+		k = k + 1;
+//		break;
+	} while (k == 7);
+
+	k = 8;
+}
