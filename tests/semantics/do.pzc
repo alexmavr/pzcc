@@ -1,4 +1,4 @@
-PROGRAM testwhile () {
+PROGRAM testdo () {
 	int k=7;
 
 //*

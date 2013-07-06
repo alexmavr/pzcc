@@ -115,6 +115,19 @@ void conditional_scope_save (LLVMBasicBlockRef first, LLVMBasicBlockRef second, 
 	current_cond_scope_list->third = third;
 }
 
+/* Inserts a value reference (needed for switch statements) in the appropriate field of the conditional scope structure. */
+void conditional_scope_valset (LLVMValueRef vr) {
+	if (current_cond_scope_list == NULL)
+		my_error(ERR_LV_INTERN, "Conditional scope undefined");
+	current_cond_scope_list->val = vr;
+}
+
+/* Simply sanity checking (unneeded, as it is guarded by the parser rules) and returns the ValueRef of the current conditional scope. */
+LLVMValueRef conditional_scope_valget (void) {
+	if (current_cond_scope_list == NULL)
+		my_error(ERR_LV_INTERN, "Conditional scope undefined");
+	return (current_cond_scope_list->val);
+}
 
 /* Converts a type from the symbol table format to the corresponding LLVM one */
 LLVMTypeRef type_to_llvm(Type t) {

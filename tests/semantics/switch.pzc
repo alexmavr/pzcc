@@ -1,0 +1,21 @@
+PROGRAM testswitch () {
+	int k=7;
+
+	switch (k) {
+		case 3:
+			k = 33;
+			break;
+		case 7:
+			k = 77;
+			NEXT;
+		case 54:
+			NEXT;
+		default:
+//			if (k == 77)
+//				break;
+			k = 5454;
+			break;
+	}
+
+	k = 8;
+}
