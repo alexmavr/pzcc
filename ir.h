@@ -17,6 +17,7 @@
 extern LLVMBuilderRef builder;
 extern LLVMModuleRef module;
 
+/* Structure : General LLVMValueRef LL */
 struct list_node {
     LLVMValueRef Valref;
     struct list_node * next;
@@ -28,12 +29,12 @@ struct list_node *add_to_list(struct list_node * head, LLVMValueRef val);
 LLVMValueRef *array_from_list(struct list_node * head, unsigned int size);
 void free_list(struct list_node * head);
 
+/* Structure : Conditional scope LL (for if/while/do/for/switch support in LLVM IR generation) stack implementation */
+extern struct cond_scope *current_cond_scope_list;
+
 typedef enum { IF_COND, FOR_COND, WHILE_COND, DO_COND, SWITCH_COND } cond_type;
 struct cond_scope {
 	cond_type type;
-	//TODO: What did we say we would do with switches? Was it an array of BBRefs or inlining the condition checks?
-	//TODO: If we want switches (or whatever that was) inside whiles not to have breaks, we can do a flag inheritance scheme like with curses.
-	bool control_flow_flags;
 
 	LLVMBasicBlockRef first;
 	LLVMBasicBlockRef second;
@@ -46,7 +47,6 @@ struct cond_scope {
 	struct cond_scope *prev;
 };
 
-extern struct cond_scope *current_cond_scope_list;
 void new_conditional_scope (cond_type type);
 void delete_conditional_scope (void);
 
@@ -60,6 +60,23 @@ void conditional_scope_save (LLVMBasicBlockRef first, LLVMBasicBlockRef second, 
 void conditional_scope_valset (LLVMValueRef vr);
 LLVMValueRef conditional_scope_valget (void);
 
+/* Structure : Function call stack (for nested calls of type "a(b(c())") */
+extern struct func_call *current_func_call_list;
+
+struct func_call {
+	Type call_type;
+	SymbolEntry *current_param;
+
+	struct func_call *prev;
+};
+
+void function_call_type_push (Type type);
+Type function_call_type_pop (void);
+
+void function_call_param_set (SymbolEntry *param_ref);
+SymbolEntry *function_call_param_get (void);
+
+/* Interface : Type transformation (?) methods */
 LLVMTypeRef type_to_llvm(Type t);
 LLVMValueRef cast_compat(Type dest, Type src, LLVMValueRef src_val);
 

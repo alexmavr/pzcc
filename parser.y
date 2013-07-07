@@ -11,7 +11,6 @@
 #include "error.h"
 #include "ir.h"
 
-
 extern int yylex();
 extern LLVMBuilderRef builder;
 extern LLVMModuleRef module;
@@ -19,9 +18,7 @@ extern LLVMModuleRef module;
 Type currentType = NULL;				// Type indicator for var_init
 LLVMTypeRef currentLLVMType = NULL;	    // LLVMType indicator var_init
 Type currentFunctionType = NULL;		// type indicator for function return
-Type currentCallType = NULL;			// type indicator for the return type of a func
 SymbolEntry *currentFun = NULL;			// global function indicator for parameter declaration
-SymbolEntry *currentParam = NULL;
 bool functionHasReturn = false;
 bool array_last = false;
 bool global_scope = true;
@@ -755,37 +752,39 @@ call
 			SymbolEntry *fun = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
 			if (fun == NULL)
 				YYERROR;
-            /* TODO: Doesnt support a(b(d), ..), remove the global */
-			currentCallType = fun->u.eFunction.resultType;
-			currentParam = fun->u.eFunction.firstArgument;
-		} call_opt ')' { $$.type = currentCallType; }
+
+			function_call_type_push(fun->u.eFunction.resultType);
+			function_call_param_set(fun->u.eFunction.firstArgument);
+		} call_opt ')' { $$.type = function_call_type_pop(); }
 	;
 call_opt
 	: /* Nothing */
 	| expr call_opt_tail
 		{
+			SymbolEntry *currentParam = function_call_param_get();
 			if (currentParam == NULL) {
 				my_error(ERR_LV_ERR, "Invalid number of parameters specified");
 				YYERROR;
 			} else if (!compat_types(currentParam->u.eParameter.type, $1.type)) {
-				my_error(ERR_LV_ERR, "Illegal parameter assignment from %s to %s", verbose_type($1.type), \
-					verbose_type(currentParam->u.eParameter.type));
+				my_error(ERR_LV_ERR, "Illegal parameter assignment from %s to %s", \
+					verbose_type($1.type), verbose_type(currentParam->u.eParameter.type));
 			}
-			currentParam = currentParam->u.eParameter.next;
+			function_call_param_set(currentParam->u.eParameter.next);
 		}
 	;
 call_opt_tail
 	: /* Nothing */
 	| ',' expr call_opt_tail
 		{
+			SymbolEntry *currentParam = function_call_param_get();
 			if (currentParam == NULL) {
 				my_error(ERR_LV_ERR, "Invalid number of parameters specified");
 				YYERROR;
 			}
 			if (!compat_types(currentParam->u.eParameter.type, $2.type))
-				my_error(ERR_LV_ERR, "Illegal parameter assignment from %s to %s",\
-        verbose_type($2.type), verbose_type(currentParam->u.eParameter.type));
-			currentParam = currentParam->u.eParameter.next;
+				my_error(ERR_LV_ERR, "Illegal parameter assignment from %s to %s", \
+					verbose_type($2.type), verbose_type(currentParam->u.eParameter.type));
+			function_call_param_set(currentParam->u.eParameter.next);
 		}
 	;
 block

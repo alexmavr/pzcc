@@ -20,6 +20,8 @@
 #define YY_NO_INPUT
 
 #define T_eof		0
+
+int comment_caller;
 %}
 
 %option noyywrap
@@ -33,6 +35,8 @@ CHAR		({ESC_SEQ}|[^\'\"\\\n])
 SEPAR_n_OPS	[&;.\(\):,\[\]\{\}+\-*/%!=><]
 WARN_SEQ	\\[^\']
 WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
+
+%x comment_mode
 
 %%
 
@@ -185,7 +189,15 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 									}
 
 "\/\/"[^\n]*						{ /* one-line comment */	}
-\/\*([^*]|(\**[^\/]))*\*\/			{ /* multi-line comment */  }
+"/*"								{ /* multi-line comment start */
+										comment_caller = YYSTATE;
+										BEGIN(comment_mode);
+									}
+<comment_mode>[^*]*					{ /* multi-line comment */ }
+<comment_mode>"*"+[^*/\n]*			{ /* multi-line comment */ }
+<comment_mode>"*"+"/"				{ /* multi-line comment end */
+										BEGIN(comment_caller);
+									}
 
 {W}+								{ /* ignore whitespace */	}
 \n									{ /* line counting: yylineno */	}

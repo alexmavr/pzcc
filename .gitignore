@@ -6,6 +6,3 @@ pzc.lex.c
 pzcc
 a.out
 parser.output
-symbol/symbtest*
-symbol/Makefile
-anathema

@@ -1,0 +1,26 @@
+
+// One line comment
+/* multi-line comment */
+
+/*
+//comment in comment
+*/
+
+/* multi-line comment2
+which goes on ** /
+* WRITELN("in comment");
+		and on **/
+
+
+PROGRAM comments() 
+{
+    // One line comment
+    WRITELN("legit command\j");
+    /* multi-line comment */
+    /* multi-line comment2
+    which goes on ** /
+    * WRITELN("in comment");
+            and on **/
+    
+    WRITELN("outside comment");
+}
