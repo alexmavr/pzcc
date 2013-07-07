@@ -67,6 +67,9 @@ struct func_call {
 	Type call_type;
 	SymbolEntry *current_param;
 
+	LLVMValueRef *argv;
+	size_t current_arg_i;
+
 	struct func_call *prev;
 };
 
@@ -75,6 +78,9 @@ Type function_call_type_pop (void);
 
 void function_call_param_set (SymbolEntry *param_ref);
 SymbolEntry *function_call_param_get (void);
+
+void function_call_argv_init (SymbolEntry *fun);
+void function_call_argval_push (LLVMValueRef val);
 
 /* Interface : Type transformation (?) methods */
 LLVMTypeRef type_to_llvm(Type t);

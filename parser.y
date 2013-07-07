@@ -755,7 +755,12 @@ call
 
 			function_call_type_push(fun->u.eFunction.resultType);
 			function_call_param_set(fun->u.eFunction.firstArgument);
-		} call_opt ')' { $$.type = function_call_type_pop(); }
+			function_call_argv_init(fun);
+		} call_opt ')'
+		{ 
+			$$.type = function_call_type_pop();
+			//TODO: Code generation for call. We have the argument list in ...argv and the function id in $1.
+		}
 	;
 call_opt
 	: /* Nothing */
@@ -770,6 +775,8 @@ call_opt
 					verbose_type($1.type), verbose_type(currentParam->u.eParameter.type));
 			}
 			function_call_param_set(currentParam->u.eParameter.next);
+
+			function_call_argval_push($1.Valref);
 		}
 	;
 call_opt_tail
@@ -785,6 +792,8 @@ call_opt_tail
 				my_error(ERR_LV_ERR, "Illegal parameter assignment from %s to %s", \
 					verbose_type($2.type), verbose_type(currentParam->u.eParameter.type));
 			function_call_param_set(currentParam->u.eParameter.next);
+
+			function_call_argval_push($2.Valref);
 		}
 	;
 block

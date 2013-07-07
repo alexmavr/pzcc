@@ -168,6 +168,35 @@ SymbolEntry *function_call_param_get (void) {
 	return (current_func_call_list->current_param);
 }
 
+/* Initializes a proper length array for the arguments of a function call. */
+void function_call_argv_init (SymbolEntry *fun) {
+	SymbolEntry *cur_arg;
+	size_t i = 0;
+
+	if (current_func_call_list == NULL)
+		my_error(ERR_LV_INTERN, "Function call frame undefined");
+
+	cur_arg = fun->u.eFunction.firstArgument;
+	while (cur_arg != NULL) {
+		i++;
+		cur_arg = cur_arg->u.eParameter.next;
+	}
+
+	current_func_call_list->argv = new((sizeof(LLVMValueRef))*i);
+	current_func_call_list->current_arg_i = i;
+
+//	fprintf(stderr, "The call %s has %u arguments.\n", fun->id, i);		//TAG: Remove - simple sanity check.
+}
+
+/* 'Push' a LLVMValueRef in the current function call. */
+void function_call_argval_push (LLVMValueRef val) {
+	if (current_func_call_list == NULL)
+		my_error(ERR_LV_INTERN, "Function call frame undefined");
+
+	current_func_call_list->argv[(current_func_call_list->current_arg_i) - 1] = val;
+	current_func_call_list->current_arg_i--;
+}
+
 /* Converts a type from the symbol table format to the corresponding LLVM one */
 LLVMTypeRef type_to_llvm(Type t) {
 	LLVMTypeRef res;
