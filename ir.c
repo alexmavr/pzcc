@@ -184,6 +184,7 @@ void function_call_argv_init (SymbolEntry *fun) {
 
 	current_func_call_list->argv = new((sizeof(LLVMValueRef))*i);
 	current_func_call_list->current_arg_i = i;
+	current_func_call_list->total_argno = i;
 
 //	fprintf(stderr, "The call %s has %u arguments.\n", fun->id, i);		//TAG: Remove - simple sanity check.
 }
@@ -195,6 +196,22 @@ void function_call_argval_push (LLVMValueRef val) {
 
 	current_func_call_list->argv[(current_func_call_list->current_arg_i) - 1] = val;
 	current_func_call_list->current_arg_i--;
+}
+
+/* Return the pointer to the argument LLVMValueRef array for the current function call frame. */
+LLVMValueRef *function_call_arglist_get (void) {
+	if (current_func_call_list == NULL)
+		my_error(ERR_LV_INTERN, "Function call frame undefined");
+
+	return current_func_call_list->argv;
+}
+
+/* Returns the argno for the current call stack frame. */
+size_t function_call_argno_get (void) {
+	if (current_func_call_list == NULL)
+		my_error(ERR_LV_INTERN, "Function call frame undefined");
+
+	return current_func_call_list->total_argno;
 }
 
 /* Converts a type from the symbol table format to the corresponding LLVM one */

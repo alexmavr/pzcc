@@ -404,7 +404,11 @@ routine_tail
 		{
 			if ((currentFunctionType != typeVoid) && (!functionHasReturn))
 				my_error(ERR_LV_ERR, "function without a return statement");
+
 			//TODO: Insert body definition code here
+			//...
+			
+			//...
 		}
 	;
 routine_header
@@ -758,8 +762,18 @@ call
 			function_call_argv_init(fun);
 		} call_opt ')'
 		{ 
-			$$.type = function_call_type_pop();
 			//TODO: Code generation for call. We have the argument list in ...argv and the function id in $1.
+			//I think the below commented snippet should cover it.
+			/*
+			LLVMValueRef fun_ref = LLVMGetNamedFunction(module, $1);
+			if (fun_ref == NULL) {
+				my_error(ERR_LV_ERR, "Definition of function %s is not visible at call site");
+			}
+
+			LLVMBuildCall(builder, fun_ref, function_call_arglist_get(), function_call_argno_get(), "calltmp");
+			*/
+
+			$$.type = function_call_type_pop();
 		}
 	;
 call_opt
