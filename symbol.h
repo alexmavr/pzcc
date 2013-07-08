@@ -114,6 +114,7 @@ struct SymbolEntry_tag {
 
 		struct {                                /******* Συνάρτηση *******/
 			bool          isForward;             /* Δήλωση forward        */
+			size_t        argno;                 // Number of arguments the function is accepting (hold the max value for vararg support?)
 			SymbolEntry * firstArgument;         /* Λίστα παραμέτρων      */
 			SymbolEntry * lastArgument;          /* Τελευταία παράμετρος  */
 			Type          resultType;            /* Τύπος αποτελέσματος   */

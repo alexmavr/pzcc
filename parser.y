@@ -407,7 +407,27 @@ routine_tail
 
 			//TODO: Insert body definition code here
 			//...
-			
+			LLVMValueRef func_ref = LLVMGetNamedFunction(module, currentFun->id);
+			if (func_ref != NULL) {
+				if (LLVMCountParams(func_ref) != currentFun->u.eFunction.argno) {
+					my_error(ERR_LV_ERR, "Function %s is already declared with a different parameter count", \
+								currentFun->id);
+				}
+				if (LLVMCountBasicBlocks(func_ref) != 0) {
+					my_error(ERR_LV_ERR, "Function %s is already fully defined");
+					//TODO: Or alternatively we could keep the last definition of a function if it is defined in full multiple times.
+				}
+			} else {
+				//=====algo:
+				//create param list
+				//create function type
+				//create function
+				//assign arguments to named values lookup (params)
+				//...????
+				//save current builder position?
+				//position builder at end of function body?
+				//restore builder position to after the function?
+			}
 			//...
 		}
 	;
@@ -757,7 +777,7 @@ call
 			if (fun == NULL)
 				YYERROR;
 
-			function_call_type_push(fun->u.eFunction.resultType);
+			function_call_func_type_push(fun);
 			function_call_param_set(fun->u.eFunction.firstArgument);
 			function_call_argv_init(fun);
 		} call_opt ')'
@@ -767,7 +787,7 @@ call
 			/*
 			LLVMValueRef fun_ref = LLVMGetNamedFunction(module, $1);
 			if (fun_ref == NULL) {
-				my_error(ERR_LV_ERR, "Definition of function %s is not visible at call site");
+				my_error(ERR_LV_ERR, "Definition of function %s is not visible at call site", $1);
 			}
 
 			LLVMBuildCall(builder, fun_ref, function_call_arglist_get(), function_call_argno_get(), "calltmp");

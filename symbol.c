@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include "semantic.h"
 #include "symbol.h"
 #include "general.h"
@@ -329,6 +330,7 @@ SymbolEntry * newFunction (const char * name) {
 			e->u.eFunction.pardef = PARDEF_DEFINE;
 			e->u.eFunction.firstArgument = e->u.eFunction.lastArgument = NULL;
 			e->u.eFunction.resultType = NULL;
+			e->u.eFunction.argno = 0;
 		}
 		return e;
 	} else if (e->entryType == ENTRY_FUNCTION && e->u.eFunction.isForward) {
@@ -358,6 +360,10 @@ SymbolEntry * newParameter (const char * name, Type type,
 				type->refCount++;
 				e->u.eParameter.mode = mode;
 				e->u.eParameter.next = NULL;
+				//Increment the argument no, and avoid overflows. Not fully safe tho.
+				// That is, if we can have SIZE_MAX parameters on a function.
+				if (f->u.eFunction.argno < (SIZE_MAX-1))
+					f->u.eFunction.argno++;
 			}
 			if (f->u.eFunction.lastArgument == NULL) {
 				f->u.eFunction.firstArgument = f->u.eFunction.lastArgument = e;

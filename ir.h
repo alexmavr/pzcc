@@ -64,6 +64,7 @@ LLVMValueRef conditional_scope_valget (void);
 extern struct func_call *current_func_call_list;
 
 struct func_call {
+	SymbolEntry *func_ref;
 	Type call_type;
 	SymbolEntry *current_param;
 
@@ -74,7 +75,7 @@ struct func_call {
 	struct func_call *prev;
 };
 
-void function_call_type_push (Type type);
+void function_call_func_type_push (SymbolEntry *fun);
 Type function_call_type_pop (void);
 
 void function_call_param_set (SymbolEntry *param_ref);

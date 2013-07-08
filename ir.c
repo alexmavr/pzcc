@@ -122,12 +122,15 @@ LLVMValueRef conditional_scope_valget (void) {
 }
 
 /* Create a new function pushes a new function call type frame on the stack and sets its type. */
-void function_call_type_push (Type type) {
+void function_call_func_type_push (SymbolEntry *fun) {
 	struct func_call *temp_call;
+
+	Type type = fun->u.eFunction.resultType;
 
 	temp_call = new(sizeof(struct func_call));
 	temp_call->prev = current_func_call_list;
 
+	temp_call->func_ref = fun;
 	temp_call->call_type = type;
 	temp_call->current_param = NULL;
 
@@ -206,15 +209,15 @@ LLVMValueRef *function_call_arglist_get (void) {
 	return current_func_call_list->argv;
 }
 
-/* Returns the argno for the current call stack frame. */
+/* Return the number of arguments for the current function frame. */
 size_t function_call_argno_get (void) {
 	if (current_func_call_list == NULL)
 		my_error(ERR_LV_INTERN, "Function call frame undefined");
 
-	return current_func_call_list->total_argno;
+	return current_func_call_list->func_ref->u.eFunction.argno;
 }
 
-/* Converts a type from the symbol table format to the corresponding LLVM one */
+/* Converts a type from the symbol table format to the corresponding LLVM one. */
 LLVMTypeRef type_to_llvm(Type t) {
 	LLVMTypeRef res;
 	switch (t->kind) {
@@ -239,7 +242,7 @@ LLVMTypeRef type_to_llvm(Type t) {
 	return res;
 }
 
-/* Cast an LLVM Value from one type to another */
+/* Cast an LLVM Value from one type to another. */
 LLVMValueRef cast_compat(Type dest, Type src, LLVMValueRef src_val) {
     LLVMValueRef res;
     if ((dest == typeReal) && (src == typeInteger)) {
