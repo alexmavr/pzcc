@@ -422,7 +422,11 @@ routine_tail
 
             // Create param list
             for(i=0; i<argno; i++, curr_param=curr_param->u.eParameter.next) {
-                params[i] = type_to_llvm(curr_param->u.eParameter.type);
+                if (curr_param->u.eParameter.type->kind >= TYPE_ARRAY)
+                params[i] = LLVMPointerType(type_to_llvm( \
+                    iarray_to_array(curr_param->u.eParameter.type)), 0);
+                else
+                    params[i] = type_to_llvm(curr_param->u.eParameter.type);
             }
             
             // Create function type
@@ -492,8 +496,11 @@ routine_header_opt
 				newParameter($2.value.s, $1.type, PASS_BY_REFERENCE, currentFun);
 			} else if ($2.type->kind >= TYPE_ARRAY) {
 				Type current = $2.type;
-				while (current->refType != typeVoid)
+				while (current->refType != typeVoid) {
 					current = current->refType;
+                    if (current->refType == NULL)
+                        my_error(ERR_LV_INTERN, "unreachable array state");
+                }
 				current->refType = $1.type;
 				newParameter($2.value.s, $2.type, PASS_BY_REFERENCE, currentFun);
 			} else {
@@ -553,10 +560,8 @@ formal_tail
 	: /* nothing */ { $$.type = typeVoid; }
 	| '[' const_expr ']' formal_tail
 		{
-			if (array_index_check(&($2)))
-				$$.type = typeArray($2.value.i, $4.type);
-			else
-				$$.type = typeVoid; // error recovery
+			array_index_check(&($2));
+            $$.type = typeArray($2.value.i, $4.type);
 		}
 	;
 program_header
@@ -740,10 +745,13 @@ l_value
 					 	 * :: $2 is the number of dimensions following the id */
 						dims = array_dimensions(id->u.eVariable.type);
 						if ($2.value.i > dims)
-                            if (dims == 0) 
+                            if (dims == 0) {
                                 my_error(ERR_LV_ERR, "\"%s\" is not an Array", id->id);
-                            else
+                                YYERROR;
+                            } else {
                                 my_error(ERR_LV_ERR, "\"%s\" has less dimensions than specified", id->id);
+                                YYERROR;
+                            }
 						else
 							$$.type = n_dimension_type(id->u.eVariable.type, $2.value.i);
 						break;
@@ -752,10 +760,13 @@ l_value
 					{
 						dims = array_dimensions(id->u.eParameter.type);
 						if ($2.value.i > dims)
-                            if (dims == 0) 
+                            if (dims == 0) {
                                 my_error(ERR_LV_ERR, "\"%s\" is not an Array", id->id);
-                            else
+                                YYERROR;
+                            } else {
                                 my_error(ERR_LV_ERR, "\"%s\" has less dimensions than specified", id->id);
+                                YYERROR;
+                            }
 						else
 							$$.type = n_dimension_type(id->u.eParameter.type, $2.value.i);
 						break;
@@ -851,7 +862,7 @@ call_opt
 
 			function_call_param_set(currentParam->u.eParameter.next);
             if ((wanted_type->kind >= TYPE_ARRAY) && (wanted_type->size==0)) {
-                LLVMTypeRef dest_type = type_to_llvm(iarray_to_array($1.type));
+                LLVMTypeRef dest_type = LLVMPointerType(type_to_llvm(iarray_to_array($1.type)),0);
                 LLVMValueRef tmp = LLVMBuildPointerCast(builder, $1.Valref, dest_type, "ptrcasttmp");
                 function_call_argval_push(tmp);
             } else
@@ -863,6 +874,7 @@ call_opt_tail
 	| ',' expr call_opt_tail
 		{
 			SymbolEntry *currentParam = function_call_param_get();
+            Type wanted_type = currentParam->u.eParameter.type;
 			if (currentParam == NULL) {
 				my_error(ERR_LV_ERR, "Invalid number of parameters specified");
 				YYERROR;
@@ -872,7 +884,7 @@ call_opt_tail
 					verbose_type($2.type), verbose_type(currentParam->u.eParameter.type));
 			function_call_param_set(currentParam->u.eParameter.next);
             if ((wanted_type->kind >= TYPE_ARRAY) && (wanted_type->size==0)) {
-                LLVMTypeRef dest_type = type_to_llvm(iarray_to_array($2.type));
+                LLVMTypeRef dest_type = LLVMPointerType(type_to_llvm(iarray_to_array($2.type)),0);
                 LLVMValueRef tmp = LLVMBuildPointerCast(builder, $2.Valref, dest_type, "ptrcasttmp");
                 function_call_argval_push(tmp);
             } else

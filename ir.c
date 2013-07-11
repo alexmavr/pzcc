@@ -237,10 +237,10 @@ LLVMTypeRef type_to_llvm(Type t) {
 			res = LLVMInt8Type();
 			break;
         case TYPE_ARRAY:
-			res = LLVMPointerType(LLVMArrayType(type_to_llvm(t->refType), t->size),0);
+			res = LLVMArrayType(type_to_llvm(t->refType), t->size);
 			break;
         case TYPE_IARRAY:
-			res = LLVMPointerType(LLVMArrayType(type_to_llvm(t->refType), 0),0);
+			res = LLVMArrayType(type_to_llvm(t->refType), 0);
 			break;
 		default:
 			res = NULL;
