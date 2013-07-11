@@ -278,10 +278,7 @@ LLVMValueRef cast_compat(Type dest, Type src, LLVMValueRef src_val) {
     return res;
 }
 
-/* Creates a ARRAY type from an IARRAY type by setting 0 to every dimension */
+/* Creates a ARRAY type from an IARRAY type by setting 0 to the first dimension */
 Type iarray_to_array(Type array) {
-    if (array->kind >= TYPE_ARRAY)
-        return typeArray(0, iarray_to_array(array->refType));
-    else
-        return array;
+        return typeArray(0, array->refType);
 }

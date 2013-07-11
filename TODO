@@ -6,6 +6,15 @@ IR:
         WRITE, FORMAT
     refactor parser.y
     function declarations and calls
+    functions with a return value are not emitted without an assignment
+    command line parameter parsing
+    static compilation invocation
+    capture llvm stream ( dump to file? )
+    link with Library
+    testing + debugging
+
+semantics:
+    stricter array parameter size checking
 
 General:
     compiler arguments and llvm backend invocation (link together?)

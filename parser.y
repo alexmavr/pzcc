@@ -401,7 +401,6 @@ routine
 routine_tail
 	: ';' { forwardFunction(currentFun); }
 	| '{' {
-        //TODO: Insert body definition code here
         LLVMValueRef func_ref = LLVMGetNamedFunction(module, currentFun->id);
         
         if (func_ref != NULL) {
@@ -421,7 +420,7 @@ routine_tail
             int i;
 
             // Create param list
-            for(i=0; i<argno; i++, curr_param=curr_param->u.eParameter.next) {
+            for(i=argno-1; i>=0; i--, curr_param=curr_param->u.eParameter.next) {
                 if (curr_param->u.eParameter.type->kind >= TYPE_ARRAY)
                 params[i] = LLVMPointerType(type_to_llvm( \
                     iarray_to_array(curr_param->u.eParameter.type)), 0);
@@ -445,7 +444,7 @@ routine_tail
             // Store parameters in new local variables if passed by value
             curr_param = currentFun->u.eFunction.firstArgument;
             char * new_str; // IR parameters are <name>_ref
-            for(i=0; i<argno; i++, curr_param=curr_param->u.eParameter.next) {
+            for(i=argno-1; i>=0; i--, curr_param=curr_param->u.eParameter.next) {
                 LLVMValueRef param = LLVMGetParam(func_ref, i);
                 if (curr_param->u.eParameter.mode == PASS_BY_VALUE) {
                     curr_param->Valref = LLVMBuildAlloca(builder, \

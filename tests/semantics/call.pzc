@@ -6,7 +6,7 @@ FUNC int iproc(int j[]) {
     return j[2] + 3;
 }
 
-FUNC int i2proc(int j[], int pjk[][5][6]) {
+FUNC int i2proc(int j[], int pjk[][4][6]) {
     return j[2] + pjk[2][4][6];
 }
 
@@ -15,9 +15,9 @@ PROGRAM my_main () {
 	int k = 96;
 	int p[10];
 	int jp[10][4][6];
-    p[2]=4;
+    p[2]=14;
     jp[2][4][6]=6;
-    k = proc(proc(5));
+ //   k = proc(proc(5));
     j = iproc(p);
     j = i2proc(p, jp);
 }
