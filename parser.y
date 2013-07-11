@@ -401,66 +401,72 @@ routine
 routine_tail
 	: ';' { forwardFunction(currentFun); }
 	| '{' {
-			//TODO: Insert body definition code here
-			//...
-			LLVMValueRef func_ref = LLVMGetNamedFunction(module, currentFun->id);
+        //TODO: Insert body definition code here
+        LLVMValueRef func_ref = LLVMGetNamedFunction(module, currentFun->id);
+        
+        if (func_ref != NULL) {
+            if (LLVMCountParams(func_ref) != currentFun->u.eFunction.argno) {
+                my_error(ERR_LV_ERR, "Function %s is already declared with a different parameter count", currentFun->id);
+                YYERROR;
+            }
+            if (LLVMCountBasicBlocks(func_ref) != 0) {
+                my_error(ERR_LV_ERR, "Function %s is already fully defined");
+                YYERROR;
+                //TODO: Or alternatively we could keep the last definition of a function if it is defined in full multiple times.
+            }
+        } else {
+            size_t argno = currentFun->u.eFunction.argno;    
+            SymbolEntry *curr_param = currentFun->u.eFunction.firstArgument;
+            LLVMTypeRef *params = new(sizeof(LLVMTypeRef) * argno);
+            int i;
+
+            // Create param list
+            for(i=0; i<argno; i++, curr_param=curr_param->u.eParameter.next) {
+                params[i] = type_to_llvm(curr_param->u.eParameter.type);
+            }
             
-			if (func_ref != NULL) {
-				if (LLVMCountParams(func_ref) != currentFun->u.eFunction.argno) {
-					my_error(ERR_LV_ERR, "Function %s is already declared with a different parameter count", \
-								currentFun->id);
-                    YYERROR;
-				}
-				if (LLVMCountBasicBlocks(func_ref) != 0) {
-					my_error(ERR_LV_ERR, "Function %s is already fully defined");
-                    YYERROR;
-					//TODO: Or alternatively we could keep the last definition of a function if it is defined in full multiple times.
-				}
-			} else {
-                size_t argno = currentFun->u.eFunction.argno;    
-                SymbolEntry *curr_param = currentFun->u.eFunction.firstArgument;
-                LLVMTypeRef *params = new(sizeof(LLVMTypeRef) * argno);
-                int i;
+            // Create function type
+            LLVMTypeRef funcType = LLVMFunctionType( \
+                type_to_llvm(currentFun->u.eFunction.resultType), \
+                    params, argno, false);
 
-				// Create param list
-                for(i=0; i<argno; i++, curr_param=curr_param->u.eParameter.next) {
-                    params[i] = type_to_llvm(curr_param->u.eParameter.type);
-                }
-                
-                // Create function type
-                LLVMTypeRef funcType = LLVMFunctionType( \
-                    type_to_llvm(currentFun->u.eFunction.resultType), \
-                        params, argno, false);
+            // Create function 
+            func_ref = LLVMAddFunction(module, currentFun->id, funcType);
+            LLVMSetLinkage(func_ref, LLVMExternalLinkage);
 
-                // Create function 
-                func_ref = LLVMAddFunction(module, currentFun->id, funcType);
-                LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+            // position builder at start/end of function body
+            LLVMBasicBlockRef block = LLVMAppendBasicBlock(func_ref, "entry");
+            LLVMPositionBuilderAtEnd(builder, block);
 
-                // position builder at start/end of function body
-                LLVMBasicBlockRef block = LLVMAppendBasicBlock(func_ref, "entry");
-                LLVMPositionBuilderAtEnd(builder, block);
-
-				// Assign arguments to named values lookup 
-                curr_param = currentFun->u.eFunction.firstArgument;
-                char * new_str; // string for the new var names
-                for(i=0; i<argno; i++, curr_param=curr_param->u.eParameter.next) {
-                    LLVMValueRef param = LLVMGetParam(func_ref, i);
+            // Store parameters in new local variables if passed by value
+            curr_param = currentFun->u.eFunction.firstArgument;
+            char * new_str; // IR parameters are <name>_ref
+            for(i=0; i<argno; i++, curr_param=curr_param->u.eParameter.next) {
+                LLVMValueRef param = LLVMGetParam(func_ref, i);
+                if (curr_param->u.eParameter.mode == PASS_BY_VALUE) {
                     curr_param->Valref = LLVMBuildAlloca(builder, \
                         type_to_llvm(curr_param->u.eParameter.type), curr_param->id);
-
                     new_str = new(strlen(curr_param->id)+strlen("_ref")+1);
                     new_str[0] = '\0';
-                    strcat(new_str,curr_param->id);
-                    strcat(new_str,"_ref");
+                    strcat(new_str, curr_param->id);
+                    strcat(new_str, "_ref");
                     LLVMBuildStore(builder, param, curr_param->Valref);
                     LLVMSetValueName(param, new_str);
+                } else {
+                    LLVMSetValueName(param, curr_param->id);
+                    curr_param->Valref = param;
                 }
             }
-        } block_tail '}' 
-        {
-            if ((currentFunctionType != typeVoid) && (!functionHasReturn))
-				my_error(ERR_LV_ERR, "function without a return statement");
-		}
+        }
+    } block_tail '}' 
+    {
+        if ((currentFunctionType != typeVoid) && (!functionHasReturn))
+            my_error(ERR_LV_ERR, "function without a return statement");
+        
+        if ((currentFunctionType == typeVoid) && (!functionHasReturn)) {
+            LLVMBuildRetVoid(builder);
+        }
+    }
 	;
 routine_header
 	: routine_header_head T_id '('
@@ -678,8 +684,11 @@ expr
 	| '(' error ')' { $$.type = typeVoid; }
 	| l_value
 		{
-			 $$.type = $1.type;
-             $$.Valref = LLVMBuildLoad(builder, $1.Valref, "loadtmp");
+			$$.type = $1.type;
+            if ($1.type->kind < TYPE_ARRAY)
+                $$.Valref = LLVMBuildLoad(builder, $1.Valref, "loadtmp");
+            else
+                $$.Valref = $1.Valref;
 		}
 	| call { $$ = $1; }
 	| expr binop1 expr %prec '*'
@@ -830,16 +839,23 @@ call_opt
 	| expr call_opt_tail
 		{
 			SymbolEntry *currentParam = function_call_param_get();
+            Type wanted_type = currentParam->u.eParameter.type;
 			if (currentParam == NULL) {
 				my_error(ERR_LV_ERR, "Invalid number of parameters specified");
 				YYERROR;
-			} else if (!compat_types(currentParam->u.eParameter.type, $1.type)) {
+			} else if (!compat_types(wanted_type, $1.type)) {
 				my_error(ERR_LV_ERR, "Illegal parameter assignment from %s to %s", \
-					verbose_type($1.type), verbose_type(currentParam->u.eParameter.type));
+					verbose_type($1.type), verbose_type(wanted_type));
+                YYERROR;
 			}
-			function_call_param_set(currentParam->u.eParameter.next);
 
-			function_call_argval_push($1.Valref);
+			function_call_param_set(currentParam->u.eParameter.next);
+            if ((wanted_type->kind >= TYPE_ARRAY) && (wanted_type->size==0)) {
+                LLVMTypeRef dest_type = type_to_llvm(iarray_to_array($1.type));
+                LLVMValueRef tmp = LLVMBuildPointerCast(builder, $1.Valref, dest_type, "ptrcasttmp");
+                function_call_argval_push(tmp);
+            } else
+                function_call_argval_push($1.Valref);
 		}
 	;
 call_opt_tail
@@ -855,8 +871,12 @@ call_opt_tail
 				my_error(ERR_LV_ERR, "Illegal parameter assignment from %s to %s", \
 					verbose_type($2.type), verbose_type(currentParam->u.eParameter.type));
 			function_call_param_set(currentParam->u.eParameter.next);
-
-			function_call_argval_push($2.Valref);
+            if ((wanted_type->kind >= TYPE_ARRAY) && (wanted_type->size==0)) {
+                LLVMTypeRef dest_type = type_to_llvm(iarray_to_array($2.type));
+                LLVMValueRef tmp = LLVMBuildPointerCast(builder, $2.Valref, dest_type, "ptrcasttmp");
+                function_call_argval_push(tmp);
+            } else
+                function_call_argval_push($2.Valref);
 		}
 	;
 block
@@ -905,8 +925,8 @@ base_stmt
 	| l_value stmt_choice ';'
 		{
 			if (!compat_types($1.type, typeInteger)) {
-				my_error(ERR_LV_ERR, "Type mismatch on \"%s\" operator: lvalue can be %s, %s or %s", $2, verbose_type(typeReal), verbose_type(typeInteger), \
-                        verbose_type(typeChar));
+				my_error(ERR_LV_ERR, "Type mismatch on \"%s\" operator: lvalue can be %s, %s or %s", $2, verbose_type(typeReal), verbose_type(typeInteger), verbose_type(typeChar));
+                YYERROR;
 			}
 
             struct ast_node tmp, one, res;

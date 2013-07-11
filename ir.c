@@ -236,6 +236,12 @@ LLVMTypeRef type_to_llvm(Type t) {
 		case TYPE_CHAR:
 			res = LLVMInt8Type();
 			break;
+        case TYPE_ARRAY:
+			res = LLVMPointerType(LLVMArrayType(type_to_llvm(t->refType), t->size),0);
+			break;
+        case TYPE_IARRAY:
+			res = LLVMPointerType(LLVMArrayType(type_to_llvm(t->refType), 0),0);
+			break;
 		default:
 			res = NULL;
 	}
@@ -270,4 +276,12 @@ LLVMValueRef cast_compat(Type dest, Type src, LLVMValueRef src_val) {
         res = src_val;
     }
     return res;
+}
+
+/* Creates a ARRAY type from an IARRAY type by setting 0 to every dimension */
+Type iarray_to_array(Type array) {
+    if (array->kind >= TYPE_ARRAY)
+        return typeArray(0, iarray_to_array(array->refType));
+    else
+        return array;
 }

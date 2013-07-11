@@ -7,7 +7,7 @@
  *
  */
 
-#ifndef __IR_H__
+#ifndef __IR_H__ 
 #define __IR_H__
 
 #include <llvm-c/Core.h>
@@ -88,6 +88,7 @@ size_t function_call_argno_get (void);
 
 /* Interface : Type transformation (?) methods */
 LLVMTypeRef type_to_llvm(Type t);
+Type iarray_to_array(Type array);
 LLVMValueRef cast_compat(Type dest, Type src, LLVMValueRef src_val);
 
 #endif	/* __IR_H__ */

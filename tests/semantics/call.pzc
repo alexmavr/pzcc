@@ -2,9 +2,16 @@ FUNC int proc(int i) {
 	return i+4;
 }
 
+FUNC int iproc(int j[]) {
+    return j[2] + 3;
+}
+
 PROGRAM my_main () {
 	int j = 9;
 	int k = 96;
-	j = j + k;
+	int p[10];
+    p[2]=4;
     k = proc(proc(5));
+    j = iproc(p);
+    j = j;
 }
