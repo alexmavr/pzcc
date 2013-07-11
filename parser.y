@@ -400,35 +400,66 @@ routine
 	;
 routine_tail
 	: ';' { forwardFunction(currentFun); }
-	| block
-		{
-			if ((currentFunctionType != typeVoid) && (!functionHasReturn))
-				my_error(ERR_LV_ERR, "function without a return statement");
-
+	| '{' {
 			//TODO: Insert body definition code here
 			//...
 			LLVMValueRef func_ref = LLVMGetNamedFunction(module, currentFun->id);
+            
 			if (func_ref != NULL) {
 				if (LLVMCountParams(func_ref) != currentFun->u.eFunction.argno) {
 					my_error(ERR_LV_ERR, "Function %s is already declared with a different parameter count", \
 								currentFun->id);
+                    YYERROR;
 				}
 				if (LLVMCountBasicBlocks(func_ref) != 0) {
 					my_error(ERR_LV_ERR, "Function %s is already fully defined");
+                    YYERROR;
 					//TODO: Or alternatively we could keep the last definition of a function if it is defined in full multiple times.
 				}
 			} else {
-				//=====algo:
-				//create param list
-				//create function type
-				//create function
-				//assign arguments to named values lookup (params)
-				//...????
-				//save current builder position?
-				//position builder at end of function body?
-				//restore builder position to after the function?
-			}
-			//...
+                size_t argno = currentFun->u.eFunction.argno;    
+                SymbolEntry *curr_param = currentFun->u.eFunction.firstArgument;
+                LLVMTypeRef *params = new(sizeof(LLVMTypeRef) * argno);
+                int i;
+
+				// Create param list
+                for(i=0; i<argno; i++, curr_param=curr_param->u.eParameter.next) {
+                    params[i] = type_to_llvm(curr_param->u.eParameter.type);
+                }
+                
+                // Create function type
+                LLVMTypeRef funcType = LLVMFunctionType( \
+                    type_to_llvm(currentFun->u.eFunction.resultType), \
+                        params, argno, false);
+
+                // Create function 
+                func_ref = LLVMAddFunction(module, currentFun->id, funcType);
+                LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+                // position builder at start/end of function body
+                LLVMBasicBlockRef block = LLVMAppendBasicBlock(func_ref, "entry");
+                LLVMPositionBuilderAtEnd(builder, block);
+
+				// Assign arguments to named values lookup 
+                curr_param = currentFun->u.eFunction.firstArgument;
+                char * new_str; // string for the new var names
+                for(i=0; i<argno; i++, curr_param=curr_param->u.eParameter.next) {
+                    LLVMValueRef param = LLVMGetParam(func_ref, i);
+                    curr_param->Valref = LLVMBuildAlloca(builder, \
+                        type_to_llvm(curr_param->u.eParameter.type), curr_param->id);
+
+                    new_str = new(strlen(curr_param->id)+strlen("_ref")+1);
+                    new_str[0] = '\0';
+                    strcat(new_str,curr_param->id);
+                    strcat(new_str,"_ref");
+                    LLVMBuildStore(builder, param, curr_param->Valref);
+                    LLVMSetValueName(param, new_str);
+                }
+            }
+        } block_tail '}' 
+        {
+            if ((currentFunctionType != typeVoid) && (!functionHasReturn))
+				my_error(ERR_LV_ERR, "function without a return statement");
 		}
 	;
 routine_header
@@ -554,7 +585,6 @@ type
 	| T_char	{ $$.type = typeChar; }
 	| T_real	{ $$.type = typeReal; }
 	;
-
 const_unit
 	: T_CONST_integer
 		{
@@ -688,6 +718,8 @@ l_value
 			SymbolEntry * id = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
 			if (id == NULL)
 				YYERROR;
+			if (id->Valref == NULL)
+				YYERROR;
             
 			$$.value.i = 0; // if 1, then the l_value is constant
 
@@ -715,7 +747,6 @@ l_value
                                 my_error(ERR_LV_ERR, "\"%s\" is not an Array", id->id);
                             else
                                 my_error(ERR_LV_ERR, "\"%s\" has less dimensions than specified", id->id);
-
 						else
 							$$.type = n_dimension_type(id->u.eParameter.type, $2.value.i);
 						break;
@@ -1101,10 +1132,13 @@ base_stmt
 		{
 			if (currentFunctionType == NULL)
 				YYERROR;
-			else if (!compat_types(currentFunctionType, $2.type))
+			else if (!compat_types(currentFunctionType, $2.type)) {
 				my_error(ERR_LV_ERR, "return: incompatible return type: %s instead of %s", \
-				verbose_type($2.type), verbose_type(currentFunctionType));
+                    verbose_type($2.type), verbose_type(currentFunctionType));
+                YYERROR;
+            }
 			functionHasReturn = true;
+            LLVMBuildRet(builder, $2.Valref);
 		}
 	| write '(' stmt_opt_write ')' ';' 
 	| error ';' 
