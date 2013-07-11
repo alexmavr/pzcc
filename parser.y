@@ -815,14 +815,12 @@ call
 		{ 
 			//TODO: Code generation for call. We have the argument list in ...argv and the function id in $1.
 			//I think the below commented snippet should cover it.
-			/*
 			LLVMValueRef fun_ref = LLVMGetNamedFunction(module, $1);
 			if (fun_ref == NULL) {
 				my_error(ERR_LV_ERR, "Definition of function %s is not visible at call site", $1);
 			}
 
-			LLVMBuildCall(builder, fun_ref, function_call_arglist_get(), function_call_argno_get(), "calltmp");
-			*/
+			$$.Valref = LLVMBuildCall(builder, fun_ref, function_call_arglist_get(), function_call_argno_get(), "calltmp");
 
 			$$.type = function_call_type_pop();
 		}
