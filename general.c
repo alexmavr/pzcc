@@ -70,14 +70,39 @@ int main (int argc, char **argv) {
 	yyparse();
 //	closeScope();
 
-	char *err_msg = NULL;
-	if (our_options.output_is_stdout == false) {
-		if (LLVMPrintModuleToFile(module, our_options.output_filename, &err_msg)) {
-			my_error(ERR_LV_INTERN, "LLVM module not dumped correctly: %s", err_msg);
-			LLVMDisposeMessage(err_msg);
-		}
-	} else {
-		LLVMDumpModule(module);
+	if (our_options.opt_flag == true) {
+		//...
+fprintf(stderr, "TODO: Must implement optimizations\n");
+		//...
+	}
+
+	switch (our_options.output_type) {
+		case OUT_IR:
+/*
+			if (our_options.output_is_stdout == false) {
+				char *err_msg = NULL;
+				if (LLVMPrintModuleToFile(module, our_options.output_filename, &err_msg)) {
+					my_error(ERR_LV_INTERN, "LLVM module not dumped correctly: %s", err_msg);
+					LLVMDisposeMessage(err_msg);
+				}
+			} else {
+				LLVMDumpModule(module);
+			}
+*/
+			LLVMDumpModule(module);
+			break;
+		case OUT_ASM:
+			//...
+fprintf(stderr, "TODO: Must implement assembly output\n");
+			//...
+			break;
+		case OUT_EXEC:
+			//...
+fprintf(stderr, "TODO: Must implement executable output (assembler - linker)\n");
+			//...
+			break;
+		default:
+			my_error(ERR_LV_INTERN, "Unknown output file type detected");
 	}
 
 //	LLVMDisposePassManager(pass_manager);

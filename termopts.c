@@ -62,6 +62,11 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
 				ret = 1;
 			}
 			break;
+/*
+		case 'l':
+fprintf(stderr, "Argument to llc-flags is %s\n", arg);
+			break;
+*/
 		//Capture input filename.
 		case ARGP_KEY_ARG:
 			if (our_options.in_file == NULL) {
@@ -106,9 +111,10 @@ const char *argp_program_version = "Pazcal 0.1a";
 const char *argp_program_bug_address = "<spiritual.dragon.of.ra@gmail.com>";
 //Argp option structure.
 static struct argp_option options[] = {
-	{ "optimize", 'o', 0, 0, "Enable all optimizations", 0 }, 
-	{ "emit-intermediate", 'i', 0, 0, "Emit LLVM intermediate code", 1 }, 
-	{ "emit-final", 'f', 0, 0, "Emit final assembly code", 1 }, 
+	{ "emit-intermediate", 'i', 0, 0, "Emit LLVM intermediate code", 0 }, 
+	{ "emit-final", 'f', 0, 0, "Emit final assembly code", 0 }, 
+	{ "optimize", 'o', 0, 0, "Enable all optimizations", 1 }, 
+//	{ "llc-flags", 'l', "LLC_FLAGS", 0, "Flags to be used when -f option is in effect", 2 }, 
 	{ 0 }
 };
 //Non-option argument description.
