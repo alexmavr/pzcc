@@ -46,8 +46,23 @@ extern FILE *yyin;
 
 struct options_t our_options = { .in_file = NULL, .output_type = OUT_NONE, .output_is_stdout = false, .output_filename = NULL, .opt_flag = 0 };
 
+//IR dump method.
+static void dump_ir (char *outfile) {
+	if (our_options.output_is_stdout == false) {
+		char *err_msg = NULL;
+		if (LLVMPrintModuleToFile(module, outfile, &err_msg)) {
+			my_error(ERR_LV_INTERN, "LLVM module not dumped correctly: %s", err_msg);
+			LLVMDisposeMessage(err_msg);
+		}
+	} else {
+		LLVMDumpModule(module);
+	}
+}
+
 //Entry point.
 int main (int argc, char **argv) {
+	char tmp_f[L_tmpnam];
+	int ret = 0;
 
 	//Parse command-line options.
 	parse_term_options(argc, argv);
@@ -72,25 +87,22 @@ int main (int argc, char **argv) {
 
 	if (our_options.opt_flag == true) {
 		//...
+		//Create command-line call for opt and its arguments.
 fprintf(stderr, "TODO: Must implement optimizations\n");
 		//...
 	}
 
 	switch (our_options.output_type) {
 		case OUT_IR:
-//*
-			if (our_options.output_is_stdout == false) {
-				char *err_msg = NULL;
-				if (LLVMPrintModuleToFile(module, our_options.output_filename, &err_msg)) {
-					my_error(ERR_LV_INTERN, "LLVM module not dumped correctly: %s", err_msg);
-					LLVMDisposeMessage(err_msg);
-				}
-			} else {
-				LLVMDumpModule(module);
-			}
-//*/
+			dump_ir(our_options.output_filename);
 			break;
 		case OUT_ASM:
+			if (tmpnam(tmp_f) == NULL) {
+				my_error(ERR_LV_ERR, "Could not open temporary file");
+				goto err_end;
+			}
+fprintf(stderr, "TMPNAME is %s\n", tmp_f);
+			//Create command-line call for llc and its arguments.
 			//...
 fprintf(stderr, "TODO: Must implement assembly output\n");
 			//...
@@ -110,5 +122,9 @@ fprintf(stderr, "TODO: Must implement executable output (assembler - linker)\n")
 
 	printf("Parsing Complete\n");
 
-	return 0;
+	goto ntm_end;
+err_end:
+	ret = 1;
+nrm_end:
+	return ret;
 }
