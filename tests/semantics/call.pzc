@@ -2,8 +2,8 @@ FUNC int proc(int i) {
 	return i+4;
 }
 
-FUNC int iproc(int j[]) {
-    return j[2] + 3;
+PROC rproc(int &j) {
+    j = 5;
 }
 
 FUNC int i2proc(int j[], int pjk[][4][6]) {
@@ -22,9 +22,9 @@ PROGRAM my_main () {
 	int jp[10][4][6];
     p[2]=14;
     jp[2][4][6]=6;
- //   k = proc(proc(5));
-    j = iproc(p);
-    i2proc(p, jp);
+//   k = proc(proc(5));
+    rproc(k);
+//    i2proc(p, jp);
     dostuff(p, jp, 4.6, s);
     j = s[4];
     j = j;
