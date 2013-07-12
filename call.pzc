@@ -1,0 +1,31 @@
+FUNC int proc(int i) {
+	return i+4;
+}
+
+FUNC int iproc(int j[]) {
+    return j[2] + 3;
+}
+
+FUNC int i2proc(int j[], int pjk[][4][6]) {
+    return j[2] + pjk[2][4][6];
+}
+
+PROC dostuff(int j[], int pjk[][4][6], REAL KK, char s[]) {
+    s[4] = i2proc(j, pjk);
+}
+
+PROGRAM my_main () {
+	int j = 9;
+	int k = 96;
+	int p[10];
+	char s[10];
+	int jp[10][4][6];
+    p[2]=14;
+    jp[2][4][6]=6;
+ //   k = proc(proc(5));
+    j = iproc(p);
+    i2proc(p, jp);
+    dostuff(p, jp, 4.6, s);
+    j = s[4];
+    j = j;
+}

@@ -10,6 +10,8 @@ IR:
 	static compilation invocation	-> call llc
 	link with Library
 	testing + debugging
+	pass-by-reference parameters
+	fix LLVMPrintModulToFile to properly accept file name (it could have something to do with file creation flags in open())
 
 semantics:
 	stricter array parameter size checking

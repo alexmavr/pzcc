@@ -29,7 +29,9 @@ static void calculate_output_file (void) {
 		my_error(ERR_LV_ERR, "Error opening output file: filename too long");
 	}
 
-	snprintf(temp, MAX_FILENAME_LEN, "%s.%s", our_options.output_filename, extension_s[our_options.output_type]);
+	temp[i] = temp[i+1] = temp[i+2] =temp[i+3] = '\0';
+	snprintf(temp, ((MAX_FILENAME_LEN > i+3) ? (i+5) : MAX_FILENAME_LEN), "%s.%s", our_options.output_filename, extension_s[our_options.output_type]);
+fprintf(stderr, "FILE is %s\n", temp);
 
 	free(our_options.output_filename);
 	our_options.output_filename = temp;
@@ -39,13 +41,17 @@ static void calculate_output_file (void) {
 static error_t parse_opt (int key, char *arg, struct argp_state *state) {
 	error_t ret = 0;
 
+	fprintf(stderr, "Parsing option %c with argument %s\n", key, arg);
+
 	switch (key) {
 		//Set optimization flag.
 		case 'o':
+fprintf(stderr, "Switch line %d\n", __LINE__);
 			our_options.opt_flag = true;
 			break;
 		//Set output to IR.
 		case 'i':
+fprintf(stderr, "Switch line %d\n", __LINE__);
 			if (our_options.output_type == OUT_NONE) {
 				our_options.output_type = OUT_IR;
 			} else {
@@ -55,6 +61,7 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
 			break;
 		//Set output to assembly.
 		case 'f':
+fprintf(stderr, "Switch line %d\n", __LINE__);
 			if (our_options.output_type == OUT_NONE) {
 				our_options.output_type = OUT_ASM;
 			} else {
@@ -69,6 +76,7 @@ fprintf(stderr, "Argument to llc-flags is %s\n", arg);
 */
 		//Capture input filename.
 		case ARGP_KEY_ARG:
+fprintf(stderr, "Switch line %d\n", __LINE__);
 			if (our_options.in_file == NULL) {
 				our_options.in_file = fopen(arg, "r");
 				if (our_options.in_file == NULL) {
@@ -89,6 +97,7 @@ fprintf(stderr, "Argument to llc-flags is %s\n", arg);
 			break;
 		//Capture option parsing end event, check input stream and open output.
 		case ARGP_KEY_END:
+fprintf(stderr, "Switch line %d\n", __LINE__);
 			if (our_options.output_type == OUT_NONE)
 				our_options.output_type = OUT_EXEC;
 
