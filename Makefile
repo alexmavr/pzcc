@@ -7,7 +7,7 @@ LLVMFLAGS = $(shell llvm-config --cflags)
 CFLAGS += -Wall $(LLVMFLAGS)
 LDFLAGS +=
 LLVM_LINK_FLAGS=$(shell llvm-config --libs --cflags --ldflags core analysis native)
-OBJ += pzc.lex.o semantic.o parser.o symbol.o general.o error.o ir.o
+OBJ += pzc.lex.o semantic.o parser.o symbol.o general.o error.o ir.o termopts.o
 DEPENDS += 
 
 ifndef DEBUG
@@ -26,6 +26,8 @@ all: pzcc clean
 pzcc: $(OBJ) 
 	$(LD) $(OBJ) $(LDFLAGS) $(LLVM_LINK_FLAGS) -o $@
 
+termopts.o: termopts.c termopts.h
+	$(CC) $(CFLAGS) -c $< -o $@
 general.o: general.c general.h
 	$(CC) $(CFLAGS) -c $< -o $@
 semantic.o: semantic.c semantic.h

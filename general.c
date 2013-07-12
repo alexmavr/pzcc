@@ -18,6 +18,7 @@
 #include "error.h"
 #include "general.h"
 #include "ir.h"
+#include "termopts.h"
 
 //Cleanup hook.
 void cleanup (void) {
@@ -43,8 +44,14 @@ void delete (void *p) {
 char *filename = "stdin";
 extern FILE *yyin;
 
+struct options_t our_options = { .in_file = NULL, .output_type = OUT_NONE, .out_file = NULL, .opt_flag = 0 };
+
 //Entry point.
 int main (int argc, char **argv) {
+
+	//Parse command-line options.
+	parse_term_options(argc, argv);
+/*
 	//Open input file (if none exists, it uses the default - stdin).
 	if (argc > 1) {
 		filename=argv[1];
@@ -54,6 +61,7 @@ int main (int argc, char **argv) {
 			exit(EXIT_FAILURE);
 		}
 	}
+*/
 
 	module = LLVMModuleCreateWithName("pzcc");
 	builder = LLVMCreateBuilder();
@@ -72,7 +80,11 @@ int main (int argc, char **argv) {
 	yyparse();
 	//closeScope();
 
-	LLVMDumpModule(module);
+	char *err_msg = NULL;
+	if (LLVMPrintModuleToFile(module, "current.ll", &err_msg))
+		my_error(ERR_LV_INTERN, "LLVM module not dumped correctly: %s", err_msg);
+	LLVMDisposeMessage(err_msg);
+
 //	LLVMDisposePassManager(pass_manager);
 	LLVMDisposeBuilder(builder);
 	LLVMDisposeModule(module);

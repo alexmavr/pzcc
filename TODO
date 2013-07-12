@@ -2,37 +2,35 @@ Syntax:
 	improve error recovery and messages
 
 IR:
-    statements:
-        WRITE, FORMAT
-    refactor parser.y
-    function declarations and calls
-    functions with a return value are not emitted without an assignment
-    command line parameter parsing
-    static compilation invocation
-    capture llvm stream ( dump to file? )
-    link with Library
-    testing + debugging
+	statements:
+		WRITE, FORMAT
+	refactor parser.y
+	functions with a return value are not emitted without an assignment
+	command line parameter parsing	-> mostly done :: only have to modify output file extension and open it
+	static compilation invocation	-> call llc
+	link with Library
+	testing + debugging
 
 semantics:
-    stricter array parameter size checking
+	stricter array parameter size checking
 
 General:
-    compiler arguments and llvm backend invocation (link together?)
-    refactor parser.y
+	compiler arguments and llvm backend invocation (link together?)
+	refactor parser.y
 
 Done:
 *	replace currentCallType and currentParam with CallTypeStack and ParamStack
 *	loop_counter is not needed for anything else than checking if continue and break statements are legal, remove it. We have break_is_legal, but atm it doesn't function with continue statements.	-> %s/break_is_legal/control_flow_flags/gc' ed.
-*   statemets: if, for, while, do..until, switch
-*   global array initializations 
-*   IR - global variables
-*   IR - global constants
-*   IR - constant expression assignments
-*   IR - array initializations 
-*   IR - assignments
-*   IR - binops + signed operations
-*   IR - unops
-*   signed operations handling
+*	statemets: if, for, while, do..until, switch
+*	global array initializations 
+*	IR - global variables
+*	IR - global constants
+*	IR - constant expression assignments
+*	IR - array initializations 
+*	IR - assignments
+*	IR - binops + signed operations
+*	IR - unops
+*	signed operations handling
 *	parser.y cleanup and polishing
 *	refactor comp_lib	:: Done, moved to semantic
 *	test forward function declarations
@@ -52,3 +50,5 @@ Done:
 		switch(X)	->	X | 10
 	>>
 		switch break is indicated by 1X bit, and while control flow is indicated by X1 bit.
+*	function declarations and calls
+*	capture llvm stream ( dump to file? )
