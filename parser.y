@@ -212,10 +212,11 @@ const_def
 				con->u.eConstant.value.vChar = int_to_char($6.value.i);
                 res = LLVMConstInt(LLVMInt8Type(), \
                             con->u.eConstant.value.vChar, false);
-			} else if (currentType != $6.type)
+			} else if (currentType != $6.type) {
 				my_error(ERR_LV_ERR, "Illegal assignment from %s to %s on \"%s\"", \
 						verbose_type($6.type), verbose_type(currentType), $4);
-			else if (currentType == typeInteger) {
+                YYERROR;
+			} else if (currentType == typeInteger) {
 				con->u.eConstant.value.vInteger = $6.value.i;
                 res = LLVMConstInt(LLVMInt32Type(), \
                         con->u.eConstant.value.vInteger, false);
@@ -230,9 +231,11 @@ const_def
 				con->u.eConstant.value.vChar = $6.value.c;
                 res = LLVMConstInt(LLVMInt8Type(), \
                         con->u.eConstant.value.vChar, false);
-			} else
+			} else {
 				my_error(ERR_LV_ERR, "Unexpected type %s for constant declaration", \
 																 currentType);
+                YYERROR;
+            }
 
             if (global_scope) {
                 /* Set the const as global */
@@ -270,10 +273,11 @@ const_def_tail
 				con->u.eConstant.value.vChar = int_to_char($4.value.i);
                 res = LLVMConstInt(LLVMInt8Type(), \
                             con->u.eConstant.value.vChar, false);
-			} else if (currentType != $4.type)
+			} else if (currentType != $4.type) {
 				my_error(ERR_LV_ERR, "Illegal assignment from %s to %s on \"%s\"", \
 						verbose_type($4.type), verbose_type(currentType), $4);
-			else if (currentType == typeInteger) {
+                YYERROR;
+			} else if (currentType == typeInteger) {
 				con->u.eConstant.value.vInteger = $4.value.i;
                 res = LLVMConstInt(LLVMInt32Type(), \
                         con->u.eConstant.value.vInteger, false);
@@ -288,9 +292,11 @@ const_def_tail
 				con->u.eConstant.value.vChar = $4.value.c;
                 res = LLVMConstInt(LLVMInt8Type(), \
                         con->u.eConstant.value.vChar, false);
-			} else
+			} else {
 				my_error(ERR_LV_ERR, "Unexpected type %s for constant declaration", \
 																 currentType);
+                YYERROR;
+            }
             if (global_scope) {
                 /* Set the const as global */
                 con->Valref = LLVMAddGlobal(module, type_to_llvm(currentType), $2);
@@ -411,7 +417,7 @@ routine_tail
             if (LLVMCountBasicBlocks(func_ref) != 0) {
                 my_error(ERR_LV_ERR, "Function %s is already fully defined");
                 YYERROR;
-                //TODO: Or alternatively we could keep the last definition of a function if it is defined in full multiple times.
+                //TODO: Or alternatively we could keep the last definition of a function if it is defined in full multiple times. -naaah
             }
         } else {
             size_t argno = currentFun->u.eFunction.argno;    
@@ -463,8 +469,10 @@ routine_tail
         }
     } block_tail '}' 
     {
-        if ((currentFunctionType != typeVoid) && (!functionHasReturn))
+        if ((currentFunctionType != typeVoid) && (!functionHasReturn)) {
             my_error(ERR_LV_ERR, "function without a return statement");
+            YYERROR;
+        }
         
         if ((currentFunctionType == typeVoid) && (!functionHasReturn)) {
             LLVMBuildRetVoid(builder);
@@ -498,7 +506,7 @@ routine_header_opt
 				while (current->refType != typeVoid) {
 					current = current->refType;
                     if (current->refType == NULL)
-                        my_error(ERR_LV_INTERN, "unreachable array state");
+                        my_error(ERR_LV_INTERN, "unreachable null array state");
                 }
 				current->refType = $1.type;
 				newParameter($2.value.s, $2.type, PASS_BY_REFERENCE, currentFun);
@@ -771,8 +779,10 @@ l_value
 						break;
 					}
 				case ENTRY_CONSTANT:
-					if ($2.value.i)
-						my_error(ERR_LV_ERR, "Constant \"%s\" cannot an Array",id->id);
+					if ($2.value.i) {
+						my_error(ERR_LV_ERR, "Constant \"%s\" cannot be an Array",id->id);
+                        YYERROR;
+                    }
 					$$.type = id->u.eConstant.type;
                     $$.value.i = 1;
 					break;
@@ -799,8 +809,10 @@ l_value_tail
         }
 	| '[' expr ']'  l_value_tail
 		{
-			if (!compat_types(typeInteger, $2.type))
-			   my_error(ERR_LV_ERR, "Array index cannot be %s", verbose_type($2.type));
+			if (!compat_types(typeInteger, $2.type)) {
+                my_error(ERR_LV_ERR, "Array index cannot be %s", verbose_type($2.type));
+                YYERROR;
+            }
             
             $$.v_list = add_to_list($4.v_list, $2.Valref);
 			$$.value.i = 1 + $4.value.i;
@@ -836,6 +848,7 @@ call
 			LLVMValueRef fun_ref = LLVMGetNamedFunction(module, $1);
 			if (fun_ref == NULL) {
 				my_error(ERR_LV_ERR, "Definition of function %s is not visible at call site", $1);
+                YYERROR;
 			}
 
             if (fun->u.eFunction.resultType == typeVoid)
@@ -880,9 +893,11 @@ call_opt_tail
 				my_error(ERR_LV_ERR, "Invalid number of parameters specified");
 				YYERROR;
 			}
-			if (!compat_types(currentParam->u.eParameter.type, $2.type))
+			if (!compat_types(currentParam->u.eParameter.type, $2.type)) {
 				my_error(ERR_LV_ERR, "Illegal parameter assignment from %s to %s", \
 					verbose_type($2.type), verbose_type(currentParam->u.eParameter.type));
+                YYERROR;
+            }
 			function_call_param_set(currentParam->u.eParameter.next);
             if ((wanted_type->kind >= TYPE_ARRAY) && (wanted_type->size==0)) {
                 LLVMTypeRef dest_type = LLVMPointerType(type_to_llvm(iarray_to_array($2.type)),0);
@@ -909,11 +924,15 @@ base_stmt
 	: ';' 
 	| l_value assign expr ';'
 		{
-			if (!compat_types($1.type, $3.type))
+			if (!compat_types($1.type, $3.type)) {
 				my_error(ERR_LV_ERR, "Illegal assignment from %s to %s ", \
 						verbose_type($3.type), verbose_type($1.type));
-            if ($1.value.i == 1)
+                YYERROR;
+            }
+            if ($1.value.i == 1) {
                 my_error(ERR_LV_ERR, "Illegal assignment to constant variable");
+                YYERROR;
+            }
 
             struct ast_node res = $3;
             if (strcmp($2, "=")) {
@@ -958,9 +977,11 @@ base_stmt
 	| call ';' 
 	| T_if '(' expr ')'
 		{
-			if (!compat_types(typeBoolean, $3.type))
+			if (!compat_types(typeBoolean, $3.type)) {
 				my_error(ERR_LV_ERR, "if: condition is %s instead of Boolean", \
 							verbose_type($3.type));
+                YYERROR;
+            }
 
 			new_conditional_scope(IF_COND);
 
@@ -1008,10 +1029,13 @@ base_stmt
             if (i == NULL)
                 YYERROR;
 
-            if (i->entryType != ENTRY_VARIABLE)
+            if (i->entryType != ENTRY_VARIABLE) {
                 my_error(ERR_LV_ERR, "FOR: \"%s\" is not a variable", i->id);
-            else if (!compat_types(typeInteger, i->u.eVariable.type))
+                YYERROR;
+            } else if (!compat_types(typeInteger, i->u.eVariable.type)) {
                 my_error(ERR_LV_ERR, "FOR: control variable \"%s\" is not an Integer", i->id);
+                YYERROR;
+            }
             new_conditional_scope(FOR_COND);
 
             LLVMBuildStore(builder, $5.from , i->Valref);
@@ -1075,9 +1099,11 @@ base_stmt
 
         } '(' expr ')'
         { 
-            if (!compat_types(typeBoolean, $4.type))
+            if (!compat_types(typeBoolean, $4.type)) {
 				my_error(ERR_LV_ERR, "while: condition is %s instead of Boolean", \
 							verbose_type($4.type));
+                YYERROR;
+            }
 
             LLVMBasicBlockRef whilebody_ref = conditional_scope_get(second);
             LLVMBasicBlockRef endwhile_ref = conditional_scope_get(third);
@@ -1114,9 +1140,11 @@ base_stmt
 		}
 		T_while '(' expr ')' ';'
 		{
-			if (!compat_types(typeBoolean, $7.type))
+			if (!compat_types(typeBoolean, $7.type)) {
 				my_error(ERR_LV_ERR, "do..while: condition is %s instead of Boolean", \
 							verbose_type($7.type));
+                YYERROR;
+            }
 
 			LLVMBasicBlockRef do_ref = conditional_scope_get(first);
 			LLVMBasicBlockRef enddo_ref = conditional_scope_get(third);
@@ -1130,9 +1158,11 @@ base_stmt
 	| T_switch
 	'(' expr ')' '{'
 		{
-			if (!compat_types(typeInteger, $3.type))
+			if (!compat_types(typeInteger, $3.type)) {
 				my_error(ERR_LV_ERR, "switch: expression is %s instead of Integer", \
 							verbose_type($3.type));
+                YYERROR;
+            }
 
 			new_conditional_scope(SWITCH_COND);
 			conditional_scope_valset($3.Valref);
@@ -1228,9 +1258,11 @@ stmt_tail_tail_plus
 stmt_tail_tail
 	: T_case const_expr ':'
 		{
-			if (!compat_types(typeInteger, $2.type))
+			if (!compat_types(typeInteger, $2.type)) {
 				my_error(ERR_LV_ERR, "switch: case is %s instead of Integer", \
 						verbose_type($2.type));
+                YYERROR;
+            }
 
 			LLVMBasicBlockRef switchcond_ref = conditional_scope_get(first);
 			LLVMPositionBuilderAtEnd(builder, switchcond_ref);
@@ -1296,12 +1328,16 @@ assign
 range
 	: expr range_choice expr range_opt
 		{
-			if (!compat_types(typeInteger, $1.type))
+			if (!compat_types(typeInteger, $1.type)) {
 				my_error(ERR_LV_ERR, "FOR: range start is %s instead of Integer", \
 										verbose_type($1.type));
-			if (!compat_types(typeInteger, $3.type))
+                YYERROR;
+            }
+			if (!compat_types(typeInteger, $3.type)) {
 				my_error(ERR_LV_ERR, "FOR: range end is %s instead of Integer", \
 										verbose_type($3.type));
+                YYERROR;
+            }
             $$.from = $1.Valref;
             $$.to = $3.Valref;
             $$.step = $4.Valref;
@@ -1316,9 +1352,11 @@ range_opt
 	: /* Nothing */ { $$.Valref = LLVMConstInt(LLVMInt32Type(), 1, false); }
 	| T_step expr
 		{
-			if (!compat_types(typeInteger, $2.type))
+			if (!compat_types(typeInteger, $2.type)) {
 				my_error(ERR_LV_ERR, "FOR: STEP is %s instead of Integer", \
 										verbose_type($2.type));
+                YYERROR;
+            }
             $$.Valref = cast_compat(typeInteger, $2.type, $2.Valref);
 		}
 	;
@@ -1348,28 +1386,35 @@ write
 format
 	: expr
 		{
-			if (($1.type->kind >= TYPE_ARRAY) && ( $1.type->refType != typeChar))
+			if (($1.type->kind >= TYPE_ARRAY) && ( $1.type->refType != typeChar)) {
 				my_error(ERR_LV_ERR, "Cannot display an Array of type other than Char");
+                YYERROR;
+            }
 		}
 	| T_form '(' expr ',' expr format_opt ')'
 		{
-			if (!compat_types(typeInteger, $5.type))
+			if (!compat_types(typeInteger, $5.type)) {
 				my_error(ERR_LV_ERR, "FORM: second argument is %s instead of Integer", \
 										verbose_type($5.type));
-			if (($6 == 1) && (!compat_types(typeReal, $3.type)))
-				my_error(ERR_LV_ERR, "FORM: first argument is not Real and precision is specified", \
+                YYERROR;
+            }
+			if (($6 == 1) && (!compat_types(typeReal, $3.type))) {
+				my_error(ERR_LV_ERR, "FORM: first argument is not Real but precision is specified", \
 										verbose_type($5.type));
+                YYERROR;
+            }
 		}
 	;
 format_opt
 	: /* Nothing */ { $$ = 0; }
 	| ',' expr
 		{
-			if (!compat_types(typeInteger, $2.type))
+			if (!compat_types(typeInteger, $2.type)) {
 				my_error(ERR_LV_ERR, "FORM: third argument is %s instead of Integer", \
 										verbose_type($2.type));
+                YYERROR;
+            }
 			$$ = 1;
 		}
 	;
-
 %%
