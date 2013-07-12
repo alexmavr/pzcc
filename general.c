@@ -78,7 +78,6 @@ fprintf(stderr, "TODO: Must implement optimizations\n");
 
 	switch (our_options.output_type) {
 		case OUT_IR:
-/*
 			if (our_options.output_is_stdout == false) {
 				char *err_msg = NULL;
 				if (LLVMPrintModuleToFile(module, our_options.output_filename, &err_msg)) {
@@ -88,8 +87,7 @@ fprintf(stderr, "TODO: Must implement optimizations\n");
 			} else {
 				LLVMDumpModule(module);
 			}
-*/
-			LLVMDumpModule(module);
+			//LLVMDumpModule(module);
 			break;
 		case OUT_ASM:
 			//...

@@ -8,6 +8,7 @@
  */
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "ir.h"
 #include "error.h"
 
@@ -281,4 +282,18 @@ LLVMValueRef cast_compat(Type dest, Type src, LLVMValueRef src_val) {
 /* Creates a ARRAY type from an IARRAY type by setting 0 to the first dimension */
 Type iarray_to_array(Type array) {
         return typeArray(0, array->refType);
+}
+
+/* Returns a substring of length len from the provided string */
+const char * substring(const char * string, unsigned int len) {
+    char * res;
+    if (strlen(string)<len)
+        res = (char *) string;
+    else {
+        char substr[len+1];
+        memcpy(substr, string, len);
+        substr[len] = '\0'; 
+        res = substr;
+    }
+    return (const char *) res;
 }

@@ -24,7 +24,7 @@ PROGRAM my_main () {
     jp[2][4][6]=6;
  //   k = proc(proc(5));
     j = iproc(p);
-//    j = i2proc(p, jp);
+    i2proc(p, jp);
     dostuff(p, jp, 4.6, s);
     j = s[4];
     j = j;

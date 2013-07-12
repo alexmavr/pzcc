@@ -19,9 +19,9 @@ Type currentType = NULL;				// Type indicator for var_init
 LLVMTypeRef currentLLVMType = NULL;	    // LLVMType indicator var_init
 Type currentFunctionType = NULL;		// type indicator for function return
 SymbolEntry *currentFun = NULL;			// global function indicator for parameter declaration
-bool functionHasReturn = false;
-bool array_last = false;
-bool global_scope = true;
+bool function_has_ret = false;          // flag for marking whether a routine body returns
+bool array_last = false;                // flag for the last dimension of an array variable
+bool global_scope = true;               // flag marking the scope for initializations
 
 %}
 
@@ -400,7 +400,7 @@ routine
 			// Actions for when a function is closing (be it a forward declaration or a definition).
 			closeScope();
 			currentFunctionType = NULL;
-			functionHasReturn = false;
+			function_has_ret = false;
             global_scope = true;
 		}
 	;
@@ -469,12 +469,12 @@ routine_tail
         }
     } block_tail '}' 
     {
-        if ((currentFunctionType != typeVoid) && (!functionHasReturn)) {
+        if ((currentFunctionType != typeVoid) && (!function_has_ret)) {
             my_error(ERR_LV_ERR, "function without a return statement");
             YYERROR;
         }
         
-        if ((currentFunctionType == typeVoid) && (!functionHasReturn)) {
+        if ((currentFunctionType == typeVoid) && (!function_has_ret)) {
             LLVMBuildRetVoid(builder);
         }
     }
@@ -851,11 +851,13 @@ call
                 YYERROR;
 			}
 
-            if (fun->u.eFunction.resultType == typeVoid)
+            if (fun->u.eFunction.resultType == typeVoid) {
                 $$.Valref = LLVMBuildCall(builder, fun_ref, function_call_arglist_get(), function_call_argno_get(), "");
-            else
+                $$.value.b = false;
+             } else {
                 $$.Valref = LLVMBuildCall(builder, fun_ref, function_call_arglist_get(), function_call_argno_get(), "calltmp");
-
+                $$.value.b = true;
+            }
 			$$.type = function_call_type_pop();
 		}
 	;
@@ -975,6 +977,12 @@ base_stmt
             LLVMBuildStore(builder, res.Valref, $1.Valref);
 		}
 	| call ';' 
+        {
+            if ($1.value.b == true) {
+                my_error(ERR_LV_ERR, "Unused function return value");
+                YYERROR;
+            }
+        }
 	| T_if '(' expr ')'
 		{
 			if (!compat_types(typeBoolean, $3.type)) {
@@ -1198,7 +1206,7 @@ base_stmt
                     verbose_type($2.type), verbose_type(currentFunctionType));
                 YYERROR;
             }
-			functionHasReturn = true;
+			function_has_ret = true;
             LLVMBuildRet(builder, $2.Valref);
 		}
 	| write '(' stmt_opt_write ')' ';' 

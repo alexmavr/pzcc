@@ -91,4 +91,5 @@ LLVMTypeRef type_to_llvm(Type t);
 Type iarray_to_array(Type array);
 LLVMValueRef cast_compat(Type dest, Type src, LLVMValueRef src_val);
 
+const char * substring(const char * string, unsigned int len);
 #endif	/* __IR_H__ */
