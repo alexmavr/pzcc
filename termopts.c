@@ -7,9 +7,33 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include "termopts.h"
+#include "general.h"
 #include "error.h"
+#include "termopts.h"
+
+#define MAX_FILENAME_LEN 300
+
+static void calculate_output_file (void) {
+	char *temp = NULL;
+	char *extension_s[] = { "", "imm", "asm", "out" };
+	size_t i;
+
+	for (i=0; our_options.output_filename[i] != '\0'; i++) {
+	}
+	
+	temp = new(sizeof(char) * (i+4));
+
+	if (i == MAX_FILENAME_LEN) {
+		my_error(ERR_LV_ERR, "Error opening output file: filename too long");
+	}
+
+	snprintf(temp, MAX_FILENAME_LEN, "%s.%s", our_options.output_filename, extension_s[our_options.output_type]);
+
+	free(our_options.output_filename);
+	our_options.output_filename = temp;
+}
 
 //Per-option parser.
 static error_t parse_opt (int key, char *arg, struct argp_state *state) {
@@ -47,36 +71,29 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
 					ret = 1;
 				//Save the output file name.
 				} else {
-					our_options.input_filename = strdup(arg);
-					if (our_options.input_filename == NULL) {
+					our_options.output_filename = strdup(arg);
+					if (our_options.output_filename == NULL) {
 						my_error(ERR_LV_WARN, "strdup() failed");
 						ret = 1;
 					}
 				}
 			} else {
-				my_error(ERR_LV_WARN, "Multiple files specified");
+				my_error(ERR_LV_WARN, "Multiple input files specified");
 				ret = 1;
 			}
 			break;
 		//Capture option parsing end event, check input stream and open output.
 		case ARGP_KEY_END:
+			if (our_options.output_type == OUT_NONE)
+				our_options.output_type = OUT_EXEC;
+
 			if (our_options.in_file == NULL) {
 				our_options.in_file = stdin;
 			}
 			if (our_options.in_file == stdin) {
-				our_options.out_file = stdout;
+				our_options.output_is_stdout = true;
 			} else {
-				//...
-fprintf(stderr, "FILENAME copy is %s\n", our_options.input_filename);
-				char *ext_ptr = strstr(our_options.input_filename, ".pzc");
-				if (ext_ptr != NULL) {
-					//...
-					//TODO: Modify the file extension.
-fprintf(stderr, "NOT SUPPORTED. EXITING\n");
-exit(EXIT_FAILURE);
-					//...
-				}
-				//...
+				calculate_output_file();
 			}
 			break;
 	}

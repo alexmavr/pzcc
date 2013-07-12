@@ -29,7 +29,7 @@ void *new (size_t size) {
 	void *result = malloc(size);
 
 	if (result == NULL) {
-		my_error(ERR_LV_CRIT, "\rOut of memory");
+		my_error(ERR_LV_CRIT, "Out of memory");
 	}
 	return result;
 }
@@ -44,24 +44,14 @@ void delete (void *p) {
 char *filename = "stdin";
 extern FILE *yyin;
 
-struct options_t our_options = { .in_file = NULL, .output_type = OUT_NONE, .out_file = NULL, .opt_flag = 0 };
+struct options_t our_options = { .in_file = NULL, .output_type = OUT_NONE, .output_is_stdout = false, .output_filename = NULL, .opt_flag = 0 };
 
 //Entry point.
 int main (int argc, char **argv) {
 
 	//Parse command-line options.
 	parse_term_options(argc, argv);
-/*
-	//Open input file (if none exists, it uses the default - stdin).
-	if (argc > 1) {
-		filename=argv[1];
-		yyin = fopen(filename, "r");
-		if (yyin == NULL) {
-			my_error(ERR_LV_CRIT, "Cannot open input file %s", filename);
-			exit(EXIT_FAILURE);
-		}
-	}
-*/
+	yyin = our_options.in_file;
 
 	module = LLVMModuleCreateWithName("pzcc");
 	builder = LLVMCreateBuilder();
@@ -78,12 +68,17 @@ int main (int argc, char **argv) {
 */
 
 	yyparse();
-	//closeScope();
+//	closeScope();
 
 	char *err_msg = NULL;
-	if (LLVMPrintModuleToFile(module, "current.ll", &err_msg))
-		my_error(ERR_LV_INTERN, "LLVM module not dumped correctly: %s", err_msg);
-	LLVMDisposeMessage(err_msg);
+	if (our_options.output_is_stdout == false) {
+		if (LLVMPrintModuleToFile(module, our_options.output_filename, &err_msg)) {
+			my_error(ERR_LV_INTERN, "LLVM module not dumped correctly: %s", err_msg);
+			LLVMDisposeMessage(err_msg);
+		}
+	} else {
+		LLVMDumpModule(module);
+	}
 
 //	LLVMDisposePassManager(pass_manager);
 	LLVMDisposeBuilder(builder);

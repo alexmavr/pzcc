@@ -15,10 +15,10 @@
 //Structure for option parsing. We use it to store the parsed information.
 struct options_t {
 	//Input/Output files.
-	char *input_filename;
 	FILE *in_file;
 	enum { OUT_NONE, OUT_IR, OUT_ASM, OUT_EXEC } output_type;
-	FILE *out_file;
+	bool output_is_stdout;
+	char *output_filename;
 
 	//Optimization flag
 	bool opt_flag;
