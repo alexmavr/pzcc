@@ -263,7 +263,7 @@ LLVMValueRef cast_compat(Type dest, Type src, LLVMValueRef src_val) {
          * If it was 0, the integer was positive and no action is taken.
          * Finally, truncate the integer to 8 bits */
 
-        LLVMValueRef shift_amm = LLVMConstInt(LLVMInt8Type(), 7, false);
+        LLVMValueRef shift_amm = LLVMConstInt(LLVMInt32Type(), 7, false);
         LLVMValueRef imv = LLVMBuildLShr(builder, src_val, shift_amm, "lshrtmp"); 
         imv = LLVMBuildTrunc(builder, imv, LLVMInt1Type(), "trunctmp"); 
         LLVMValueRef neg = LLVMBuildNeg(builder, src_val, "negtmp"); 
