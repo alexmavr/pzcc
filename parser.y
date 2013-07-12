@@ -891,7 +891,7 @@ call_opt
             } else {
                 if (currentParam->u.eParameter.mode == PASS_BY_REFERENCE) {
                     if ($1.v_list == NULL) {
-                        my_error("Cannot pass non-variable arguments by reference");
+                        my_error(ERR_LV_ERR, "Cannot pass non-variable arguments by reference");
                         YYERROR;
                     }
                     function_call_argval_push($1.v_list->Valref);
