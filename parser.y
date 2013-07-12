@@ -889,9 +889,13 @@ call_opt
                 LLVMValueRef tmp = LLVMBuildPointerCast(builder, $1.Valref, dest_type, "ptrcasttmp");
                 function_call_argval_push(tmp);
             } else {
-                if (currentParam->u.eParameter.mode == PASS_BY_REFERENCE)
+                if (currentParam->u.eParameter.mode == PASS_BY_REFERENCE) {
+                    if ($1.v_list == NULL) {
+                        my_error("Cannot pass non-variable arguments by reference");
+                        YYERROR;
+                    }
                     function_call_argval_push($1.v_list->Valref);
-                else 
+                } else 
                     function_call_argval_push(cast_compat(wanted_type, $1.type, $1.Valref));
             }
 		}
