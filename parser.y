@@ -882,6 +882,18 @@ call_opt
 					verbose_type($1.type), verbose_type(wanted_type));
                 YYERROR;
 			}
+            if (wanted_type->kind >= TYPE_ARRAY) {
+                Type cur_wanted_dim = wanted_type->refType;
+                Type cur_given_dim = $1.type->refType;
+                while (cur_wanted_dim->kind >= TYPE_ARRAY) {
+                    if (cur_wanted_dim->size != cur_given_dim->size) {
+                        my_error(ERR_LV_ERR, "incompatible array sizes for parameter passing");
+                        YYERROR;
+                    }
+                    cur_given_dim = cur_given_dim->refType;
+                    cur_wanted_dim = cur_wanted_dim->refType;
+                }
+            }
 
 			function_call_param_set(currentParam->u.eParameter.next);
             if ((wanted_type->kind >= TYPE_ARRAY) && (wanted_type->size==0)) {
@@ -915,15 +927,32 @@ call_opt_tail
 					verbose_type($2.type), verbose_type(currentParam->u.eParameter.type));
                 YYERROR;
             }
+            if (wanted_type->kind >= TYPE_ARRAY) {
+                Type cur_wanted_dim = wanted_type->refType;
+                Type cur_given_dim = $2.type->refType;
+                while (cur_wanted_dim->kind >= TYPE_ARRAY) {
+                    if (cur_wanted_dim->size != cur_given_dim->size) {
+                        my_error(ERR_LV_ERR, "incompatible array sizes for parameter passing");
+                        YYERROR;
+                    }
+                    cur_given_dim = cur_given_dim->refType;
+                    cur_wanted_dim = cur_wanted_dim->refType;
+                }
+            }
+
 			function_call_param_set(currentParam->u.eParameter.next);
             if ((wanted_type->kind >= TYPE_ARRAY) && (wanted_type->size==0)) {
                 LLVMTypeRef dest_type = LLVMPointerType(type_to_llvm(iarray_to_array($2.type)),0);
                 LLVMValueRef tmp = LLVMBuildPointerCast(builder, $2.Valref, dest_type, "ptrcasttmp");
                 function_call_argval_push(tmp);
             } else {
-                if (currentParam->u.eParameter.mode == PASS_BY_REFERENCE)
+                if (currentParam->u.eParameter.mode == PASS_BY_REFERENCE) {
+                    if ($2.v_list == NULL) {
+                        my_error(ERR_LV_ERR, "Cannot pass non-variable arguments by reference");
+                        YYERROR;
+                    }
                     function_call_argval_push($2.v_list->Valref);
-                else 
+                } else 
                     function_call_argval_push(cast_compat(wanted_type, $2.type, $2.Valref));
             }
 		}

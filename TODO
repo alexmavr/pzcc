@@ -5,22 +5,20 @@ IR:
 	statements:
 		WRITE, FORMAT
 	refactor parser.y
-	functions with a return value are not emitted without an assignment
 	command line parameter parsing	-> mostly done :: only have to modify output file extension and open it
 	static compilation invocation	-> call llc
 	link with Library
 	testing + debugging
-	pass-by-reference parameters
 	fix LLVMPrintModulToFile to properly accept file name (it could have something to do with file creation flags in open())
-
-semantics:
-	stricter array parameter size checking
 
 General:
 	compiler arguments and llvm backend invocation (link together?)
 	refactor parser.y
 
 Done:
+*	stricter array parameter size checking
+*	pass-by-reference parameters
+*	functions with a return value are not emitted without an assignment
 *	replace currentCallType and currentParam with CallTypeStack and ParamStack
 *	loop_counter is not needed for anything else than checking if continue and break statements are legal, remove it. We have break_is_legal, but atm it doesn't function with continue statements.	-> %s/break_is_legal/control_flow_flags/gc' ed.
 *	statemets: if, for, while, do..until, switch
