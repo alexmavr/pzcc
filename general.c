@@ -53,20 +53,9 @@ int main (int argc, char **argv) {
 	parse_term_options(argc, argv);
 	yyin = our_options.in_file;
 
-fprintf(stderr, "Line %d\n", __LINE__);
-
 	module = LLVMModuleCreateWithName("pzcc");
-
-fprintf(stderr, "Line %d\n", __LINE__);
-
 	builder = LLVMCreateBuilder();
-
-fprintf(stderr, "Line %d\n", __LINE__);
-
 	LLVMInitializeNativeTarget();
-
-fprintf(stderr, "Line %d\n", __LINE__);
-
 
 /*
 	LLVMPassManagerRef pass_manager = LLVMCreateFunctionPassManagerForModule(module);
@@ -100,7 +89,6 @@ fprintf(stderr, "TODO: Must implement optimizations\n");
 				LLVMDumpModule(module);
 			}
 //*/
-//			LLVMDumpModule(module);
 			break;
 		case OUT_ASM:
 			//...
