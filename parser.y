@@ -428,8 +428,11 @@ routine_tail
             // Create param list
             for(i=argno-1; i>=0; i--, curr_param=curr_param->u.eParameter.next) {
                 if (curr_param->u.eParameter.type->kind >= TYPE_ARRAY)
-                params[i] = LLVMPointerType(type_to_llvm( \
-                    iarray_to_array(curr_param->u.eParameter.type)), 0);
+                    params[i] = LLVMPointerType(type_to_llvm( \
+                        iarray_to_array(curr_param->u.eParameter.type)), 0);
+                else if (curr_param->u.eParameter.mode == PASS_BY_REFERENCE)
+                    params[i] = LLVMPointerType(type_to_llvm( \
+                        curr_param->u.eParameter.type), 0);
                 else
                     params[i] = type_to_llvm(curr_param->u.eParameter.type);
             }
@@ -500,6 +503,7 @@ routine_header_opt
 			if (currentFun == NULL)
 				YYERROR;
 			if ($2.type == NULL) {
+                // NULL is placeholder for &name
 				newParameter($2.value.s, $1.type, PASS_BY_REFERENCE, currentFun);
 			} else if ($2.type->kind >= TYPE_ARRAY) {
 				Type current = $2.type;
@@ -697,9 +701,12 @@ expr
 	| l_value
 		{
 			$$.type = $1.type;
-            if ($1.type->kind < TYPE_ARRAY)
+            if ($1.type->kind < TYPE_ARRAY) {
                 $$.Valref = LLVMBuildLoad(builder, $1.Valref, "loadtmp");
-            else
+                $$.v_list = new(sizeof(struct list_node));
+                $$.v_list->Valref = $1.Valref;
+                $$.v_list->next = NULL;
+            } else
                 $$.Valref = $1.Valref;
 		}
 	| call { $$ = $1; }
@@ -881,8 +888,12 @@ call_opt
                 LLVMTypeRef dest_type = LLVMPointerType(type_to_llvm(iarray_to_array($1.type)),0);
                 LLVMValueRef tmp = LLVMBuildPointerCast(builder, $1.Valref, dest_type, "ptrcasttmp");
                 function_call_argval_push(tmp);
-            } else
-                function_call_argval_push($1.Valref);
+            } else {
+                if (currentParam->u.eParameter.mode == PASS_BY_REFERENCE)
+                    function_call_argval_push($1.v_list->Valref);
+                else 
+                    function_call_argval_push(cast_compat(wanted_type, $1.type, $1.Valref));
+            }
 		}
 	;
 call_opt_tail
@@ -905,8 +916,12 @@ call_opt_tail
                 LLVMTypeRef dest_type = LLVMPointerType(type_to_llvm(iarray_to_array($2.type)),0);
                 LLVMValueRef tmp = LLVMBuildPointerCast(builder, $2.Valref, dest_type, "ptrcasttmp");
                 function_call_argval_push(tmp);
-            } else
-                function_call_argval_push($2.Valref);
+            } else {
+                if (currentParam->u.eParameter.mode == PASS_BY_REFERENCE)
+                    function_call_argval_push($2.v_list->Valref);
+                else 
+                    function_call_argval_push(cast_compat(wanted_type, $2.type, $2.Valref));
+            }
 		}
 	;
 block
