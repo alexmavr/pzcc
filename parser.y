@@ -628,9 +628,12 @@ const_unit
 		}
 	| T_CONST_string
 		{
-			$$.type = typeArray(strlen($1), typeChar);
+			$$.type = typeArray(strlen($1) + 1, typeChar);
 			$$.value.s = $1;
-            $$.Valref = LLVMConstString($1, strlen($1), false);
+            LLVMValueRef str = LLVMConstString($1, strlen($1), false);
+            LLVMValueRef tmp = LLVMBuildAlloca(builder, type_to_llvm($$.type), "strtmp");
+            LLVMBuildStore(builder, str, tmp);
+            $$.Valref = tmp;
 		}
 	| T_true
 		{
@@ -1465,7 +1468,10 @@ format
                 args[2] = args[1]; 
                 LLVMBuildCall(builder, func_ref, args, 3, "");
             } else {
+                /* allocate & store the array, and pass the pointer */
                 func_ref = LLVMGetNamedFunction(module, "WRITE_STRING");
+                LLVMTypeRef dest_type = LLVMPointerType(type_to_llvm(iarray_to_array($1.type)),0);
+                args[0] = LLVMBuildPointerCast(builder, $1.Valref, dest_type, "ptrcasttmp");
                 LLVMBuildCall(builder, func_ref, args, 2, "");
             }
             delete(args);
