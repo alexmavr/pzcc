@@ -46,11 +46,11 @@ void delete (void *p) {
 char *filename = "stdin";
 extern FILE *yyin;
 
-struct options_t our_options = { .in_file = NULL, .output_type = OUT_NONE, .output_is_stdout = false, .output_filename = NULL, .opt_flags = NULL, .llc_flags = NULL, .opt_flag = 0 };
+struct options_t our_options = { .in_file = NULL, .output_type = OUT_NONE, .output_is_stdout = false, .output_filename = NULL, .llvmopt_flags = NULL, .llvmllc_flags = NULL, .opt_flag = 0 };
 
 //LLVM IR dump method.
 static void dump_ir (char *outfile) {
-	if (our_options.output_is_stdout == false) {
+	if (outfile != NULL) {
 		char *err_msg = NULL;
 		if (LLVMPrintModuleToFile(module, outfile, &err_msg)) {
 			my_error(ERR_LV_INTERN, "LLVM module not dumped correctly: %s", err_msg);
@@ -75,9 +75,9 @@ int main (int argc, char **argv) {
 	LLVMInitializeNativeTarget();
 
 	initSymbolTable(256);
-    openScope();
+	openScope();
 
-    generate_external_definitions(); // declares external function prototypes
+	generate_external_definitions(); // declares external function prototypes
 
 	yyparse();
 
@@ -88,13 +88,13 @@ int main (int argc, char **argv) {
 	if (our_options.opt_flag == true) {
 		tmp_pid = fork();
 		if (tmp_pid == 0) {
-			if (our_options.opt_flags == NULL) {
+			if (our_options.llvmopt_flags == NULL) {
 				execlp("opt", "opt", "-S", "-std-compile-opts", "-o", our_options.tmp_filename, our_options.tmp_filename, (char *)NULL);
-			} else if (tmp_pid < 0) {
-				my_error(ERR_LV_INTERN, "fork() call failed");
 			} else {
-				execlp("opt", "opt", "-S", "-std-compile-opts", our_options.opt_flags, "-o", our_options.tmp_filename, our_options.tmp_filename, (char *)NULL);
+				execlp("opt", "opt", "-S", "-std-compile-opts", our_options.llvmopt_flags, "-o", our_options.tmp_filename, our_options.tmp_filename, (char *)NULL);
 			}
+		} else if (tmp_pid < 0) {
+			my_error(ERR_LV_INTERN, "fork() call failed");
 		} else {
 			size_t guard = 0;
 			while ((waitpid(tmp_pid, NULL, 0) != tmp_pid) && (guard < 100)) { guard++; }
@@ -122,10 +122,16 @@ int main (int argc, char **argv) {
 			if (tmp_pid == 0) {
 				switch (our_options.opt_flag) {
 					case true	:
-						execlp("llc", "llc", "-filetype=asm", "-O3", "-o", our_options.output_filename, our_options.tmp_filename, (char *)NULL);
+						if (our_options.output_filename != NULL)
+							execlp("llc", "llc", "-filetype=asm", "-O3", "-o", our_options.output_filename, our_options.tmp_filename, (char *)NULL);
+						else
+							execlp("llc", "llc", "-filetype=asm", "-O3", our_options.tmp_filename, (char *)NULL);
 						break;
 					case false	:
-						execlp("llc", "llc", "-filetype=asm", "-o", our_options.output_filename, our_options.tmp_filename, (char *)NULL);
+						if (our_options.output_filename != NULL)
+							execlp("llc", "llc", "-filetype=asm", "-o", our_options.output_filename, our_options.tmp_filename, (char *)NULL);
+						else
+							execlp("llc", "llc", "-filetype=asm", our_options.tmp_filename, (char *)NULL);
 						break;
 					default		:
 						my_error(ERR_LV_INTERN, "Invalid value in boolean variable");

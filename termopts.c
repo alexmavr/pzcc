@@ -14,6 +14,7 @@
 #include "error.h"
 #include "termopts.h"
 
+char output_default[] = "-";
 char tmp_template[] = "/tmp/.pzcc-XXXXXX";
 
 static void calculate_filenames (void) {
@@ -23,19 +24,24 @@ static void calculate_filenames (void) {
 
 	//Create temporary file.
 	int fd = mkstemp(tmp_template);
-	if (fd == 0)
+	if (fd == 0) {
 		my_error(ERR_LV_ERR, "Failed to open temporary file %s", tmp_template);
-	else
+	} else {
 		close(fd);
 		our_options.tmp_filename = tmp_template;
+	}
 
 	//Calculate output filename.
-	for (i=0; our_options.output_filename[i] != '\0'; i++) { }
-	
-	temp = new(sizeof(char) * (i+5));
+	if (our_options.output_is_stdout != true) {
+		for (i=0; our_options.output_filename[i] != '\0'; i++) { }
 
-	snprintf(temp, (i+5), "%s.%s", our_options.output_filename, extension_s[our_options.output_type]);
-	temp[i+4] = '\0';
+		temp = new(sizeof(char) * (i+5));
+
+		snprintf(temp, (i+5), "%s.%s", our_options.output_filename, extension_s[our_options.output_type]);
+		temp[i+4] = '\0';
+	} else {
+		temp = output_default;
+	}
 
 	//Free previous string in output_filename field (it was the result of strdup on the input filename) and set proper.
 	free(our_options.output_filename);
@@ -45,8 +51,6 @@ static void calculate_filenames (void) {
 //Per-option parser.
 static error_t parse_opt (int key, char *arg, struct argp_state *state) {
 	error_t ret = 0;
-
-//fprintf(stderr, "OPTION PARSER called with key %c and argument %s\n", key, arg);
 
 	switch (key) {
 		//Set optimization flag.
@@ -72,10 +76,10 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
 			}
 			break;
 		case 'l':
-			our_options.llc_flags = arg;
+			our_options.llvmllc_flags = arg;
 			break;
 		case 't':
-			our_options.opt_flags = arg;
+			our_options.llvmopt_flags = arg;
 			break;
 		//Capture input filename.
 		case ARGP_KEY_ARG:
@@ -102,14 +106,12 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
 			if (our_options.output_type == OUT_NONE)
 				our_options.output_type = OUT_EXEC;
 
-			if (our_options.in_file == NULL) {
+			if (our_options.in_file == NULL)
 				our_options.in_file = stdin;
-			}
-			if (our_options.in_file == stdin) {
+			if (our_options.in_file == stdin)
 				our_options.output_is_stdout = true;
-			} else {
-				calculate_filenames();
-			}
+			calculate_filenames();
+
 			break;
 	}
 

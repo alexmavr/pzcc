@@ -24,8 +24,8 @@ struct options_t {
 	char *tmp_filename;
 
 	//Flags for propagation
-	char *opt_flags;
-	char *llc_flags;
+	char *llvmopt_flags;
+	char *llvmllc_flags;
 
 	//Optimization flag
 	bool opt_flag;
