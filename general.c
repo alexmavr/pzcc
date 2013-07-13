@@ -48,7 +48,7 @@ extern FILE *yyin;
 
 struct options_t our_options = { .in_file = NULL, .output_type = OUT_NONE, .output_is_stdout = false, .output_filename = NULL, .opt_flags = NULL, .llc_flags = NULL, .opt_flag = 0 };
 
-//IR dump method.
+//LLVM IR dump method.
 static void dump_ir (char *outfile) {
 	if (our_options.output_is_stdout == false) {
 		char *err_msg = NULL;
@@ -91,7 +91,7 @@ int main (int argc, char **argv) {
 			if (our_options.opt_flags == NULL) {
 				execlp("opt", "opt", "-S", "-std-compile-opts", "-o", our_options.tmp_filename, our_options.tmp_filename, (char *)NULL);
 			} else if (opted < 0) {
-				my_error(ERR_LV_INTERN, "Could not fork()");
+				my_error(ERR_LV_INTERN, "fork() call failed");
 			} else {
 				execlp("opt", "opt", "-S", "-std-compile-opts", our_options.opt_flags, "-o", our_options.tmp_filename, our_options.tmp_filename, (char *)NULL);
 			}
@@ -109,23 +109,34 @@ int main (int argc, char **argv) {
 				if (mv == 0) {
 					execlp("mv", "mv", our_options.tmp_filename, our_options.output_filename, (char *)NULL);
 				} else if (mv < 0) {
-					my_error(ERR_LV_INTERN, "Could not fork()");
+					my_error(ERR_LV_INTERN, "fork() call failed");
 				} else {
 					size_t guard = 0;
 					while ((waitpid(mv, NULL, 0) != mv) && (guard < 100)) { guard++; }
 				}
 			}
 			break;
+		//If assembly output was requested, generate and dump it to the output file.
 		case OUT_ASM:
-			if (tmpnam(tmp_f) == NULL) {
-				my_error(ERR_LV_ERR, "Could not open temporary file");
-				goto err_end;
+			pid_t llcomp = fork();
+			if (llcomp == 0) {
+				switch (our_options.opt_flag) {
+					case true	:
+						execlp("llc", "llc", "-filetype=asm", "-O3", "-o", our_options.output_filename, our_options.tmp_filename, (char *)NULL);
+						break;
+					case false	:
+						execlp("llc", "llc", "-filetype=asm", "-o", our_options.output_filename, our_options.tmp_filename, (char *)NULL);
+						break;
+					default		:
+						my_error(ERR_LV_INTERN, "Invalid value in boolean variable");
+						break;
+				}
+			} else if (llcomp < 0) {
+				my_error(ERR_LV_INTERN, "fork() call failed");
+			} else {
+				size_t guard = 0;
+				while ((waitpid(llcomp, NULL, 0) != llcomp) && (guard < 100)) { guard++; }
 			}
-fprintf(stderr, "TMPNAME is %s\n", tmp_f);
-			//Create command-line call for llc and its arguments.
-			//...
-fprintf(stderr, "TODO: Must implement assembly output\n");
-			//...
 			break;
 		case OUT_EXEC:
 			//...
