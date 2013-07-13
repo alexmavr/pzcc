@@ -14,11 +14,14 @@
 
 //Structure for option parsing. We use it to store the parsed information.
 struct options_t {
-	//Input/Output files.
+	//Input/Output files
 	FILE *in_file;
-	enum { OUT_NONE, OUT_IR, OUT_ASM, OUT_EXEC } output_type;
 	bool output_is_stdout;
+	enum { OUT_NONE, OUT_IR, OUT_ASM, OUT_EXEC } output_type;
 	char *output_filename;
+
+	//General requirements
+	char *tmp_filename;
 
 	//Flags for propagation
 	char *opt_flags;

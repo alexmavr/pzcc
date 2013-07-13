@@ -9,23 +9,35 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "general.h"
 #include "error.h"
 #include "termopts.h"
 
-static void calculate_output_file (void) {
+char tmp_template[] = "/tmp/.pzcc-XXXXXX";
+
+static void calculate_filenames (void) {
 	char *temp = NULL;
 	char *extension_s[] = { "", "imm", "asm", "out" };
 	size_t i;
 
-	for (i=0; our_options.output_filename[i] != '\0'; i++) {
-	}
+	//Create temporary file.
+	int fd = mkstemp(tmp_template);
+	if (fd == 0)
+		my_error(ERR_LV_ERR, "Failed to open temporary file %s", tmp_template);
+	else
+		close(fd);
+		our_options.tmp_filename = tmp_template;
+
+	//Calculate output filename.
+	for (i=0; our_options.output_filename[i] != '\0'; i++) { }
 	
 	temp = new(sizeof(char) * (i+5));
 
 	snprintf(temp, (i+5), "%s.%s", our_options.output_filename, extension_s[our_options.output_type]);
 	temp[i+4] = '\0';
 
+	//Free previous string in output_filename field (it was the result of strdup on the input filename) and set proper.
 	free(our_options.output_filename);
 	our_options.output_filename = temp;
 }
@@ -96,7 +108,7 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
 			if (our_options.in_file == stdin) {
 				our_options.output_is_stdout = true;
 			} else {
-				calculate_output_file();
+				calculate_filenames();
 			}
 			break;
 	}

@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <llvm-c/Target.h>
 #include <llvm-c/Core.h>
 #include <llvm-c/Analysis.h>
@@ -44,7 +45,7 @@ void delete (void *p) {
 char *filename = "stdin";
 extern FILE *yyin;
 
-struct options_t our_options = { .in_file = NULL, .output_type = OUT_NONE, .output_is_stdout = false, .output_filename = NULL, .opt_flag = 0 };
+struct options_t our_options = { .in_file = NULL, .output_type = OUT_NONE, .output_is_stdout = false, .output_filename = NULL, .opt_flags = NULL, .llc_flags = NULL, .opt_flag = 0 };
 
 //IR dump method.
 static void dump_ir (char *outfile) {
@@ -87,7 +88,20 @@ int main (int argc, char **argv) {
 	yyparse();
 //	closeScope();
 
+	//dump ir to temp file here.
+
 	if (our_options.opt_flag == true) {
+		pid_t opted = fork();
+		if (opted == 0) {
+/*
+			if (our_options.opt_flags == NULL)
+				execlp("opt", "opt", "-S", "-std-compile-opts", our_options.opt_flags, , (char *)NULL);
+			else
+				execlp("opt", "opt", "-S", "-std-compile-opts", , (char *)NULL);
+*/
+		} else {
+			//wait for death
+		}
 		//...
 		//Create command-line call for opt and its arguments.
 fprintf(stderr, "TODO: Must implement optimizations\n");
