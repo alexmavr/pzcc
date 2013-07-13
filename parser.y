@@ -19,6 +19,7 @@ Type currentType = NULL;				// Type indicator for var_init
 LLVMTypeRef currentLLVMType = NULL;	    // LLVMType indicator var_init
 Type currentFunctionType = NULL;		// type indicator for function return
 SymbolEntry *currentFun = NULL;			// global function indicator for parameter declaration
+int currentWrite = 0;                   // indicator for WRITE mode
 bool function_has_ret = false;          // flag for marking whether a routine body returns
 bool array_last = false;                // flag for the last dimension of an array variable
 bool global_scope = true;               // flag marking the scope for initializations
@@ -169,7 +170,6 @@ bool global_scope = true;               // flag marking the scope for initializa
 
 %initial-action
 {
-	initSymbolTable(256);
 	openScope();
 }
 
@@ -1434,10 +1434,10 @@ clause_choice
         { /* No action */ }
 	;
 write
-	: T_write
-	| T_wrln
-	| T_wrsp
-	| T_wrspln
+	: T_write  { currentWrite = 0; }
+	| T_wrln   { currentWrite = 1; }
+	| T_wrsp   { currentWrite = 2; }
+	| T_wrspln { currentWrite = 3; }
 	;
 format
 	: expr
@@ -1446,6 +1446,29 @@ format
 				my_error(ERR_LV_ERR, "Cannot display an Array of type other than Char");
                 YYERROR;
             }
+
+            LLVMValueRef func_ref;
+            LLVMValueRef * args = new(3 * sizeof(LLVMValueRef));
+            args[0] = $1.Valref;
+            args[1] = LLVMConstInt(LLVMInt32Type(), 5, false); // TODO: placeholder
+            if ($1.type == typeInteger) {
+                func_ref = LLVMGetNamedFunction(module, "WRITE_INT");
+                LLVMBuildCall(builder, func_ref, args, 2, "");
+            } else if ($1.type == typeBoolean) {
+                func_ref = LLVMGetNamedFunction(module, "WRITE_BOOL");
+                LLVMBuildCall(builder, func_ref, args, 2, "");
+            } else if ($1.type == typeChar) {
+                func_ref = LLVMGetNamedFunction(module, "WRITE_CHAR");
+                LLVMBuildCall(builder, func_ref, args, 2, "");
+            } else if ($1.type == typeReal) {
+                func_ref = LLVMGetNamedFunction(module, "WRITE_REAL");
+                args[2] = args[1]; 
+                LLVMBuildCall(builder, func_ref, args, 3, "");
+            } else {
+                func_ref = LLVMGetNamedFunction(module, "WRITE_STRING");
+                LLVMBuildCall(builder, func_ref, args, 2, "");
+            }
+            delete(args);
 		}
 	| T_form '(' expr ',' expr format_opt ')'
 		{

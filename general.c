@@ -72,6 +72,9 @@ int main (int argc, char **argv) {
 	builder = LLVMCreateBuilder();
 	LLVMInitializeNativeTarget();
 
+	initSymbolTable(256);
+    openScope();
+
     generate_external_definitions(); // declares external function prototypes
 
 /*
