@@ -190,7 +190,7 @@ static SymbolEntry * newEntry (const char * name) {
 	/* Έλεγχος αν υπάρχει ήδη */
 
 	for (e = currentScope->entries; e != NULL; e = e->nextInScope)
-		if (strcmp(name, e->id) == 0) {
+		if ((strcmp(name, e->id) == 0) && (strcmp(name, "__PLACEHOLDER__") == 1)) {
 			my_error(ERR_LV_ERR, "Duplicate identifier: %s", name);
 			return NULL;
 		}

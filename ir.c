@@ -38,8 +38,7 @@ void free_list(struct list_node * head) {
     while (current != NULL) {
        next = current->next;
        free(current);
-       current = next;
-    }
+       current = next; }
 }
 
 /* Creates an array of ValueRefs from a given list. 
@@ -284,9 +283,10 @@ Type iarray_to_array(Type array) {
         return typeArray(0, array->refType);
 }
 
-/* Generates IR for all external function prototypes */
+/* Generates IR for all external function prototypes and adds them to symbol table */
 void generate_external_definitions(void) {
     LLVMTypeRef *params = new(sizeof(LLVMTypeRef) * 3);
+    SymbolEntry * func;
     LLVMValueRef func_ref;
 
     // PROC putchar(char)
@@ -294,12 +294,18 @@ void generate_external_definitions(void) {
     func_ref = LLVMAddFunction(module, "putchar", \
                     LLVMFunctionType(type_to_llvm(typeVoid), params, 1, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("putchar");
+    newParameter("__PLACEHOLDER__", typeChar, PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeVoid);
     
     // PROC puts(char[])
     params[0] = type_to_llvm(typeArray(0, typeChar));
     func_ref = LLVMAddFunction(module, "puts", \
                     LLVMFunctionType(type_to_llvm(typeVoid), params, 1, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("puts");
+    newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeVoid);
 
     // PROC WRITE_INT(int, int)
     params[0] = type_to_llvm(typeInteger);
@@ -307,6 +313,10 @@ void generate_external_definitions(void) {
     func_ref = LLVMAddFunction(module, "WRITE_INT", \
                     LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("WRITE_INT");
+    newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
+    newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeVoid);
 
     // PROC WRITE_BOOL(bool, int)
     params[0] = type_to_llvm(typeBoolean);
@@ -314,6 +324,10 @@ void generate_external_definitions(void) {
     func_ref = LLVMAddFunction(module, "WRITE_BOOL", \
                     LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("WRITE_BOOL");
+    newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
+    newParameter("__PLACEHOLDER__", typeBoolean, PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeVoid);
 
     // PROC WRITE_CHAR(char, int)
     params[0] = type_to_llvm(typeChar);
@@ -321,6 +335,10 @@ void generate_external_definitions(void) {
     func_ref = LLVMAddFunction(module, "WRITE_CHAR", \
                     LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("WRITE_CHAR");
+    newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
+    newParameter("__PLACEHOLDER__", typeChar, PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeVoid);
 
     // PROC WRITE_REAL(REAL, int, int)
     params[0] = type_to_llvm(typeReal);
@@ -329,6 +347,10 @@ void generate_external_definitions(void) {
     func_ref = LLVMAddFunction(module, "WRITE_REAL", \
                     LLVMFunctionType(type_to_llvm(typeVoid), params, 3, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("WRITE_REAL");
+    newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
+    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeVoid);
 
     // PROC WRITE_STRING(char[], int)
     params[0] = type_to_llvm(typeArray(0, typeChar));
@@ -336,26 +358,38 @@ void generate_external_definitions(void) {
     func_ref = LLVMAddFunction(module, "WRITE_STRING", \
                     LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("WRITE_STRING");
+    newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
+    newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeVoid);
 
     // FUNC int READ_INT()
     func_ref = LLVMAddFunction(module, "READ_INT", \
                     LLVMFunctionType(type_to_llvm(typeInteger), params, 0, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("READ_INT");
+    endFunctionHeader(func, typeInteger);
 
     // FUNC bool READ_BOOL()
     func_ref = LLVMAddFunction(module, "READ_BOOL", \
                     LLVMFunctionType(type_to_llvm(typeBoolean), params, 0, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("READ_BOOL");
+    endFunctionHeader(func, typeBoolean);
 
     // FUNC int getchar()
     func_ref = LLVMAddFunction(module, "getchar", \
                     LLVMFunctionType(type_to_llvm(typeInteger), params, 0, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("getchar");
+    endFunctionHeader(func, typeInteger);
 
     // FUNC REAL READ_REAL()
     func_ref = LLVMAddFunction(module, "READ_REAL", \
                     LLVMFunctionType(type_to_llvm(typeReal), params, 0, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("READ_REAL");
+    endFunctionHeader(func, typeReal);
 
     // PROC READ_STRING(int, char[])
     params[0] = type_to_llvm(typeInteger);
@@ -363,99 +397,159 @@ void generate_external_definitions(void) {
     func_ref = LLVMAddFunction(module, "READ_STRING", \
                     LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("READ_STRING");
+    newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
+    newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeVoid);
 
     // FUNC int abs(int)
     params[0] = type_to_llvm(typeInteger);
     func_ref = LLVMAddFunction(module, "abs", \
                     LLVMFunctionType(type_to_llvm(typeInteger), params, 1, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("abs");
+    newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeInteger);
 
     // FUNC REAL fabs(REAL)
     params[0] = type_to_llvm(typeReal);
     func_ref = LLVMAddFunction(module, "fabs", \
                     LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("fabs");
+    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeReal);
 
     // FUNC REAL sqrt(REAL)
     func_ref = LLVMAddFunction(module, "sqrt", \
                     LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("sqrt");
+    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeReal);
 
     // FUNC REAL sin(REAL)
     func_ref = LLVMAddFunction(module, "sin", \
                     LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("sin");
+    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeReal);
 
     // FUNC REAL cos(REAL)
     func_ref = LLVMAddFunction(module, "cos", \
                     LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("cos");
+    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeReal);
 
     // FUNC REAL tan(REAL)
     func_ref = LLVMAddFunction(module, "tan", \
                     LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("tan");
+    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeReal);
 
     // FUNC REAL arctan(REAL)
     func_ref = LLVMAddFunction(module, "arctan", \
                     LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("arctan");
+    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeReal);
 
     // FUNC REAL exp(REAL)
     func_ref = LLVMAddFunction(module, "exp", \
                     LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("exp");
+    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeReal);
 
     // FUNC REAL ln(REAL)
     func_ref = LLVMAddFunction(module, "ln", \
                     LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("ln");
+    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeReal);
 
     // FUNC REAL trunc(REAL)
     func_ref = LLVMAddFunction(module, "trunc", \
                     LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("trunc");
+    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeReal);
 
     // FUNC REAL round(REAL)
     func_ref = LLVMAddFunction(module, "round", \
                     LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("round");
+    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeReal);
 
     // FUNC REAL pi()
     func_ref = LLVMAddFunction(module, "pi", \
                     LLVMFunctionType(type_to_llvm(typeReal), params, 0, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("pi");
+    endFunctionHeader(func, typeReal);
 
     // FUNC INT ROUND(REAL)
     func_ref = LLVMAddFunction(module, "ROUND", \
                     LLVMFunctionType(type_to_llvm(typeInteger), params, 1, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("ROUND");
+    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeInteger);
 
     // FUNC INT TRUNC(REAL)
     func_ref = LLVMAddFunction(module, "TRUNC", \
                     LLVMFunctionType(type_to_llvm(typeInteger), params, 1, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("TRUNC");
+    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeInteger);
 
     // FUNC INT strlen(char[])
     params[0] = type_to_llvm(typeArray(0, typeChar));
     func_ref = LLVMAddFunction(module, "strlen", \
                     LLVMFunctionType(type_to_llvm(typeInteger), params, 1, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("strlen");
+    newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeInteger);
 
     // FUNC INT strcmp(char[], char[])
     params[1] = type_to_llvm(typeArray(0, typeChar));
     func_ref = LLVMAddFunction(module, "strcmp", \
                     LLVMFunctionType(type_to_llvm(typeInteger), params, 2, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("strcmp");
+    newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
+    newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeInteger);
 
     // PROC strcpy(char[], char[])
     func_ref = LLVMAddFunction(module, "strcpy", \
                     LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("strcpy");
+    newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
+    newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeVoid);
 
     // PROC strcat(char[], char[])
     func_ref = LLVMAddFunction(module, "strcat", \
                     LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("strcat");
+    newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
+    newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeVoid);
 
 }
