@@ -10,6 +10,16 @@ IR:
 	link with Library
 	furnish code with proper deallocations (for example unlink the tmpfile, all the structures we use, ...) and put them in cleanup (and the temps in the proper places)
 
+Cleanup:
+	pzc.lex:90		->	id allocation
+	ir.c:49			->	creating an array for GEP (of some sort - i dont remember)
+	parser.y:461	->	creating name string for reference variables
+	symbol.c:539	->	creating new element to return
+	pzc.lex:130		->	creating new string token to return
+	pzc.lex:*		->	any token with new() call
+	ir.c:188		->	function call frame argument list allocation
+	ir.c:*			->	anything that has to do with function call frames
+
 General:
 	compiler arguments and llvm backend invocation (link together?)
 	refactor parser.y

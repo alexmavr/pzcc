@@ -46,7 +46,7 @@ void free_list(struct list_node * head) {
  * of BuildGEP command */
 LLVMValueRef * array_from_list(struct list_node * head, unsigned int size) {
     int i=1;
-    LLVMValueRef * res = malloc((size + 1) * sizeof(LLVMValueRef));
+    LLVMValueRef *res = new((size+1) * sizeof(LLVMValueRef));
     res[0] = LLVMConstInt(LLVMInt32Type(), 0, false);
 
      while (head != NULL) {
