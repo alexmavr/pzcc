@@ -5,8 +5,8 @@ IR:
 	statements:
 		WRITE, FORMAT
 	refactor parser.y
-	command line parameter parsing	-> mostly done :: only have to modify output file extension and open it
-	static compilation invocation	-> call llc
+	command line parameter parsing	-> mostly done :: have to propagate flags to llc
+	static compilation invocation	-> call llc and opt
 	link with Library
 	testing + debugging
 	fix LLVMPrintModulToFile to properly accept file name (it could have something to do with file creation flags in open())

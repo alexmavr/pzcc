@@ -284,16 +284,178 @@ Type iarray_to_array(Type array) {
         return typeArray(0, array->refType);
 }
 
-/* Returns a substring of length len from the provided string */
-const char * substring(const char * string, unsigned int len) {
-    char * res;
-    if (strlen(string)<len)
-        res = (char *) string;
-    else {
-        char substr[len+1];
-        memcpy(substr, string, len);
-        substr[len] = '\0'; 
-        res = substr;
-    }
-    return (const char *) res;
+/* Generates IR for all external function prototypes */
+void generate_external_definitions(void) {
+    LLVMTypeRef *params = new(sizeof(LLVMTypeRef) * 3);
+    LLVMValueRef func_ref;
+
+    // PROC putchar(char)
+    params[0] = type_to_llvm(typeChar);
+    func_ref = LLVMAddFunction(module, "putchar", \
+                    LLVMFunctionType(type_to_llvm(typeVoid), params, 1, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    
+    // PROC puts(char[])
+    params[0] = type_to_llvm(typeArray(0, typeChar));
+    func_ref = LLVMAddFunction(module, "puts", \
+                    LLVMFunctionType(type_to_llvm(typeVoid), params, 1, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // PROC WRITE_INT(int, int)
+    params[0] = type_to_llvm(typeInteger);
+    params[1] = type_to_llvm(typeInteger);
+    func_ref = LLVMAddFunction(module, "WRITE_INT", \
+                    LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // PROC WRITE_BOOL(bool, int)
+    params[0] = type_to_llvm(typeBoolean);
+    params[1] = type_to_llvm(typeInteger);
+    func_ref = LLVMAddFunction(module, "WRITE_BOOL", \
+                    LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // PROC WRITE_CHAR(char, int)
+    params[0] = type_to_llvm(typeChar);
+    params[1] = type_to_llvm(typeInteger);
+    func_ref = LLVMAddFunction(module, "WRITE_CHAR", \
+                    LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // PROC WRITE_REAL(REAL, int, int)
+    params[0] = type_to_llvm(typeReal);
+    params[1] = type_to_llvm(typeInteger);
+    params[2] = type_to_llvm(typeInteger);
+    func_ref = LLVMAddFunction(module, "WRITE_REAL", \
+                    LLVMFunctionType(type_to_llvm(typeVoid), params, 3, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // PROC WRITE_STRING(char[], int)
+    params[0] = type_to_llvm(typeArray(0, typeChar));
+    params[1] = type_to_llvm(typeInteger);
+    func_ref = LLVMAddFunction(module, "WRITE_STRING", \
+                    LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // FUNC int READ_INT()
+    func_ref = LLVMAddFunction(module, "READ_INT", \
+                    LLVMFunctionType(type_to_llvm(typeInteger), params, 0, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // FUNC bool READ_BOOL()
+    func_ref = LLVMAddFunction(module, "READ_BOOL", \
+                    LLVMFunctionType(type_to_llvm(typeBoolean), params, 0, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // FUNC int getchar()
+    func_ref = LLVMAddFunction(module, "getchar", \
+                    LLVMFunctionType(type_to_llvm(typeInteger), params, 0, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // FUNC REAL READ_REAL()
+    func_ref = LLVMAddFunction(module, "READ_REAL", \
+                    LLVMFunctionType(type_to_llvm(typeReal), params, 0, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // PROC READ_STRING(int, char[])
+    params[0] = type_to_llvm(typeInteger);
+    params[1] = type_to_llvm(typeArray(0, typeChar));
+    func_ref = LLVMAddFunction(module, "READ_STRING", \
+                    LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // FUNC int abs(int)
+    params[0] = type_to_llvm(typeInteger);
+    func_ref = LLVMAddFunction(module, "abs", \
+                    LLVMFunctionType(type_to_llvm(typeInteger), params, 1, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // FUNC REAL fabs(REAL)
+    params[0] = type_to_llvm(typeReal);
+    func_ref = LLVMAddFunction(module, "fabs", \
+                    LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // FUNC REAL sqrt(REAL)
+    func_ref = LLVMAddFunction(module, "sqrt", \
+                    LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // FUNC REAL sin(REAL)
+    func_ref = LLVMAddFunction(module, "sin", \
+                    LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // FUNC REAL cos(REAL)
+    func_ref = LLVMAddFunction(module, "cos", \
+                    LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // FUNC REAL tan(REAL)
+    func_ref = LLVMAddFunction(module, "tan", \
+                    LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // FUNC REAL arctan(REAL)
+    func_ref = LLVMAddFunction(module, "arctan", \
+                    LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // FUNC REAL exp(REAL)
+    func_ref = LLVMAddFunction(module, "exp", \
+                    LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // FUNC REAL ln(REAL)
+    func_ref = LLVMAddFunction(module, "ln", \
+                    LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // FUNC REAL trunc(REAL)
+    func_ref = LLVMAddFunction(module, "trunc", \
+                    LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // FUNC REAL round(REAL)
+    func_ref = LLVMAddFunction(module, "round", \
+                    LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // FUNC REAL pi()
+    func_ref = LLVMAddFunction(module, "pi", \
+                    LLVMFunctionType(type_to_llvm(typeReal), params, 0, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // FUNC INT ROUND(REAL)
+    func_ref = LLVMAddFunction(module, "ROUND", \
+                    LLVMFunctionType(type_to_llvm(typeInteger), params, 1, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // FUNC INT TRUNC(REAL)
+    func_ref = LLVMAddFunction(module, "TRUNC", \
+                    LLVMFunctionType(type_to_llvm(typeInteger), params, 1, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // FUNC INT strlen(char[])
+    params[0] = type_to_llvm(typeArray(0, typeChar));
+    func_ref = LLVMAddFunction(module, "strlen", \
+                    LLVMFunctionType(type_to_llvm(typeInteger), params, 1, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // FUNC INT strcmp(char[], char[])
+    params[1] = type_to_llvm(typeArray(0, typeChar));
+    func_ref = LLVMAddFunction(module, "strcmp", \
+                    LLVMFunctionType(type_to_llvm(typeInteger), params, 2, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // PROC strcpy(char[], char[])
+    func_ref = LLVMAddFunction(module, "strcpy", \
+                    LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
+    // PROC strcat(char[], char[])
+    func_ref = LLVMAddFunction(module, "strcat", \
+                    LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+
 }
