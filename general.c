@@ -63,7 +63,7 @@ static void dump_ir (char *outfile) {
 
 //Entry point.
 int main (int argc, char **argv) {
-	char tmp_f[L_tmpnam];
+	pid_t tmp_pid;
 	int ret = 0;
 
 	//Parse command-line options.
@@ -86,18 +86,18 @@ int main (int argc, char **argv) {
 
 	//Optimizer pass on dumped IR.
 	if (our_options.opt_flag == true) {
-		pid_t opted = fork();
-		if (opted == 0) {
+		tmp_pid = fork();
+		if (tmp_pid == 0) {
 			if (our_options.opt_flags == NULL) {
 				execlp("opt", "opt", "-S", "-std-compile-opts", "-o", our_options.tmp_filename, our_options.tmp_filename, (char *)NULL);
-			} else if (opted < 0) {
+			} else if (tmp_pid < 0) {
 				my_error(ERR_LV_INTERN, "fork() call failed");
 			} else {
 				execlp("opt", "opt", "-S", "-std-compile-opts", our_options.opt_flags, "-o", our_options.tmp_filename, our_options.tmp_filename, (char *)NULL);
 			}
 		} else {
 			size_t guard = 0;
-			while ((waitpid(opted, NULL, 0) != opted) && (guard < 100)) { guard++; }
+			while ((waitpid(tmp_pid, NULL, 0) != tmp_pid) && (guard < 100)) { guard++; }
 		}
 	}
 
@@ -105,21 +105,21 @@ int main (int argc, char **argv) {
 		//If IR was requested, simply copy the temp file to the output file.
 		case OUT_IR:
 			if (rename(our_options.tmp_filename, our_options.output_filename) != 0) {
-				pid_t mv = fork();
-				if (mv == 0) {
+				tmp_pid = fork();
+				if (tmp_pid == 0) {
 					execlp("mv", "mv", our_options.tmp_filename, our_options.output_filename, (char *)NULL);
-				} else if (mv < 0) {
+				} else if (tmp_pid < 0) {
 					my_error(ERR_LV_INTERN, "fork() call failed");
 				} else {
 					size_t guard = 0;
-					while ((waitpid(mv, NULL, 0) != mv) && (guard < 100)) { guard++; }
+					while ((waitpid(tmp_pid, NULL, 0) != tmp_pid) && (guard < 100)) { guard++; }
 				}
 			}
 			break;
 		//If assembly output was requested, generate and dump it to the output file.
 		case OUT_ASM:
-			pid_t llcomp = fork();
-			if (llcomp == 0) {
+			tmp_pid = fork();
+			if (tmp_pid == 0) {
 				switch (our_options.opt_flag) {
 					case true	:
 						execlp("llc", "llc", "-filetype=asm", "-O3", "-o", our_options.output_filename, our_options.tmp_filename, (char *)NULL);
@@ -131,11 +131,11 @@ int main (int argc, char **argv) {
 						my_error(ERR_LV_INTERN, "Invalid value in boolean variable");
 						break;
 				}
-			} else if (llcomp < 0) {
+			} else if (tmp_pid < 0) {
 				my_error(ERR_LV_INTERN, "fork() call failed");
 			} else {
 				size_t guard = 0;
-				while ((waitpid(llcomp, NULL, 0) != llcomp) && (guard < 100)) { guard++; }
+				while ((waitpid(tmp_pid, NULL, 0) != tmp_pid) && (guard < 100)) { guard++; }
 			}
 			break;
 		case OUT_EXEC:
@@ -152,9 +152,11 @@ fprintf(stderr, "TODO: Must implement executable output (assembler - linker)\n")
 
 	printf("Parsing Complete\n");
 
+/*
 	goto nrm_end;
 err_end:
 	ret = 1;
 nrm_end:
+*/
 	return ret;
 }

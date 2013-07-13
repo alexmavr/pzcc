@@ -4,17 +4,18 @@ Syntax:
 IR:
 	statements:
 		WRITE, FORMAT
-	refactor parser.y
 	ask for external linkage as a feature. if not, we don't need to keep external linkage, which will allow for aggressive opts in llvm
-	static compilation invocation	-> call llc and opt (opt done, only llc remains)
-	link with Library
 	testing + debugging
+	refactor parser.y
+	link with Library
+	furnish code with proper deallocations (for example unlink the tmpfile, all the structures we use, ...) and put them in cleanup (and the temps in the proper places)
 
 General:
 	compiler arguments and llvm backend invocation (link together?)
 	refactor parser.y
 
 Done:
+*	static compilation invocation	-> call llc and opt (opt done, only llc remains :: llc finished too)
 *	fix LLVMPrintModulToFile to properly accept file name (it could have something to do with file creation flags in open())
 *	command line parameter parsing	-> mostly done :: have to propagate flags to llc and opt
 *	stricter array parameter size checking
