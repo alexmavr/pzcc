@@ -122,7 +122,7 @@ fprintf(stderr, "TODO: Must implement executable output (assembler - linker)\n")
 
 	printf("Parsing Complete\n");
 
-	goto ntm_end;
+	goto nrm_end;
 err_end:
 	ret = 1;
 nrm_end:
