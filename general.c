@@ -90,6 +90,8 @@ int main (int argc, char **argv) {
 		if (opted == 0) {
 			if (our_options.opt_flags == NULL) {
 				execlp("opt", "opt", "-S", "-std-compile-opts", "-o", our_options.tmp_filename, our_options.tmp_filename, (char *)NULL);
+			} else if (opted < 0) {
+				my_error(ERR_LV_INTERN, "Could not fork()");
 			} else {
 				execlp("opt", "opt", "-S", "-std-compile-opts", our_options.opt_flags, "-o", our_options.tmp_filename, our_options.tmp_filename, (char *)NULL);
 			}
@@ -102,9 +104,17 @@ int main (int argc, char **argv) {
 	switch (our_options.output_type) {
 		//If IR was requested, simply copy the temp file to the output file.
 		case OUT_IR:
-			//...
-			dump_ir(our_options.output_filename);
-			//...
+			if (rename(our_options.tmp_filename, our_options.output_filename) != 0) {
+				pid_t mv = fork();
+				if (mv == 0) {
+					execlp("mv", "mv", our_options.tmp_filename, our_options.output_filename, (char *)NULL);
+				} else if (mv < 0) {
+					my_error(ERR_LV_INTERN, "Could not fork()");
+				} else {
+					size_t guard = 0;
+					while ((waitpid(mv, NULL, 0) != mv) && (guard < 100)) { guard++; }
+				}
+			}
 			break;
 		case OUT_ASM:
 			if (tmpnam(tmp_f) == NULL) {
