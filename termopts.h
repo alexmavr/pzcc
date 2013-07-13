@@ -20,6 +20,10 @@ struct options_t {
 	bool output_is_stdout;
 	char *output_filename;
 
+	//Flags for propagation
+	char *opt_flags;
+	char *llc_flags;
+
 	//Optimization flag
 	bool opt_flag;
 };

@@ -34,6 +34,8 @@ static void calculate_output_file (void) {
 static error_t parse_opt (int key, char *arg, struct argp_state *state) {
 	error_t ret = 0;
 
+//fprintf(stderr, "OPTION PARSER called with key %c and argument %s\n", key, arg);
+
 	switch (key) {
 		//Set optimization flag.
 		case 'o':
@@ -57,11 +59,12 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
 				ret = 1;
 			}
 			break;
-/*
 		case 'l':
-fprintf(stderr, "Argument to llc-flags is %s\n", arg);
+			our_options.llc_flags = arg;
 			break;
-*/
+		case 't':
+			our_options.opt_flags = arg;
+			break;
 		//Capture input filename.
 		case ARGP_KEY_ARG:
 			if (our_options.in_file == NULL) {
@@ -109,7 +112,8 @@ static struct argp_option options[] = {
 	{ "emit-intermediate", 'i', 0, 0, "Emit LLVM intermediate code", 0 }, 
 	{ "emit-final", 'f', 0, 0, "Emit final assembly code", 0 }, 
 	{ "optimize", 'o', 0, 0, "Enable all optimizations", 1 }, 
-//	{ "llc-flags", 'l', "LLC_FLAGS", 0, "Flags to be used when -f option is in effect", 2 }, 
+	{ "opt-flags" , 't', "OPT_FLAGS", 0, "Option string to be used with opt when -o option is in effect", 2 }, 
+	{ "llc-flags", 'l', "LLC_FLAGS", 0, "Option string to be used with llc when -f option is in effect", 2 }, 
 	{ 0 }
 };
 //Non-option argument description.
