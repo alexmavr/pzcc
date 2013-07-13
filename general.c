@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/wait.h>
 #include <llvm-c/Target.h>
 #include <llvm-c/Core.h>
 #include <llvm-c/Analysis.h>
@@ -78,42 +79,32 @@ int main (int argc, char **argv) {
 
     generate_external_definitions(); // declares external function prototypes
 
-/*
-	LLVMPassManagerRef pass_manager = LLVMCreateFunctionPassManagerForModule(module);
-	LLVMAddPromoteMemoryToRegisterPass(pass_manager);
-	LLVMAddInstructionCombiningPass(pass_manager);
-	LLVMAddReassociatePass(pass_manager);
-	LLVMAddGVNPass(pass_manager);
-	LLVMAddCFGSimplificationPass(pass_manager);
-	LLVMInitializeFunctionPassManager(pass_manager);
-*/
-
 	yyparse();
-//	closeScope();
 
-	//dump ir to temp file here.
+	//Dump IR to intermediate file.
+	dump_ir(our_options.tmp_filename);
 
+	//Optimizer pass on dumped IR.
 	if (our_options.opt_flag == true) {
 		pid_t opted = fork();
 		if (opted == 0) {
-/*
-			if (our_options.opt_flags == NULL)
-				execlp("opt", "opt", "-S", "-std-compile-opts", our_options.opt_flags, , (char *)NULL);
-			else
-				execlp("opt", "opt", "-S", "-std-compile-opts", , (char *)NULL);
-*/
+			if (our_options.opt_flags == NULL) {
+				execlp("opt", "opt", "-S", "-std-compile-opts", "-o", our_options.tmp_filename, our_options.tmp_filename, (char *)NULL);
+			} else {
+				execlp("opt", "opt", "-S", "-std-compile-opts", our_options.opt_flags, "-o", our_options.tmp_filename, our_options.tmp_filename, (char *)NULL);
+			}
 		} else {
-			//wait for death
+			size_t guard = 0;
+			while ((waitpid(opted, NULL, 0) != opted) && (guard < 100)) { guard++; }
 		}
-		//...
-		//Create command-line call for opt and its arguments.
-fprintf(stderr, "TODO: Must implement optimizations\n");
-		//...
 	}
 
 	switch (our_options.output_type) {
+		//If IR was requested, simply copy the temp file to the output file.
 		case OUT_IR:
+			//...
 			dump_ir(our_options.output_filename);
+			//...
 			break;
 		case OUT_ASM:
 			if (tmpnam(tmp_f) == NULL) {
@@ -135,7 +126,6 @@ fprintf(stderr, "TODO: Must implement executable output (assembler - linker)\n")
 			my_error(ERR_LV_INTERN, "Unknown output file type detected");
 	}
 
-//	LLVMDisposePassManager(pass_manager);
 	LLVMDisposeBuilder(builder);
 	LLVMDisposeModule(module);
 

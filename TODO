@@ -5,17 +5,18 @@ IR:
 	statements:
 		WRITE, FORMAT
 	refactor parser.y
-	command line parameter parsing	-> mostly done :: have to propagate flags to llc
-	static compilation invocation	-> call llc and opt
+	ask for external linkage as a feature. if not, we don't need to keep external linkage, which will allow for aggressive opts in llvm
+	static compilation invocation	-> call llc and opt (opt done, only llc remains)
 	link with Library
 	testing + debugging
-	fix LLVMPrintModulToFile to properly accept file name (it could have something to do with file creation flags in open())
 
 General:
 	compiler arguments and llvm backend invocation (link together?)
 	refactor parser.y
 
 Done:
+*	fix LLVMPrintModulToFile to properly accept file name (it could have something to do with file creation flags in open())
+*	command line parameter parsing	-> mostly done :: have to propagate flags to llc and opt
 *	stricter array parameter size checking
 *	pass-by-reference parameters
 *	functions with a return value are not emitted without an assignment

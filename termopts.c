@@ -124,7 +124,7 @@ static struct argp_option options[] = {
 	{ "emit-intermediate", 'i', 0, 0, "Emit LLVM intermediate code", 0 }, 
 	{ "emit-final", 'f', 0, 0, "Emit final assembly code", 0 }, 
 	{ "optimize", 'o', 0, 0, "Enable all optimizations", 1 }, 
-	{ "opt-flags" , 't', "OPT_FLAGS", 0, "Option string to be used with opt when -o option is in effect", 2 }, 
+	{ "opt-flags", 't', "OPT_FLAGS", 0, "Option string to be used with opt when -o option is in effect", 2 }, 
 	{ "llc-flags", 'l', "LLC_FLAGS", 0, "Option string to be used with llc when -f option is in effect", 2 }, 
 	{ 0 }
 };
