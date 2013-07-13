@@ -72,6 +72,8 @@ int main (int argc, char **argv) {
 	builder = LLVMCreateBuilder();
 	LLVMInitializeNativeTarget();
 
+    generate_external_definitions(); // declares external function prototypes
+
 /*
 	LLVMPassManagerRef pass_manager = LLVMCreateFunctionPassManagerForModule(module);
 	LLVMAddPromoteMemoryToRegisterPass(pass_manager);
