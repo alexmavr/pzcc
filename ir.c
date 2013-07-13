@@ -299,7 +299,7 @@ void generate_external_definitions(void) {
     endFunctionHeader(func, typeVoid);
     
     // PROC puts(char[])
-    params[0] = type_to_llvm(typeArray(0, typeChar));
+    params[0] = LLVMPointerType(type_to_llvm(typeArray(0, typeChar)), 0);
     func_ref = LLVMAddFunction(module, "puts", \
                     LLVMFunctionType(type_to_llvm(typeVoid), params, 1, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
@@ -353,7 +353,7 @@ void generate_external_definitions(void) {
     endFunctionHeader(func, typeVoid);
 
     // PROC WRITE_STRING(char[], int)
-    params[0] = type_to_llvm(typeArray(0, typeChar));
+    params[0] = LLVMPointerType(type_to_llvm(typeArray(0, typeChar)), 0);
     params[1] = type_to_llvm(typeInteger);
     func_ref = LLVMAddFunction(module, "WRITE_STRING", \
                     LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
@@ -393,7 +393,7 @@ void generate_external_definitions(void) {
 
     // PROC READ_STRING(int, char[])
     params[0] = type_to_llvm(typeInteger);
-    params[1] = type_to_llvm(typeArray(0, typeChar));
+    params[1] = LLVMPointerType(type_to_llvm(typeArray(0, typeChar)), 0);
     func_ref = LLVMAddFunction(module, "READ_STRING", \
                     LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
@@ -516,7 +516,7 @@ void generate_external_definitions(void) {
     endFunctionHeader(func, typeInteger);
 
     // FUNC INT strlen(char[])
-    params[0] = type_to_llvm(typeArray(0, typeChar));
+    params[0] = LLVMPointerType(type_to_llvm(typeArray(0, typeChar)), 0);
     func_ref = LLVMAddFunction(module, "strlen", \
                     LLVMFunctionType(type_to_llvm(typeInteger), params, 1, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
@@ -525,7 +525,7 @@ void generate_external_definitions(void) {
     endFunctionHeader(func, typeInteger);
 
     // FUNC INT strcmp(char[], char[])
-    params[1] = type_to_llvm(typeArray(0, typeChar));
+    params[1] = LLVMPointerType(type_to_llvm(typeArray(0, typeChar)), 0);
     func_ref = LLVMAddFunction(module, "strcmp", \
                     LLVMFunctionType(type_to_llvm(typeInteger), params, 2, false));
     LLVMSetLinkage(func_ref, LLVMExternalLinkage);
