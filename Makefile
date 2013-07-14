@@ -56,4 +56,4 @@ distclean: clean
 
 clena celan lcean lcena: clean
 clean:
-	rm -f $(OBJ) pzc.lex.c a.out parser.c parser.h
+	rm -f $(OBJ) pzc.lex.c a.out parser.c parser.h tests/*/*.imm tests/*/*.asm

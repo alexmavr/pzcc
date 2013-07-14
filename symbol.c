@@ -561,6 +561,9 @@ Type typeIArray (Type refType) {
 }
 
 void destroyType (Type type) {
+    if (type == NULL) {
+        fprintf(stderr, "Trying to destroy NULL type\n");
+    }
 	switch (type->kind) {
 		case TYPE_ARRAY:
 		case TYPE_IARRAY:
@@ -696,7 +699,7 @@ void printSymbolTable (void) {
 				}
 				e = e->nextInScope;
 				if (e != NULL) {
-					printf(", ");
+					printf("\n");
 				}
 			}
 			scp = scp->parent;

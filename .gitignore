@@ -7,3 +7,6 @@ pzc.lex.c
 pzcc
 a.out
 parser.output
+*.imm
+*.s
+*.asm

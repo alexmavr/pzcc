@@ -170,7 +170,7 @@ bool global_scope = true;               // flag marking the scope for initializa
 
 %initial-action
 {
-	openScope();
+//	openScope(); // opening at main() now
 }
 
 %%
@@ -580,17 +580,17 @@ program_header
         {
             SymbolEntry * prog = newFunction($3);
             if (prog == NULL)
-                exit(1);
+                exit(EXIT_FAILURE);
 
             openScope();
             global_scope = false;
+            endFunctionHeader(prog, typeVoid);
 
             LLVMTypeRef funcType = LLVMFunctionType(LLVMVoidType(), NULL, 0, 0);
             LLVMValueRef func = LLVMAddFunction(module, "main", funcType);
             LLVMSetLinkage(func, LLVMExternalLinkage);
             LLVMBasicBlockRef block = LLVMAppendBasicBlock(func, "entry");
             LLVMPositionBuilderAtEnd(builder, block);
-
         }
 	;
 program

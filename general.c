@@ -80,6 +80,10 @@ int main (int argc, char **argv) {
 	generate_external_definitions(); // declares external function prototypes
 
 	yyparse();
+
+    closeScope();
+    destroySymbolTable();
+    
 	//TODO: what goes on here?? line78:openScope() -> external function definitions -> close general scope where?
 
 	//Dump IR to intermediate file.
