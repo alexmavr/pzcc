@@ -2,13 +2,15 @@ Syntax:
 	improve error recovery and messages
 
 IR:
-	statements:
-		WRITE, FORMAT
 	ask for external linkage as a feature. if not, we don't need to keep external linkage, which will allow for aggressive opts in llvm
 	testing + debugging
 	refactor parser.y
 	link with Library
 	furnish code with proper deallocations (for example unlink the tmpfile, all the structures we use, ...) and put them in cleanup (and the temps in the proper places)
+    we have TRUNC + ROUND at the library (as lowercase), we need trunc + round for reals as well
+    string functions are non-existent
+    writes are twrong wrong (see what i did there?)
+    
 
 Cleanup:
 	leak:	pzc.lex:90		->	id allocation
@@ -25,6 +27,7 @@ General:
 	refactor parser.y
 
 Done:
+*   statements: WRITE + FORMAT
 *	leak:	tmpfile			->	does not delete tmpfile
 *	leak:	general.c:83	->	what about closing general scope?
 *	static compilation invocation	-> call llc and opt (opt done, only llc remains :: llc finished too)

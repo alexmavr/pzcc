@@ -1258,7 +1258,7 @@ base_stmt
                 YYERROR;
             }
 			function_has_ret = true;
-            LLVMBuildRet(builder, $2.Valref);
+            LLVMBuildRet(builder, cast_compat(currentFunctionType, $2.type, $2.Valref));
 		}
 	| write '(' stmt_opt_write ')' ';' 
         {
