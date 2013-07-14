@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <string.h>
 #include <llvm-c/Target.h>
 #include <llvm-c/Core.h>
 #include <llvm-c/Analysis.h>
@@ -77,14 +78,12 @@ int main (int argc, char **argv) {
 	initSymbolTable(256);
 	openScope();
 
-	generate_external_definitions(); // declares external function prototypes
+	generate_external_definitions();	//Declares external function prototypes.
 
 	yyparse();
 
     closeScope();
     destroySymbolTable();
-    
-	//TODO: what goes on here?? line78:openScope() -> external function definitions -> close general scope where?
 
 	//Dump IR to intermediate file.
 	dump_ir(our_options.tmp_filename);
@@ -109,10 +108,22 @@ int main (int argc, char **argv) {
 	switch (our_options.output_type) {
 		//If IR was requested, simply copy the temp file to the output file.
 		case OUT_IR:
-			if (rename(our_options.tmp_filename, our_options.output_filename) != 0) {
+			if (strcmp(our_options.output_filename, "-") != 0) {
+				if (rename(our_options.tmp_filename, our_options.output_filename) != 0) {
+					tmp_pid = fork();
+					if (tmp_pid == 0) {
+						execlp("mv", "mv", our_options.tmp_filename, our_options.output_filename, (char *)NULL);
+					} else if (tmp_pid < 0) {
+						my_error(ERR_LV_INTERN, "fork() call failed");
+					} else {
+						size_t guard = 0;
+						while ((waitpid(tmp_pid, NULL, 0) != tmp_pid) && (guard < 100)) { guard++; }
+					}
+				}
+			} else {
 				tmp_pid = fork();
 				if (tmp_pid == 0) {
-					execlp("mv", "mv", our_options.tmp_filename, our_options.output_filename, (char *)NULL);
+					execlp("cat", "cat", our_options.tmp_filename, (char *)NULL);
 				} else if (tmp_pid < 0) {
 					my_error(ERR_LV_INTERN, "fork() call failed");
 				} else {
