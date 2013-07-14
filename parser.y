@@ -1373,8 +1373,26 @@ stmt_opt_write
 	| format stmt_opt_write_tail
 	;
 stmt_opt_write_tail
-	: /* Nothing */
-	| ',' format stmt_opt_write_tail
+	: /* Nothing */     {;}
+	| ',' 
+        { 
+            if (currentWrite >= 2){
+                /* Print space */
+                LLVMValueRef str = LLVMConstString(" ", 1, false);
+                LLVMValueRef tmp = LLVMBuildAlloca(builder, \
+                        type_to_llvm(typeArray(2, typeChar)), "strtmp");
+                LLVMBuildStore(builder, str, tmp);
+
+                LLVMValueRef * args = new(2 * sizeof(LLVMValueRef));
+                args[0] = tmp;
+                args[1] = LLVMConstInt(LLVMInt32Type(), 2, false);
+                LLVMValueRef func_ref = LLVMGetNamedFunction(module, "WRITE_STRING");
+                LLVMTypeRef dest_type = LLVMPointerType(type_to_llvm(iarray_to_array(typeArray(2, typeChar))), 0);
+                args[0] = LLVMBuildPointerCast(builder, tmp, dest_type, "ptrcasttmp");
+                LLVMBuildCall(builder, func_ref, args, 2, "");
+                delete(args);
+            }
+        } format stmt_opt_write_tail  
 	;
 assign
 	: '='     { $$ = "="; }
@@ -1452,6 +1470,7 @@ format
 
             LLVMValueRef func_ref;
             LLVMValueRef * args = new(3 * sizeof(LLVMValueRef));
+            LLVMTypeRef dest_type;
             args[0] = $1.Valref;
             args[1] = LLVMConstInt(LLVMInt32Type(), 5, false); // TODO: placeholder
             if ($1.type == typeInteger) {
@@ -1469,8 +1488,12 @@ format
                 LLVMBuildCall(builder, func_ref, args, 3, "");
             } else {
                 /* allocate & store the array, and pass the pointer */
+                func_ref = LLVMGetNamedFunction(module, "strlen");
+                dest_type = LLVMPointerType(type_to_llvm(iarray_to_array($1.type)),0);
+                args[0] = LLVMBuildPointerCast(builder, $1.Valref, dest_type, "ptrcasttmp");
+                args[1] = LLVMBuildCall(builder, func_ref, args, 1, "calltmp");
+
                 func_ref = LLVMGetNamedFunction(module, "WRITE_STRING");
-                LLVMTypeRef dest_type = LLVMPointerType(type_to_llvm(iarray_to_array($1.type)),0);
                 args[0] = LLVMBuildPointerCast(builder, $1.Valref, dest_type, "ptrcasttmp");
                 LLVMBuildCall(builder, func_ref, args, 2, "");
             }

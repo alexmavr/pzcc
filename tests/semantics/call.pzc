@@ -26,6 +26,8 @@ PROGRAM my_main () {
     rproc(k);
 //    i2proc(p, jp);
     dostuff(p, jp, 4.6, s);
+    WRITE_BOOL(false, 5);
+    WRITESPLN(k, "asd", "papadipoo");
     j = s[4];
     j = j;
 }
