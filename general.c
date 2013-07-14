@@ -10,9 +10,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <sys/wait.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <llvm-c/Target.h>
 #include <llvm-c/Core.h>
 #include <llvm-c/Analysis.h>
@@ -25,7 +27,13 @@
 
 //Cleanup hook.
 void cleanup (void) {
-	;
+	//Removal of tempfile.
+	struct stat _;
+	if ((our_options.tmp_filename != NULL) && (stat(our_options.tmp_filename, &_) == 0)) {
+		if (unlink(our_options.tmp_filename) != 0) {
+			my_error(ERR_LV_INTERN, "unlink() call failed");
+		}
+	}
 }
 
 void *new (size_t size) {
@@ -171,6 +179,8 @@ fprintf(stderr, "TODO: Must implement executable output (assembler - linker)\n")
 
 	LLVMDisposeBuilder(builder);
 	LLVMDisposeModule(module);
+
+	cleanup();
 
 	printf("Parsing Complete\n");
 
