@@ -19,6 +19,7 @@ Cleanup:
 	pzc.lex:*		->	any token with new() call
 	ir.c:188		->	function call frame argument list allocation
 	ir.c:*			->	anything that has to do with function call frames
+	general.c:83	->	what about closing general scope?
 
 General:
 	compiler arguments and llvm backend invocation (link together?)

@@ -80,6 +80,7 @@ int main (int argc, char **argv) {
 	generate_external_definitions(); // declares external function prototypes
 
 	yyparse();
+	//TODO: what goes on here?? line78:openScope() -> external function definitions -> close general scope where?
 
 	//Dump IR to intermediate file.
 	dump_ir(our_options.tmp_filename);
