@@ -92,4 +92,6 @@ Type iarray_to_array(Type array);
 LLVMValueRef cast_compat(Type dest, Type src, LLVMValueRef src_val);
 
 void generate_external_definitions(void);
+
+void build_const_str_write_call(const char * string, int size);
 #endif	/* __IR_H__ */

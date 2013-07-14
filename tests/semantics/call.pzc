@@ -17,6 +17,7 @@ PROC dostuff(int j[], int pjk[][4][6], REAL KK, char s[]) {
 PROGRAM my_main () {
 	int j = 9;
 	int k = 96;
+	REAL l = 96.2;
 	int p[10];
 	char s[10];
 	int jp[10][4][6];
@@ -27,7 +28,7 @@ PROGRAM my_main () {
 //    i2proc(p, jp);
     dostuff(p, jp, 4.6, s);
     WRITE_BOOL(false, 5);
-    WRITESPLN(k, "asd", "papadipoo");
+    WRITESPLN(k, "asd", "papadipoo", FORM(l, 5, 3), FORM(j,2));
     j = s[4];
     j = j;
 }

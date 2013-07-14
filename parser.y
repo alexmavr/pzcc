@@ -140,10 +140,10 @@ bool global_scope = true;               // flag marking the scope for initializa
 %type <node> l_value_tail
 %type <node> range_choice
 %type <node> range_opt
+%type <node> format_opt
 
 %type <for_node> range
 
-%type <i> format_opt
 
 %type <s> assign
 %type <s> binop1
@@ -1261,6 +1261,12 @@ base_stmt
             LLVMBuildRet(builder, $2.Valref);
 		}
 	| write '(' stmt_opt_write ')' ';' 
+        {
+            if ((currentWrite == 1) ||  (currentWrite == 3)) {
+                /* Print newline */
+                build_const_str_write_call("\n", 1);
+            }
+        }
 	| error ';' 
 	;
 stmt
@@ -1378,19 +1384,7 @@ stmt_opt_write_tail
         { 
             if (currentWrite >= 2){
                 /* Print space */
-                LLVMValueRef str = LLVMConstString(" ", 1, false);
-                LLVMValueRef tmp = LLVMBuildAlloca(builder, \
-                        type_to_llvm(typeArray(2, typeChar)), "strtmp");
-                LLVMBuildStore(builder, str, tmp);
-
-                LLVMValueRef * args = new(2 * sizeof(LLVMValueRef));
-                args[0] = tmp;
-                args[1] = LLVMConstInt(LLVMInt32Type(), 2, false);
-                LLVMValueRef func_ref = LLVMGetNamedFunction(module, "WRITE_STRING");
-                LLVMTypeRef dest_type = LLVMPointerType(type_to_llvm(iarray_to_array(typeArray(2, typeChar))), 0);
-                args[0] = LLVMBuildPointerCast(builder, tmp, dest_type, "ptrcasttmp");
-                LLVMBuildCall(builder, func_ref, args, 2, "");
-                delete(args);
+                build_const_str_write_call(" ", 1);
             }
         } format stmt_opt_write_tail  
 	;
@@ -1494,7 +1488,6 @@ format
                 args[1] = LLVMBuildCall(builder, func_ref, args, 1, "calltmp");
 
                 func_ref = LLVMGetNamedFunction(module, "WRITE_STRING");
-                args[0] = LLVMBuildPointerCast(builder, $1.Valref, dest_type, "ptrcasttmp");
                 LLVMBuildCall(builder, func_ref, args, 2, "");
             }
             delete(args);
@@ -1506,15 +1499,42 @@ format
 										verbose_type($5.type));
                 YYERROR;
             }
-			if (($6 == 1) && (!compat_types(typeReal, $3.type))) {
-				my_error(ERR_LV_ERR, "FORM: first argument is not Real but precision is specified", \
-										verbose_type($5.type));
+			if (($6.value.b == true) && (!compat_types(typeReal, $3.type))) {
+				my_error(ERR_LV_ERR, "FORM: first argument is not Real but precision is specified", verbose_type($5.type));
                 YYERROR;
             }
+            
+            LLVMValueRef func_ref;
+            LLVMValueRef * args = new(3 * sizeof(LLVMValueRef));
+            LLVMTypeRef dest_type;
+            args[0] = $3.Valref;
+            args[1] = cast_compat(typeInteger, $5.type, $5.Valref);
+            if ($3.type == typeInteger) {
+                func_ref = LLVMGetNamedFunction(module, "WRITE_INT");
+                LLVMBuildCall(builder, func_ref, args, 2, "");
+            } else if ($3.type == typeBoolean) {
+                func_ref = LLVMGetNamedFunction(module, "WRITE_BOOL");
+                LLVMBuildCall(builder, func_ref, args, 2, "");
+            } else if ($3.type == typeChar) {
+                func_ref = LLVMGetNamedFunction(module, "WRITE_CHAR");
+                LLVMBuildCall(builder, func_ref, args, 2, "");
+            } else if ($3.type == typeReal) {
+                func_ref = LLVMGetNamedFunction(module, "WRITE_REAL");
+                args[2] = $6.Valref;
+                LLVMBuildCall(builder, func_ref, args, 3, "");
+            } else {
+                /* allocate & store the array, and pass the pointer */
+                dest_type = LLVMPointerType(type_to_llvm(iarray_to_array($3.type)),0);
+                func_ref = LLVMGetNamedFunction(module, "WRITE_STRING");
+                args[0] = LLVMBuildPointerCast(builder, $3.Valref, dest_type, "ptrcasttmp");
+                LLVMBuildCall(builder, func_ref, args, 2, "");
+            }
+            delete(args);
+
 		}
 	;
 format_opt
-	: /* Nothing */ { $$ = 0; }
+	: /* Nothing */ { $$.value.b = false; }
 	| ',' expr
 		{
 			if (!compat_types(typeInteger, $2.type)) {
@@ -1522,7 +1542,8 @@ format_opt
 										verbose_type($2.type));
                 YYERROR;
             }
-			$$ = 1;
+			$$.value.b = true;
+            $$.Valref = $2.Valref;
 		}
 	;
 %%

@@ -553,3 +553,19 @@ void generate_external_definitions(void) {
     endFunctionHeader(func, typeVoid);
 
 }
+
+void build_const_str_write_call(const char * string, int size) {
+    LLVMValueRef str = LLVMConstString(string, size, false);
+    LLVMValueRef tmp = LLVMBuildAlloca(builder, \
+            type_to_llvm(typeArray(size+1, typeChar)), "strtmp");
+    LLVMBuildStore(builder, str, tmp);
+
+    LLVMValueRef * args = new(2 * sizeof(LLVMValueRef));
+    args[0] = tmp;
+    args[1] = LLVMConstInt(LLVMInt32Type(), (size+1), false);
+    LLVMValueRef func_ref = LLVMGetNamedFunction(module, "WRITE_STRING");
+    LLVMTypeRef dest_type = LLVMPointerType(type_to_llvm(iarray_to_array(typeArray((size+1), typeChar))), 0);
+    args[0] = LLVMBuildPointerCast(builder, tmp, dest_type, "ptrcasttmp");
+    LLVMBuildCall(builder, func_ref, args, 2, "");
+    delete(args);
+}
