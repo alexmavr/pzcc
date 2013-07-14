@@ -11,21 +11,22 @@ IR:
 	furnish code with proper deallocations (for example unlink the tmpfile, all the structures we use, ...) and put them in cleanup (and the temps in the proper places)
 
 Cleanup:
-	pzc.lex:90		->	id allocation
-	ir.c:49			->	creating an array for GEP (of some sort - i dont remember)
-	parser.y:461	->	creating name string for reference variables
-	symbol.c:539	->	creating new element to return
-	pzc.lex:130		->	creating new string token to return
-	pzc.lex:*		->	any token with new() call
-	ir.c:188		->	function call frame argument list allocation
-	ir.c:*			->	anything that has to do with function call frames
-	general.c:83	->	what about closing general scope?
+	leak:	pzc.lex:90		->	id allocation
+	leak:	ir.c:49			->	creating an array for GEP (of some sort - i dont remember)
+	leak:	parser.y:461	->	creating name string for reference variables
+	leak:	symbol.c:539	->	creating new element to return
+	leak:	pzc.lex:130		->	creating new string token to return
+	leak:	pzc.lex:*		->	any token with new() call
+	leak:	ir.c:188		->	function call frame argument list allocation
+	leak:	ir.c:*			->	anything that has to do with function call frames
 
 General:
 	compiler arguments and llvm backend invocation (link together?)
 	refactor parser.y
 
 Done:
+*	leak:	tmpfile			->	does not delete tmpfile
+*	leak:	general.c:83	->	what about closing general scope?
 *	static compilation invocation	-> call llc and opt (opt done, only llc remains :: llc finished too)
 *	fix LLVMPrintModulToFile to properly accept file name (it could have something to do with file creation flags in open())
 *	command line parameter parsing	-> mostly done :: have to propagate flags to llc and opt
