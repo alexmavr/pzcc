@@ -21,6 +21,7 @@ Cleanup:
 	leak:	pzc.lex:*		->	any token with new() call
 	leak:	ir.c:188		->	function call frame argument list allocation
 	leak:	ir.c:*			->	anything that has to do with function call frames
+	Leak fixing MUST be marked "//BUG-SQUASHING".
 
 General:
 	compiler arguments and llvm backend invocation (link together?)

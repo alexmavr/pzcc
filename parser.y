@@ -807,6 +807,7 @@ l_value
                 $$.Valref = LLVMBuildGEP(builder, id->Valref, \
                                      dim_array, $2.value.i + 1, "geptmp");
                 free_list($2.v_list);
+				delete(dim_array);		//BUG-SQUASHING
             }
 
 		}

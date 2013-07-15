@@ -1,0 +1,471 @@
+==23312== Memcheck, a memory error detector
+==23312== Copyright (C) 2002-2012, and GNU GPL'd, by Julian Seward et al.
+==23312== Using Valgrind-3.8.1 and LibVEX; rerun with -h for copyright info
+==23312== Command: ./pzcc -o -f call.pzc
+==23312== Parent PID: 16003
+==23312== 
+==23312== Invalid write of size 1
+==23312==    at 0x402BFA5: strcpy (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x806C70D: yylex (pzc.lex:91)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312==  Address 0x4393f64 is 0 bytes after a block of size 4 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x80736C0: lookupEntry (symbol.c:62)
+==23312==    by 0x80737CB: newFunction (symbol.c:323)
+==23312==  Address 0x4393f64 is 0 bytes after a block of size 4 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x402BF33: strlen (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x80732F8: newEntry (symbol.c:201)
+==23312==    by 0x8073826: newFunction (symbol.c:326)
+==23312==  Address 0x4393f64 is 0 bytes after a block of size 4 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x402BF8D: strcpy (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x8073315: newEntry (symbol.c:203)
+==23312==    by 0x8073826: newFunction (symbol.c:326)
+==23312==  Address 0x4393f64 is 0 bytes after a block of size 4 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x807334B: newEntry (symbol.c:62)
+==23312==    by 0x8073826: newFunction (symbol.c:326)
+==23312==  Address 0x4393f64 is 0 bytes after a block of size 4 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x402BF33: strlen (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x80732F8: newEntry (symbol.c:201)
+==23312==    by 0x80743B0: newParameter (symbol.c:356)
+==23312==  Address 0x43940b1 is 0 bytes after a block of size 1 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x402BF8D: strcpy (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x8073315: newEntry (symbol.c:203)
+==23312==    by 0x80743B0: newParameter (symbol.c:356)
+==23312==  Address 0x43940b1 is 0 bytes after a block of size 1 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x807334B: newEntry (symbol.c:62)
+==23312==    by 0x80743B0: newParameter (symbol.c:356)
+==23312==  Address 0x43940b1 is 0 bytes after a block of size 1 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x80736C0: lookupEntry (symbol.c:62)
+==23312==    by 0x8071444: yyparse (parser.y:749)
+==23312==  Address 0x4394c01 is 0 bytes after a block of size 1 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x402CBCA: strcmp (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x8073706: lookupEntry (symbol.c:524)
+==23312==    by 0x8071444: yyparse (parser.y:749)
+==23312==  Address 0x4394c01 is 0 bytes after a block of size 1 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x80736C0: lookupEntry (symbol.c:62)
+==23312==    by 0x807166C: yyparse (parser.y:849)
+==23312==  Address 0x4397e0e is 0 bytes after a block of size 6 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x402CBCA: strcmp (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x8073706: lookupEntry (symbol.c:524)
+==23312==    by 0x807166C: yyparse (parser.y:849)
+==23312==  Address 0x4397e0e is 0 bytes after a block of size 6 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Conditional jump or move depends on uninitialised value(s)
+==23312==    at 0x80712A4: yyparse (parser.y:948)
+==23312== 
+==23312== Conditional jump or move depends on uninitialised value(s)
+==23312==    at 0x8072293: yyparse (parser.y:903)
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x80736C0: lookupEntry (symbol.c:62)
+==23312==    by 0x80715BF: yyparse (parser.y:858)
+==23312==  Address 0x4397e0e is 0 bytes after a block of size 6 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x402CBCA: strcmp (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x8073706: lookupEntry (symbol.c:524)
+==23312==    by 0x80715BF: yyparse (parser.y:858)
+==23312==  Address 0x4397e0e is 0 bytes after a block of size 6 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x402BF33: strlen (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x863C56B: LLVMGetNamedFunction (in /home/ale1ster/Projects/Pazcal/compilers/pzcc)
+==23312==  Address 0x4397e0e is 0 bytes after a block of size 6 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x402BF33: strlen (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x80732F8: newEntry (symbol.c:201)
+==23312==    by 0x8073B9E: newVariable (symbol.c:211)
+==23312==    by 0x806FDD7: yyparse (parser.y:322)
+==23312==  Address 0x4398c09 is 0 bytes after a block of size 1 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x402BF8D: strcpy (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x8073315: newEntry (symbol.c:203)
+==23312==    by 0x8073B9E: newVariable (symbol.c:211)
+==23312==    by 0x806FDD7: yyparse (parser.y:322)
+==23312==  Address 0x4398c09 is 0 bytes after a block of size 1 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x807334B: newEntry (symbol.c:62)
+==23312==    by 0x8073B9E: newVariable (symbol.c:211)
+==23312==    by 0x806FDD7: yyparse (parser.y:322)
+==23312==  Address 0x4398c09 is 0 bytes after a block of size 1 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x402BF33: strlen (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x8748D23: llvm::Twine::toStringRef(llvm::SmallVectorImpl<char>&) const (in /home/ale1ster/Projects/Pazcal/compilers/pzcc)
+==23312==    by 0x86DD247: llvm::Value::setName(llvm::Twine const&) (in /home/ale1ster/Projects/Pazcal/compilers/pzcc)
+==23312==    by 0x86404A1: LLVMBuildAlloca (in /home/ale1ster/Projects/Pazcal/compilers/pzcc)
+==23312==    by 0x80721D0: yyparse (parser.y:341)
+==23312==  Address 0x4398c09 is 0 bytes after a block of size 1 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x402BF33: strlen (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x80732F8: newEntry (symbol.c:201)
+==23312==    by 0x8073B9E: newVariable (symbol.c:211)
+==23312==    by 0x806FF73: yyparse (parser.y:347)
+==23312==  Address 0x4399199 is 0 bytes after a block of size 1 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x402BF8D: strcpy (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x8073315: newEntry (symbol.c:203)
+==23312==    by 0x8073B9E: newVariable (symbol.c:211)
+==23312==    by 0x806FF73: yyparse (parser.y:347)
+==23312==  Address 0x4399199 is 0 bytes after a block of size 1 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x807334B: newEntry (symbol.c:62)
+==23312==    by 0x8073B9E: newVariable (symbol.c:211)
+==23312==    by 0x806FF73: yyparse (parser.y:347)
+==23312==  Address 0x4399199 is 0 bytes after a block of size 1 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Invalid write of size 1
+==23312==    at 0x402BFA5: strcpy (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x806C70D: yylex (pzc.lex:91)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312==    by 0x93333332: ???
+==23312==  Address 0x439aca9 is 0 bytes after a block of size 1 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312==    by 0x93333332: ???
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x80736C0: lookupEntry (symbol.c:62)
+==23312==    by 0x80715BF: yyparse (parser.y:858)
+==23312==    by 0x93333332: ???
+==23312==  Address 0x439a507 is 0 bytes after a block of size 7 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x402CBCA: strcmp (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x8073706: lookupEntry (symbol.c:524)
+==23312==    by 0x80715BF: yyparse (parser.y:858)
+==23312==    by 0x93333332: ???
+==23312==  Address 0x439a507 is 0 bytes after a block of size 7 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x402BF33: strlen (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x863C56B: LLVMGetNamedFunction (in /home/ale1ster/Projects/Pazcal/compilers/pzcc)
+==23312==    by 0x93333332: ???
+==23312==  Address 0x439a507 is 0 bytes after a block of size 7 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x80736C0: lookupEntry (symbol.c:62)
+==23312==    by 0x8071444: yyparse (parser.y:749)
+==23312==    by 0x93333332: ???
+==23312==  Address 0x439b149 is 0 bytes after a block of size 1 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312==    by 0x93333332: ???
+==23312== 
+==23312== Invalid read of size 1
+==23312==    at 0x402CBCA: strcmp (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x8073706: lookupEntry (symbol.c:524)
+==23312==    by 0x8071444: yyparse (parser.y:749)
+==23312==    by 0x93333332: ???
+==23312==  Address 0x439b149 is 0 bytes after a block of size 1 alloc'd
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312==    by 0x93333332: ???
+==23312== 
+==23312== 
+==23312== HEAP SUMMARY:
+==23312==     in use at exit: 29,639 bytes in 248 blocks
+==23312==   total heap usage: 717 allocs, 469 frees, 61,704 bytes allocated
+==23312== 
+==23312== 4 bytes in 4 blocks are definitely lost in loss record 5 of 70
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312==    by 0x93333332: ???
+==23312== 
+==23312== 12 bytes in 1 blocks are definitely lost in loss record 11 of 70
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x41EF7C2: (below main) (in /usr/lib/libc-2.17.so)
+==23312== 
+==23312== 13 bytes in 2 blocks are definitely lost in loss record 15 of 70
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x8072949: yyparse (parser.y:461)
+==23312==    by 0x8061455: main (general.c:91)
+==23312== 
+==23312== 16 bytes in 1 blocks are definitely lost in loss record 18 of 70
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x807387F: typeArray (symbol.c:539)
+==23312==    by 0x8076462: generate_external_definitions (ir.c:519)
+==23312==    by 0x8061450: main (general.c:89)
+==23312== 
+==23312== 16 bytes in 1 blocks are definitely lost in loss record 19 of 70
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x80738CF: typeIArray (symbol.c:552)
+==23312==    by 0x80764EB: generate_external_definitions (ir.c:524)
+==23312==    by 0x8061450: main (general.c:89)
+==23312== 
+==23312== 16 bytes in 1 blocks are definitely lost in loss record 20 of 70
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x807387F: typeArray (symbol.c:539)
+==23312==    by 0x807652B: generate_external_definitions (ir.c:528)
+==23312==    by 0x8061450: main (general.c:89)
+==23312== 
+==23312== 16 bytes in 1 blocks are definitely lost in loss record 21 of 70
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x80738CF: typeIArray (symbol.c:552)
+==23312==    by 0x80765B4: generate_external_definitions (ir.c:533)
+==23312==    by 0x8061450: main (general.c:89)
+==23312== 
+==23312== 16 bytes in 1 blocks are definitely lost in loss record 22 of 70
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x807387F: typeArray (symbol.c:539)
+==23312==    by 0x807554E: generate_external_definitions (ir.c:302)
+==23312==    by 0x8061450: main (general.c:89)
+==23312== 
+==23312== 16 bytes in 1 blocks are definitely lost in loss record 23 of 70
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x80738CF: typeIArray (symbol.c:552)
+==23312==    by 0x80755C9: generate_external_definitions (ir.c:307)
+==23312==    by 0x8061450: main (general.c:89)
+==23312== 
+==23312== 16 bytes in 1 blocks are definitely lost in loss record 24 of 70
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x807387F: typeArray (symbol.c:539)
+==23312==    by 0x8075971: generate_external_definitions (ir.c:356)
+==23312==    by 0x8061450: main (general.c:89)
+==23312== 
+==23312== 16 bytes in 1 blocks are definitely lost in loss record 25 of 70
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x80738CF: typeIArray (symbol.c:552)
+==23312==    by 0x8075A36: generate_external_definitions (ir.c:363)
+==23312==    by 0x8061450: main (general.c:89)
+==23312== 
+==23312== 16 bytes in 1 blocks are definitely lost in loss record 26 of 70
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x807387F: typeArray (symbol.c:539)
+==23312==    by 0x8075C41: generate_external_definitions (ir.c:396)
+==23312==    by 0x8061450: main (general.c:89)
+==23312== 
+==23312== 16 bytes in 1 blocks are definitely lost in loss record 27 of 70
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x80738CF: typeIArray (symbol.c:552)
+==23312==    by 0x8075CC6: generate_external_definitions (ir.c:401)
+==23312==    by 0x8061450: main (general.c:89)
+==23312== 
+==23312== 16 bytes in 1 blocks are definitely lost in loss record 28 of 70
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x80738CF: typeIArray (symbol.c:552)
+==23312==    by 0x80765D8: generate_external_definitions (ir.c:534)
+==23312==    by 0x8061450: main (general.c:89)
+==23312== 
+==23312== 16 bytes in 1 blocks are definitely lost in loss record 29 of 70
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x80738CF: typeIArray (symbol.c:552)
+==23312==    by 0x807666A: generate_external_definitions (ir.c:542)
+==23312==    by 0x8061450: main (general.c:89)
+==23312== 
+==23312== 16 bytes in 1 blocks are definitely lost in loss record 30 of 70
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x80738CF: typeIArray (symbol.c:552)
+==23312==    by 0x807668E: generate_external_definitions (ir.c:543)
+==23312==    by 0x8061450: main (general.c:89)
+==23312== 
+==23312== 16 bytes in 1 blocks are definitely lost in loss record 31 of 70
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x80738CF: typeIArray (symbol.c:552)
+==23312==    by 0x8076720: generate_external_definitions (ir.c:551)
+==23312==    by 0x8061450: main (general.c:89)
+==23312== 
+==23312== 16 bytes in 1 blocks are definitely lost in loss record 32 of 70
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x80738CF: typeIArray (symbol.c:552)
+==23312==    by 0x8076740: generate_external_definitions (ir.c:552)
+==23312==    by 0x8061450: main (general.c:89)
+==23312== 
+==23312== 16 bytes in 2 blocks are definitely lost in loss record 33 of 70
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x93333332: ???
+==23312== 
+==23312== 16 bytes in 8 blocks are definitely lost in loss record 34 of 70
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C5B3: yylex (pzc.lex:130)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312==    by 0x93333332: ???
+==23312== 
+==23312== 28 bytes in 3 blocks are definitely lost in loss record 38 of 70
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x8075048: function_call_argv_init (ir.c:188)
+==23312==    by 0x8071691: yyparse (parser.y:855)
+==23312== 
+==23312== 85 bytes in 34 blocks are definitely lost in loss record 53 of 70
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C6F9: yylex (pzc.lex:90)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== 198 bytes in 99 blocks are definitely lost in loss record 56 of 70
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312==    by 0x806C5B3: yylex (pzc.lex:130)
+==23312==    by 0x806FADD: yyparse (parser.c:1905)
+==23312== 
+==23312== 448 (352 direct, 96 indirect) bytes in 26 blocks are definitely lost in loss record 62 of 70
+==23312==    at 0x402B6A8: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==23312==    by 0x807496A: new (general.c:40)
+==23312== 
+==23312== LEAK SUMMARY:
+==23312==    definitely lost: 964 bytes in 194 blocks
+==23312==    indirectly lost: 96 bytes in 6 blocks
+==23312==      possibly lost: 0 bytes in 0 blocks
+==23312==    still reachable: 28,579 bytes in 48 blocks
+==23312==         suppressed: 0 bytes in 0 blocks
+==23312== Reachable blocks (those to which a pointer was found) are not shown.
+==23312== To see them, rerun with: --leak-check=full --show-reachable=yes
+==23312== 
+==23312== For counts of detected and suppressed errors, rerun with: -v
+==23312== Use --track-origins=yes to see where uninitialised values come from
+==23312== ERROR SUMMARY: 180 errors from 54 contexts (suppressed: 0 from 0)
