@@ -278,7 +278,7 @@ LLVMValueRef cast_compat(Type dest, Type src, LLVMValueRef src_val) {
     return res;
 }
 
-/* Creates a ARRAY type from an IARRAY type by setting 0 to the first dimension */
+/* Creates a ARRAY type from an IARRAY type by setting 0 as the first dimension */
 Type iarray_to_array(Type array) {
         return typeArray(0, array->refType);
 }
@@ -554,6 +554,7 @@ void generate_external_definitions(void) {
 
 }
 
+/* Builds the IR for calling WRITE_STRING with a constant string */
 void build_const_str_write_call(const char * string, int size) {
     LLVMValueRef str = LLVMConstString(string, size, false);
     LLVMValueRef tmp = LLVMBuildAlloca(builder, \
