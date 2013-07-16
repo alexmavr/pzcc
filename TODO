@@ -14,8 +14,7 @@ IR:
 
 Cleanup:
 	leak:	pzc.lex:90		->	id allocation
-	leak:	parser.y:461	->	creating name string for reference variables
-	leak:	symbol.c:539	->	creating new element to return
+	leak:	symbol.c:539	->	creating new element to return		==> I think we need to assign all typeArray() calls to variables and then free them...
 	leak:	pzc.lex:130		->	creating new string token to return
 	leak:	pzc.lex:*		->	any token with new() call
 	leak:	ir.c:*			->	anything that has to do with function call frames
@@ -26,6 +25,7 @@ General:
 	refactor parser.y
 
 Done:
+*	leak:	parser.y:461	->	creating name string for reference variables	=>	parser.y:467
 *	leak:	ir.c:188		->	function call frame argument list allocation	=>	ir.c:153
 *	leak:	ir.c:49			->	creating an array for GEP (of some sort - i dont remember)	=> parser.y:810
 *   statements: WRITE + FORMAT

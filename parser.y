@@ -464,6 +464,7 @@ routine_tail
                     strcat(new_str, "_ref");
                     LLVMBuildStore(builder, param, curr_param->Valref);
                     LLVMSetValueName(param, new_str);
+					delete(new_str);	//BUG-SQUASHING
                 } else {
                     LLVMSetValueName(param, curr_param->id);
                     curr_param->Valref = param;
