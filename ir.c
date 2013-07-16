@@ -150,6 +150,7 @@ Type function_call_type_pop (void) {
 	temp_call = current_func_call_list;
 	current_func_call_list = current_func_call_list->prev;
 
+	delete(temp_call->argv);	//BUG-SQUASHING
 	delete(temp_call);
 
 	return ret_type;

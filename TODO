@@ -18,7 +18,6 @@ Cleanup:
 	leak:	symbol.c:539	->	creating new element to return
 	leak:	pzc.lex:130		->	creating new string token to return
 	leak:	pzc.lex:*		->	any token with new() call
-	leak:	ir.c:188		->	function call frame argument list allocation
 	leak:	ir.c:*			->	anything that has to do with function call frames
 	Leak fixing MUST be marked "//BUG-SQUASHING".
 
@@ -27,6 +26,7 @@ General:
 	refactor parser.y
 
 Done:
+*	leak:	ir.c:188		->	function call frame argument list allocation	=>	ir.c:153
 *	leak:	ir.c:49			->	creating an array for GEP (of some sort - i dont remember)	=> parser.y:810
 *   statements: WRITE + FORMAT
 *	leak:	tmpfile			->	does not delete tmpfile
