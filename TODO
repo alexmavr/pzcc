@@ -14,7 +14,6 @@ IR:
 
 Cleanup:
 	leak:	pzc.lex:90		->	id allocation
-	leak:	ir.c:49			->	creating an array for GEP (of some sort - i dont remember)
 	leak:	parser.y:461	->	creating name string for reference variables
 	leak:	symbol.c:539	->	creating new element to return
 	leak:	pzc.lex:130		->	creating new string token to return
@@ -28,6 +27,7 @@ General:
 	refactor parser.y
 
 Done:
+*	leak:	ir.c:49			->	creating an array for GEP (of some sort - i dont remember)	=> parser.y:810
 *   statements: WRITE + FORMAT
 *	leak:	tmpfile			->	does not delete tmpfile
 *	leak:	general.c:83	->	what about closing general scope?
