@@ -24,6 +24,11 @@ General:
 	compiler arguments and llvm backend invocation (link together?)
 	refactor parser.y
 
+Linking Process - clang's ld invocation is needed as far as I can tell:
+    ./pzcc -fo input.pzc
+    as input.pzc.asm -o input.o
+    clang input.o -o output
+
 Done:
 *	leak:	parser.y:461	->	creating name string for reference variables	=>	parser.y:467
 *	leak:	ir.c:188		->	function call frame argument list allocation	=>	ir.c:153
