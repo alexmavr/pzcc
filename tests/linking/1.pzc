@@ -1,0 +1,8 @@
+FUNC REAL tocall() {
+    return pi();
+}
+
+PROGRAM exprs ()
+{
+    REAL l = tocall();   
+}

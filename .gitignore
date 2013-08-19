@@ -1,4 +1,5 @@
-*.o
+./*.o
+./tests/*/*.o
 *.swp
 *.swo
 *.bak

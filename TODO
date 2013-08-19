@@ -1,16 +1,9 @@
-Syntax:
-	improve error recovery and messages
-
-IR:
-	ask for external linkage as a feature. if not, we don't need to keep external linkage, which will allow for aggressive opts in llvm
-	testing + debugging
-	refactor parser.y
-	link with Library
-	furnish code with proper deallocations (for example unlink the tmpfile, all the structures we use, ...) and put them in cleanup (and the temps in the proper places)
-    we have TRUNC + ROUND at the library (as lowercase), we need trunc + round for reals as well
-    string functions are non-existent
-    writes are twrong wrong (see what i did there?)
-    
+Linking and Runtime:
+    1. create a shared library from all the independent object files in lib-code/elf32/
+    2. finish linking and add a user option to generate a final elf file (x86 only)
+    3. use the library format, write and parse methods to perform writes and reads 
+    4. disable external linkage where not used	
+    (optional) change trunc and round to reals, or add dummy definitions for the casts
 
 Cleanup:
 	leak:	pzc.lex:90		->	id allocation
@@ -20,16 +13,20 @@ Cleanup:
 	leak:	ir.c:*			->	anything that has to do with function call frames
 	Leak fixing MUST be marked "//BUG-SQUASHING".
 
-General:
-	compiler arguments and llvm backend invocation (link together?)
-	refactor parser.y
 
-Linking Process - clang's ld invocation is needed as far as I can tell:
+General:
+	refactor parser.y
+	furnish code with proper deallocations (for example unlink the tmpfile, all the structures we use, ...) and put them in cleanup (and the temps in the proper places)
+	improve error messages and catch error recovery segfaults
+
+Linking Process (the runtime library code demands x86):
     ./pzcc -fo input.pzc
-    as input.pzc.asm -o input.o
-    clang input.o -o output
+    as --32 input.pzc.asm -o input.o
+    clang -Wl,/path/to/lib.so input.o -o output
 
 Done:
+*	compiler arguments and llvm backend invocation (link together?)
+*   library edited to exclude c-style names and built with $jwasm -elf -zcw /path/to/lib/            
 *	leak:	parser.y:461	->	creating name string for reference variables	=>	parser.y:467
 *	leak:	ir.c:188		->	function call frame argument list allocation	=>	ir.c:153
 *	leak:	ir.c:49			->	creating an array for GEP (of some sort - i dont remember)	=> parser.y:810
