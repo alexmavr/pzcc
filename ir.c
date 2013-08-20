@@ -412,6 +412,15 @@ void generate_external_definitions(void) {
     newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
     endFunctionHeader(func, typeInteger);
 
+    // _fabs (external library name)
+    params[0] = type_to_llvm(typeReal);
+    func_ref = LLVMAddFunction(module, "_fabs", \
+                    LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("_fabs");
+    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeReal);
+
     // FUNC REAL fabs(REAL)
     params[0] = type_to_llvm(typeReal);
     func_ref = LLVMAddFunction(module, "fabs", \
@@ -420,6 +429,12 @@ void generate_external_definitions(void) {
     func = newFunction("fabs");
     newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
     endFunctionHeader(func, typeReal);
+    LLVMValueRef *farg = new(sizeof(LLVMValueRef));
+    farg[0] = LLVMGetFirstParam(func_ref);
+    LLVMBasicBlockRef block = LLVMAppendBasicBlock(func_ref, "entry");
+    LLVMPositionBuilderAtEnd(builder, block);
+    LLVMValueRef fabs_ref = LLVMGetNamedFunction(module, "_fabs");
+    LLVMBuildRet(builder, LLVMBuildCall(builder, fabs_ref, farg, 1, ""));
 
     // FUNC REAL sqrt(REAL)
     func_ref = LLVMAddFunction(module, "sqrt", \
