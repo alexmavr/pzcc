@@ -147,15 +147,15 @@ int main (int argc, char **argv) {
 				switch (our_options.opt_flag) {
 					case true	:
 						if (our_options.output_filename != NULL)
-							execlp("llc", "llc", "-filetype=asm", "-O3", "-o", our_options.output_filename, our_options.tmp_filename, (char *)NULL);
+							execlp("llc", "llc", "-filetype=asm", "-march=x86", "-O3", "-o", our_options.output_filename, our_options.tmp_filename, (char *)NULL);
 						else
-							execlp("llc", "llc", "-filetype=asm", "-O3", our_options.tmp_filename, (char *)NULL);
+							execlp("llc", "llc", "-filetype=asm", "-march=x86", "-O3", our_options.tmp_filename, (char *)NULL);
 						break;
 					case false	:
 						if (our_options.output_filename != NULL)
-							execlp("llc", "llc", "-filetype=asm", "-o", our_options.output_filename, our_options.tmp_filename, (char *)NULL);
+							execlp("llc", "llc", "-filetype=asm","-march=x86", "-o", our_options.output_filename, our_options.tmp_filename, (char *)NULL);
 						else
-							execlp("llc", "llc", "-filetype=asm", our_options.tmp_filename, (char *)NULL);
+							execlp("llc", "llc", "-filetype=asm","-march=x86", our_options.tmp_filename, (char *)NULL);
 						break;
 					default		:
 						my_error(ERR_LV_INTERN, "Invalid value in boolean variable");
