@@ -12,3 +12,5 @@ parser.output
 *.s
 tests/*/*.asm
 ./*.asm
+*.obj
+*.dmp
