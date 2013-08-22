@@ -10,4 +10,5 @@ a.out
 parser.output
 *.imm
 *.s
-*.asm
+tests/*/*.asm
+./*.asm
