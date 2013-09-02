@@ -1,8 +1,4 @@
-FUNC REAL tocall() {
-    return pi();
-}
-
 PROGRAM exprs ()
 {
-    REAL l = fabs(tocall());   
+    WRITE_INT(5,0);
 }

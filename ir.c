@@ -286,9 +286,15 @@ Type iarray_to_array(Type array) {
 
 /* Generates IR for all external function prototypes and adds them to symbol table */
 void generate_external_definitions(void) {
-    LLVMTypeRef *params = new(sizeof(LLVMTypeRef) * 3);
+    // maximum number of arguments of the library functions
+    #define MAXARGS 3
+
+    LLVMTypeRef *params = new(MAXARGS * sizeof(LLVMTypeRef));
+    LLVMValueRef *farg = new(MAXARGS * sizeof(LLVMValueRef));
     SymbolEntry * func;
     LLVMValueRef func_ref;
+    LLVMBasicBlockRef block;
+    LLVMValueRef lib_ref;
 
     // PROC putchar(char)
     params[0] = type_to_llvm(typeChar);
@@ -308,6 +314,15 @@ void generate_external_definitions(void) {
     newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
     endFunctionHeader(func, typeVoid);
 
+    // _writeInteger (external library name)
+    params[0] = type_to_llvm(typeInteger);
+    func_ref = LLVMAddFunction(module, "_writeInteger", \
+                    LLVMFunctionType(type_to_llvm(typeVoid), params, 1, false));
+    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+    func = newFunction("_writeInteger");
+    newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
+    endFunctionHeader(func, typeVoid);
+
     // PROC WRITE_INT(int, int)
     params[0] = type_to_llvm(typeInteger);
     params[1] = type_to_llvm(typeInteger);
@@ -318,6 +333,13 @@ void generate_external_definitions(void) {
     newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
     newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
     endFunctionHeader(func, typeVoid);
+    farg[0] = LLVMGetFirstParam(func_ref);
+    block = LLVMAppendBasicBlock(func_ref, "entry");
+    LLVMPositionBuilderAtEnd(builder, block);
+    lib_ref = LLVMGetNamedFunction(module, "_writeInteger");
+    LLVMBuildCall(builder, lib_ref, farg, 1, "");
+    LLVMBuildRetVoid(builder);
+
 
     // PROC WRITE_BOOL(bool, int)
     params[0] = type_to_llvm(typeBoolean);
@@ -413,6 +435,7 @@ void generate_external_definitions(void) {
     endFunctionHeader(func, typeInteger);
 
     // _fabs (external library name)
+    /*
     params[0] = type_to_llvm(typeReal);
     func_ref = LLVMAddFunction(module, "_fabs", \
                     LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
@@ -429,13 +452,13 @@ void generate_external_definitions(void) {
     func = newFunction("fabs");
     newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
     endFunctionHeader(func, typeReal);
-    LLVMValueRef *farg = new(sizeof(LLVMValueRef));
     farg[0] = LLVMGetFirstParam(func_ref);
-    LLVMBasicBlockRef block = LLVMAppendBasicBlock(func_ref, "entry");
+    block = LLVMAppendBasicBlock(func_ref, "entry");
     LLVMPositionBuilderAtEnd(builder, block);
-    LLVMValueRef fabs_ref = LLVMGetNamedFunction(module, "_fabs");
-    LLVMBuildRet(builder, LLVMBuildCall(builder, fabs_ref, farg, 1, ""));
+    lib_ref = LLVMGetNamedFunction(module, "_fabs");
+    LLVMBuildRet(builder, LLVMBuildCall(builder, lib_ref, farg, 1, ""));
 
+*/
     // FUNC REAL sqrt(REAL)
     func_ref = LLVMAddFunction(module, "sqrt", \
                     LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
