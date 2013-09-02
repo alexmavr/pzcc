@@ -17,6 +17,9 @@
 extern LLVMBuilderRef builder;
 extern LLVMModuleRef module;
 
+/* This is the default number of decimal digits shown when printing REALs */
+#define DEFAULT_REAL_PRECISION 5
+
 /* Structure : General LLVMValueRef LL */
 struct list_node {
     LLVMValueRef Valref;

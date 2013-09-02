@@ -9,6 +9,8 @@
 #ifndef __ERROR_H__
 #define __ERROR_H__
 
+#include <stdbool.h>
+
 /* Error Levels */
 typedef enum { ERR_LV_WARN, ERR_LV_ERR, ERR_LV_CRIT, ERR_LV_INTERN } error_lv;
 

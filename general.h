@@ -12,6 +12,7 @@
 #define __GENERAL_H__
 
 #include <llvm-c/Core.h>
+#include <stdbool.h>
 
 void *new		(size_t);
 void delete		(void *);
@@ -19,6 +20,7 @@ void cleanup	(void);
 
 extern char *filename;
 extern int yylineno;
+extern bool valid_codegen;
 
 int main (int argc, char **argv);
 

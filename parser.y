@@ -326,9 +326,11 @@ var_init
             /* If initialized, cast correctly */
             LLVMValueRef res = LLVMConstNull(type_to_llvm(currentType));
 			if ($2.type != NULL) {
-				if (!compat_types(currentType, $2.type))
+				if (!compat_types(currentType, $2.type)) {
 					my_error(ERR_LV_ERR, "Illegal assignment from %s to %s on \"%s\"", \
 						verbose_type($2.type), verbose_type(currentType), $1);
+                    YYERROR;
+                }
                 res = cast_compat(currentType, $2.type, $2.Valref);
 			} 
 
@@ -417,7 +419,6 @@ routine_tail
             if (LLVMCountBasicBlocks(func_ref) != 0) {
                 my_error(ERR_LV_ERR, "Function %s is already fully defined");
                 YYERROR;
-                //TODO: Or alternatively we could keep the last definition of a function if it is defined in full multiple times. -naaah
             }
         } else {
             size_t argno = currentFun->u.eFunction.argno;    
@@ -892,7 +893,7 @@ call_opt
                 Type cur_given_dim = $1.type->refType;
                 while (cur_wanted_dim->kind >= TYPE_ARRAY) {
                     if (cur_wanted_dim->size != cur_given_dim->size) {
-                        my_error(ERR_LV_ERR, "incompatible array sizes for parameter passing");
+                        my_error(ERR_LV_ERR, "Incompatible array sizes during parameter passing");
                         YYERROR;
                     }
                     cur_given_dim = cur_given_dim->refType;
@@ -908,7 +909,7 @@ call_opt
             } else {
                 if (currentParam->u.eParameter.mode == PASS_BY_REFERENCE) {
                     if ($1.v_list == NULL) {
-                        my_error(ERR_LV_ERR, "Cannot pass non-variable arguments by reference");
+                        my_error(ERR_LV_ERR, "Only variables can be passed by reference");
                         YYERROR;
                     }
                     function_call_argval_push($1.v_list->Valref);
@@ -937,7 +938,7 @@ call_opt_tail
                 Type cur_given_dim = $2.type->refType;
                 while (cur_wanted_dim->kind >= TYPE_ARRAY) {
                     if (cur_wanted_dim->size != cur_given_dim->size) {
-                        my_error(ERR_LV_ERR, "incompatible array sizes for parameter passing");
+                        my_error(ERR_LV_ERR, "Incompatible array sizes during parameter passing");
                         YYERROR;
                     }
                     cur_given_dim = cur_given_dim->refType;
@@ -1012,7 +1013,8 @@ base_stmt
 	| l_value stmt_choice ';'
 		{
 			if (!compat_types($1.type, typeInteger)) {
-				my_error(ERR_LV_ERR, "Type mismatch on \"%s\" operator: lvalue can be %s, %s or %s", $2, verbose_type(typeReal), verbose_type(typeInteger), verbose_type(typeChar));
+				my_error(ERR_LV_ERR, "Type mismatch on \"%s\" operator: lvalue can be %s, %s or %s", \
+                    $2, verbose_type(typeReal), verbose_type(typeInteger), verbose_type(typeChar));
                 YYERROR;
 			}
 
@@ -1039,8 +1041,8 @@ base_stmt
 	| T_if '(' expr ')'
 		{
 			if (!compat_types(typeBoolean, $3.type)) {
-				my_error(ERR_LV_ERR, "if: condition is %s instead of Boolean", \
-							verbose_type($3.type));
+				my_error(ERR_LV_ERR, "if: condition is %s instead of %s", \
+							verbose_type($3.type), verbose_type(typeBoolean));
                 YYERROR;
             }
 
@@ -1161,8 +1163,8 @@ base_stmt
         } '(' expr ')'
         { 
             if (!compat_types(typeBoolean, $4.type)) {
-				my_error(ERR_LV_ERR, "while: condition is %s instead of Boolean", \
-							verbose_type($4.type));
+				my_error(ERR_LV_ERR, "while: condition is %s instead of %s", \
+							verbose_type($4.type), verbose_type(typeBoolean));
                 YYERROR;
             }
 
@@ -1202,8 +1204,8 @@ base_stmt
 		T_while '(' expr ')' ';'
 		{
 			if (!compat_types(typeBoolean, $7.type)) {
-				my_error(ERR_LV_ERR, "do..while: condition is %s instead of Boolean", \
-							verbose_type($7.type));
+				my_error(ERR_LV_ERR, "do..while: condition is %s instead of %s", \
+							verbose_type($7.type), verbose_type(typeBoolean));
                 YYERROR;
             }
 
@@ -1220,8 +1222,8 @@ base_stmt
 	'(' expr ')' '{'
 		{
 			if (!compat_types(typeInteger, $3.type)) {
-				my_error(ERR_LV_ERR, "switch: expression is %s instead of Integer", \
-							verbose_type($3.type));
+				my_error(ERR_LV_ERR, "switch: expression is %s instead of %s", \
+							verbose_type($3.type), verbose_type(typeInteger));
                 YYERROR;
             }
 
@@ -1265,7 +1267,7 @@ base_stmt
 	| write '(' stmt_opt_write ')' ';' 
         {
             if ((currentWrite == 1) ||  (currentWrite == 3)) {
-                /* Print newline */
+                /* Print a newline if WRITELN or WRITESPLN */
                 build_const_str_write_call("\n", 1);
             }
         }
@@ -1326,8 +1328,8 @@ stmt_tail_tail
 	: T_case const_expr ':'
 		{
 			if (!compat_types(typeInteger, $2.type)) {
-				my_error(ERR_LV_ERR, "switch: case is %s instead of Integer", \
-						verbose_type($2.type));
+				my_error(ERR_LV_ERR, "switch: case is %s instead of %s", \
+						verbose_type($2.type), verbose_type(typeInteger));
                 YYERROR;
             }
 
@@ -1385,7 +1387,7 @@ stmt_opt_write_tail
 	| ',' 
         { 
             if (currentWrite >= 2){
-                /* Print space */
+                /* Print space if WRITESP or WRITESPLN*/
                 build_const_str_write_call(" ", 1);
             }
         } format stmt_opt_write_tail  
@@ -1402,13 +1404,13 @@ range
 	: expr range_choice expr range_opt
 		{
 			if (!compat_types(typeInteger, $1.type)) {
-				my_error(ERR_LV_ERR, "FOR: range start is %s instead of Integer", \
-										verbose_type($1.type));
+				my_error(ERR_LV_ERR, "FOR: Range start is %s instead of %s", \
+                                verbose_type($1.type), verbose_type(typeInteger));
                 YYERROR;
             }
 			if (!compat_types(typeInteger, $3.type)) {
-				my_error(ERR_LV_ERR, "FOR: range end is %s instead of Integer", \
-										verbose_type($3.type));
+				my_error(ERR_LV_ERR, "FOR: Range end is %s instead of %s", \
+                                verbose_type($3.type), verbose_type(typeInteger));
                 YYERROR;
             }
             $$.from = $1.Valref;
@@ -1426,8 +1428,8 @@ range_opt
 	| T_step expr
 		{
 			if (!compat_types(typeInteger, $2.type)) {
-				my_error(ERR_LV_ERR, "FOR: STEP is %s instead of Integer", \
-										verbose_type($2.type));
+				my_error(ERR_LV_ERR, "FOR: STEP is %s instead of %s", \
+                                verbose_type($2.type), verbose_type(typeInteger));
                 YYERROR;
             }
             $$.Valref = cast_compat(typeInteger, $2.type, $2.Valref);
@@ -1460,7 +1462,7 @@ format
 	: expr
 		{
 			if (($1.type->kind >= TYPE_ARRAY) && ( $1.type->refType != typeChar)) {
-				my_error(ERR_LV_ERR, "Cannot display an Array of type other than Char");
+				my_error(ERR_LV_ERR, "Cannot display an Array of any type other than Char");
                 YYERROR;
             }
 
@@ -1468,7 +1470,12 @@ format
             LLVMValueRef * args = new(3 * sizeof(LLVMValueRef));
             LLVMTypeRef dest_type;
             args[0] = $1.Valref;
-            args[1] = LLVMConstInt(LLVMInt32Type(), 5, false); // TODO: placeholder
+
+            /*  According to Pascal's specification, 
+                if the width is not long enough for the data,
+                the width specification is ignored, apart from REALs.
+                TODO: Make sure this is compliant with the library */
+            args[1] = LLVMConstInt(LLVMInt32Type(), 0, false); 
             if ($1.type == typeInteger) {
                 func_ref = LLVMGetNamedFunction(module, "WRITE_INT");
                 LLVMBuildCall(builder, func_ref, args, 2, "");
@@ -1480,15 +1487,17 @@ format
                 LLVMBuildCall(builder, func_ref, args, 2, "");
             } else if ($1.type == typeReal) {
                 func_ref = LLVMGetNamedFunction(module, "WRITE_REAL");
-                args[2] = args[1]; 
+                // Set 5 decimal digits as the default
+                // TODO: check if they appear correctly with w=0
+                args[2] = LLVMConstInt(LLVMInt32Type(), DEFAULT_REAL_PRECISION, false); 
                 LLVMBuildCall(builder, func_ref, args, 3, "");
             } else {
-                /* allocate & store the array, and pass the pointer */
+                /*  Array Type. store the array and pass the pointer to WRITE_STRING
+                    TODO:  test if WRITE_STRING can print the string with w=0 to avoid strlen */
                 func_ref = LLVMGetNamedFunction(module, "strlen");
-                dest_type = LLVMPointerType(type_to_llvm(iarray_to_array($1.type)),0);
+                dest_type = LLVMPointerType(type_to_llvm(iarray_to_array($1.type)), 0);
                 args[0] = LLVMBuildPointerCast(builder, $1.Valref, dest_type, "ptrcasttmp");
                 args[1] = LLVMBuildCall(builder, func_ref, args, 1, "calltmp");
-
                 func_ref = LLVMGetNamedFunction(module, "WRITE_STRING");
                 LLVMBuildCall(builder, func_ref, args, 2, "");
             }
@@ -1497,12 +1506,13 @@ format
 	| T_form '(' expr ',' expr format_opt ')'
 		{
 			if (!compat_types(typeInteger, $5.type)) {
-				my_error(ERR_LV_ERR, "FORM: second argument is %s instead of Integer", \
-										verbose_type($5.type));
+				my_error(ERR_LV_ERR, "FORM: second argument is %s instead of %s", \
+										verbose_type($5.type), verbose_type(typeInteger));
                 YYERROR;
             }
 			if (($6.value.b == true) && (!compat_types(typeReal, $3.type))) {
-				my_error(ERR_LV_ERR, "FORM: first argument is not Real but precision is specified", verbose_type($5.type));
+				my_error(ERR_LV_ERR, "FORM: first argument is %s instead of %s but precision is specified", \
+                                        verbose_type($5.type), verbose_type(typeReal));
                 YYERROR;
             }
             
@@ -1522,17 +1532,20 @@ format
                 LLVMBuildCall(builder, func_ref, args, 2, "");
             } else if ($3.type == typeReal) {
                 func_ref = LLVMGetNamedFunction(module, "WRITE_REAL");
-                args[2] = $6.Valref;
+                if ($6.value.b == false)
+                    // Use the default precision for reals if not specified
+                    args[2] = LLVMConstInt(LLVMInt32Type(), DEFAULT_REAL_PRECISION, false); 
+                else 
+                    args[2] = cast_compat(typeInteger, $6.type, $6.Valref);
                 LLVMBuildCall(builder, func_ref, args, 3, "");
             } else {
-                /* allocate & store the array, and pass the pointer */
-                dest_type = LLVMPointerType(type_to_llvm(iarray_to_array($3.type)),0);
+                /*  Array Type. store the array and pass the pointer to WRITE_STRING */
+                dest_type = LLVMPointerType(type_to_llvm(iarray_to_array($3.type)), 0);
                 func_ref = LLVMGetNamedFunction(module, "WRITE_STRING");
                 args[0] = LLVMBuildPointerCast(builder, $3.Valref, dest_type, "ptrcasttmp");
                 LLVMBuildCall(builder, func_ref, args, 2, "");
             }
             delete(args);
-
 		}
 	;
 format_opt
@@ -1540,8 +1553,8 @@ format_opt
 	| ',' expr
 		{
 			if (!compat_types(typeInteger, $2.type)) {
-				my_error(ERR_LV_ERR, "FORM: third argument is %s instead of Integer", \
-										verbose_type($2.type));
+				my_error(ERR_LV_ERR, "FORM: third argument is %s instead of %s", \
+                                verbose_type($2.type), verbose_type(typeInteger));
                 YYERROR;
             }
 			$$.value.b = true;

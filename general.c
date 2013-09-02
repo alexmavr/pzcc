@@ -70,6 +70,9 @@ static void dump_ir (char *outfile) {
 	}
 }
 
+/* Turns to false if the IR is unusable */
+bool valid_codegen = true;
+
 //Entry point.
 int main (int argc, char **argv) {
 	pid_t tmp_pid;
@@ -93,6 +96,11 @@ int main (int argc, char **argv) {
     closeScope();
     destroySymbolTable();
 
+    if (!valid_codegen) {
+        /* Dont optimize or generate final code if the IR is unusable */
+        ret = 1;
+        goto end;
+    }
 	//Dump IR to intermediate file.
 	dump_ir(our_options.tmp_filename);
 
@@ -177,18 +185,10 @@ fprintf(stderr, "TODO: Must implement executable output (assembler - linker)\n")
 			my_error(ERR_LV_INTERN, "Unknown output file type detected");
 	}
 
+end:
 	LLVMDisposeBuilder(builder);
 	LLVMDisposeModule(module);
-
 	cleanup();
 
-	printf("Parsing Complete\n");
-
-/*
-	goto nrm_end;
-err_end:
-	ret = 1;
-nrm_end:
-*/
 	return ret;
 }

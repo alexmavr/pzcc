@@ -22,21 +22,21 @@ extern LLVMBuilderRef builder;
 const char *verbose_type (Type t) {
 	char *res = new(35 * sizeof(char));
 	if (t == typeInteger) {
-		return "Integer";
+		return "int";
 	} else if (t == typeReal) {
-		return "Real";
+		return "REAL";
 	} else if (t == typeBoolean) {
-		return "Boolean";
+		return "bool";
 	} else if (t == typeChar) {
-		return "Char";
+		return "char";
 	} else if (t == typeVoid) {
-		return "Void";
+		return "void";
 	} else if (t->kind >= TYPE_ARRAY) {
 		if (t->refType->kind == TYPE_ARRAY) {
-			res = "Multidimensional Array";
+			res = "multidimensional Array";
 		} else {
 			strcpy(res, verbose_type(t->refType));
-			strcat(res, " Array");
+			strcat(res, " array");
 		}
 	}
 	return res;

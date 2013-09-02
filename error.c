@@ -14,13 +14,14 @@
 #include "general.h"
 #include "error.h"
 
-//Wrapper for interfacing with lexer's error routine.
+
+// Wrapper for interfacing with bison's error routine.
 void yyerror (const char *msg) {
 	/* reformats the string "syntax error," */
 	my_error(ERR_LV_ERR, "Syntax error: %s", &msg[14]);
 }
 
-//General error reporting function.
+// General error reporting function.
 void my_error (error_lv level, const char *msg, ...) {
 	va_list va;
 
@@ -32,12 +33,15 @@ void my_error (error_lv level, const char *msg, ...) {
 			break;
 		case ERR_LV_ERR:
 			fprintf(stderr, "ERROR: ");
+            valid_codegen = false;
 			break;
 		case ERR_LV_CRIT:
 			fprintf(stderr, "CRITICAL: ");
+            valid_codegen = false;
 			break;
 		case ERR_LV_INTERN:
 			fprintf(stderr, "INTERNAL: ");
+            valid_codegen = false;
 			break;
 		default:
 			fprintf(stderr, "My mind just exploded\n");
