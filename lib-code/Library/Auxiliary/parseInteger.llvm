@@ -1,0 +1,163 @@
+; ModuleID = 'parseInteger.c'
+target datalayout = "e-p:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:32:64-f32:32:32-f64:32:64-v64:64:64-v128:128:128-a0:0:64-f80:32:32-n8:16:32-S128"
+target triple = "i386-pc-linux-gnu"
+
+define zeroext i8 @parseInteger(i8* %buffer, i32* %p, i8 zeroext %base) nounwind {
+  %1 = alloca i8*, align 4
+  %2 = alloca i32*, align 4
+  %3 = alloca i8, align 1
+  %result = alloca i32, align 4
+  %negative = alloca i8, align 1
+  %s = alloca i8*, align 4
+  %digit = alloca i8, align 1
+  store i8* %buffer, i8** %1, align 4
+  store i32* %p, i32** %2, align 4
+  store i8 %base, i8* %3, align 1
+  store i32 0, i32* %result, align 4
+  store i8 0, i8* %negative, align 1
+  %4 = load i8** %1, align 4
+  store i8* %4, i8** %s, align 4
+  br label %5
+
+; <label>:5                                       ; preds = %9, %0
+  %6 = load i8** %s, align 4
+  %7 = load i8* %6, align 1
+  %8 = sext i8 %7 to i32
+  switch i32 %8, label %12 [
+    i32 32, label %9
+    i32 10, label %9
+    i32 9, label %9
+    i32 13, label %9
+    i32 11, label %9
+    i32 12, label %9
+  ]
+
+; <label>:9                                       ; preds = %5, %5, %5, %5, %5, %5
+  %10 = load i8** %s, align 4
+  %11 = getelementptr inbounds i8* %10, i32 1
+  store i8* %11, i8** %s, align 4
+  br label %5
+
+; <label>:12                                      ; preds = %5
+  br label %13
+
+; <label>:13                                      ; preds = %12
+  %14 = load i8** %s, align 4
+  %15 = load i8* %14, align 1
+  %16 = sext i8 %15 to i32
+  switch i32 %16, label %21 [
+    i32 45, label %17
+    i32 43, label %18
+  ]
+
+; <label>:17                                      ; preds = %13
+  store i8 1, i8* %negative, align 1
+  br label %18
+
+; <label>:18                                      ; preds = %13, %17
+  %19 = load i8** %s, align 4
+  %20 = getelementptr inbounds i8* %19, i32 1
+  store i8* %20, i8** %s, align 4
+  br label %21
+
+; <label>:21                                      ; preds = %13, %18
+  br label %22
+
+; <label>:22                                      ; preds = %62, %21
+  %23 = load i8** %s, align 4
+  %24 = load i8* %23, align 1
+  store i8 %24, i8* %digit, align 1
+  %25 = load i8* %digit, align 1
+  %26 = zext i8 %25 to i32
+  %27 = icmp sge i32 %26, 48
+  br i1 %27, label %28, label %37
+
+; <label>:28                                      ; preds = %22
+  %29 = load i8* %digit, align 1
+  %30 = zext i8 %29 to i32
+  %31 = icmp sle i32 %30, 57
+  br i1 %31, label %32, label %37
+
+; <label>:32                                      ; preds = %28
+  %33 = load i8* %digit, align 1
+  %34 = zext i8 %33 to i32
+  %35 = sub nsw i32 %34, 48
+  %36 = trunc i32 %35 to i8
+  store i8 %36, i8* %digit, align 1
+  br label %62
+
+; <label>:37                                      ; preds = %28, %22
+  %38 = load i8* %digit, align 1
+  %39 = zext i8 %38 to i32
+  %40 = or i32 %39, 32
+  %41 = trunc i32 %40 to i8
+  store i8 %41, i8* %digit, align 1
+  %42 = load i8* %digit, align 1
+  %43 = zext i8 %42 to i32
+  %44 = icmp slt i32 %43, 97
+  br i1 %44, label %45, label %46
+
+; <label>:45                                      ; preds = %37
+  br label %72
+
+; <label>:46                                      ; preds = %37
+  %47 = load i8* %digit, align 1
+  %48 = zext i8 %47 to i32
+  %49 = sub nsw i32 %48, 97
+  %50 = trunc i32 %49 to i8
+  store i8 %50, i8* %digit, align 1
+  %51 = load i8* %digit, align 1
+  %52 = zext i8 %51 to i32
+  %53 = add nsw i32 %52, 10
+  %54 = trunc i32 %53 to i8
+  store i8 %54, i8* %digit, align 1
+  %55 = load i8* %digit, align 1
+  %56 = zext i8 %55 to i32
+  %57 = load i8* %3, align 1
+  %58 = zext i8 %57 to i32
+  %59 = icmp sgt i32 %56, %58
+  br i1 %59, label %60, label %61
+
+; <label>:60                                      ; preds = %46
+  br label %72
+
+; <label>:61                                      ; preds = %46
+  br label %62
+
+; <label>:62                                      ; preds = %61, %32
+  %63 = load i32* %result, align 4
+  %64 = load i8* %3, align 1
+  %65 = zext i8 %64 to i32
+  %66 = mul nsw i32 %63, %65
+  %67 = load i8* %digit, align 1
+  %68 = zext i8 %67 to i32
+  %69 = add nsw i32 %66, %68
+  store i32 %69, i32* %result, align 4
+  %70 = load i8** %s, align 4
+  %71 = getelementptr inbounds i8* %70, i32 1
+  store i8* %71, i8** %s, align 4
+  br label %22
+
+; <label>:72                                      ; preds = %60, %45
+  %73 = load i8* %negative, align 1
+  %74 = icmp ne i8 %73, 0
+  br i1 %74, label %75, label %78
+
+; <label>:75                                      ; preds = %72
+  %76 = load i32* %result, align 4
+  %77 = sub nsw i32 0, %76
+  store i32 %77, i32* %result, align 4
+  br label %78
+
+; <label>:78                                      ; preds = %75, %72
+  %79 = load i32* %result, align 4
+  %80 = load i32** %2, align 4
+  store i32 %79, i32* %80, align 4
+  %81 = load i8** %s, align 4
+  %82 = load i8** %1, align 4
+  %83 = ptrtoint i8* %81 to i32
+  %84 = ptrtoint i8* %82 to i32
+  %85 = sub i32 %83, %84
+  %86 = trunc i32 %85 to i8
+  ret i8 %86
+}
