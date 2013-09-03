@@ -1,4 +1,4 @@
 PROGRAM exprs ()
 {
-    WRITE_INT(5,0);
+    WRITESPLN(10, 5, 3, "asd", "omg this finally works");
 }
