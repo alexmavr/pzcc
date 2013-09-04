@@ -30,5 +30,13 @@ PROGRAM prints ()
     WRITELN(TRUNC(5.6));
     WRITELN(ROUND(5.6));
     WRITELN();
-    WRITELN("this is a very large string to check for large string sizes, which is the same as printf\'s in our implementation asddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd");
+    WRITELN(strlen("asd"));
+    WRITELN(strlen("12345678901234567890123")); // 23
+    WRITELN(strcmp("1234", "1234")); // 0
+    WRITELN(strcmp("1234", "123456")); // -1
+    char a[5];
+    strcpy(a, "1234");
+    WRITELN(a);
+    strcat(a, a);
+    WRITELN(a);
 }
