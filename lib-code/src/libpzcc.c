@@ -30,3 +30,4 @@ void WRITE_BOOL(int a, int w) {
 long double pi(void) {
     return M_PI;
 }
+

@@ -3,7 +3,10 @@ Bugs:
 
 
 Linking and Runtime:
-    fix the way C functions are called
+    fix the way libc functions are called:
+        math functions require doubles as arguments. 
+            Change long double to double everywhere?
+            Find an alternative library?
     (optional) change trunc and round to reals, or add dummy definitions for the casts
     Add a user option to generate the elf file (x86 only)
 
