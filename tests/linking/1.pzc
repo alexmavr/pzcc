@@ -34,9 +34,15 @@ PROGRAM prints ()
     WRITELN(strlen("12345678901234567890123")); // 23
     WRITELN(strcmp("1234", "1234")); // 0
     WRITELN(strcmp("1234", "123456")); // -1
-    char a[5];
+    char a[15];
+    char b[15];
     strcpy(a, "1234");
+    strcpy(b, a);
+    WRITELN(b);
+    WRITELN(strlen(b));
     WRITELN(a);
-    strcat(a, a);
-    WRITELN(a);
+    WRITELN(strlen(a));
+    strcat(b, a);
+    WRITELN(b);
+    WRITELN(strlen(b));
 }
