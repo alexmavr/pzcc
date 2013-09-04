@@ -1,6 +1,9 @@
 PROGRAM reads() {
     WRITELN(READ_INT());
+    WRITELN(READ_BOOL());
     char a[10];
+    READ_STRING(10, a);
+    WRITELN(a);
     READ_STRING(10, a);
     WRITELN(a);
 }

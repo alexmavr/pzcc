@@ -1,27 +1,41 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <stdbool.h>
+
+bool used_scanf = false;
 
 int READ_INT() {
     int i;
     scanf("%d", &i);
+    used_scanf = true;
     return i;
 }
 
 double READ_REAL() {
     double i;
     scanf("%lf", &i);
+    used_scanf = true;
     return i;
 }
 
 void READ_STRING(int size, char * s) {
-    scanf("%*[^\n]", size, &s);
+    if (used_scanf) {
+        scanf("%*c");
+        used_scanf = false;
+    }
+    fgets(s, size+1, stdin);
+
+    /* Remove excess newline */
+    int len = strlen(s);
+    if (s[len-1] == '\n')
+       s[len-1] = 0;
 }
 
 int READ_BOOL() {
-    char i[10];
-    READ_STRING(10, i);
-    if (!strcmp(i, "true"))
+    char i[5];
+    READ_STRING(5, i);
+    if (!strcmp(i, "true") || !strcmp(i, "1"))
         return 1;
     else
         return 0;
