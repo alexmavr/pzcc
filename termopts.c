@@ -90,6 +90,7 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
 					ret = 1;
 				//Save the output file name.
 				} else {
+					filename = arg;
 					our_options.output_filename = strdup(arg);
 					if (our_options.output_filename == NULL) {
 						my_error(ERR_LV_WARN, "strdup() failed");

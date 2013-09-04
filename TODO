@@ -25,6 +25,7 @@ General:
 
 
 Done:
+*	Input filename always appears as stdin (just present it with an error and see output - i.e. unknown identified).
 *   Change long double to double everywhere
 *	compiler arguments and llvm backend invocation (link together?)
 *   library edited to exclude c-style names and built with $jwasm -elf -zcw /path/to/lib/            
