@@ -25,6 +25,53 @@
 #include "ir.h"
 #include "termopts.h"
 
+
+/* Converts escape sequences of t to the actual characters in s*/
+void unescape(char * s, char * t) {
+    int i, j;
+    i = j = 0;
+    
+    while (t[i]) {
+        switch (t[i]) {
+        case '\\':
+            /*  We've found an escape sequence, so translate it  */
+            switch( t[++i] ) {
+            case 'n':
+                s[j] = '\n';
+                break;
+            case 't':
+                s[j] = '\t';
+                break;
+            case 'r':
+                s[j] = '\r';
+                break;
+            case '\\':
+                s[j] = '\\';
+                break;
+            case '\"':
+                s[j] = '\"';
+                break;
+            case '\'':
+                s[j] = '\'';
+                break;
+            default:
+                /*  We don't translate this escape
+                    sequence, so just copy it verbatim  */
+                s[j++] = '\\';
+                s[j] = t[i];
+            }
+            break;
+        default:
+            /*  Not an escape sequence, so just copy the character  */
+            s[j] = t[i];
+        }
+        ++i;
+        ++j;
+    }
+    s[j] = t[i];    /*  Don't forget the null character  */
+}
+
+
 //Cleanup hook.
 void cleanup (void) {
 	//Removal of tempfile.

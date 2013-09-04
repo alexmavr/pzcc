@@ -14,6 +14,8 @@
 #include <llvm-c/Core.h>
 #include <stdbool.h>
 
+void unescape(char *s, char *t);
+
 void *new		(size_t);
 void delete		(void *);
 void cleanup	(void);

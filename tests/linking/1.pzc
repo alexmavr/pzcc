@@ -11,7 +11,7 @@ PROGRAM prints ()
 
    // WRITE_INT(strcmp("12345","12345"));
     WRITELN();
-    WRITELN(47.23 + pi());
+    WRITESPLN(3.1, FORM(pi(),1,100));
     WRITELN();
     puts("puts test");
     WRITELN();

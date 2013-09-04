@@ -116,8 +116,11 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 \"{CHAR}*\"							{
 										/* copy the string without the surrounding " chars */
 										char *tmp = (char *) new((yyleng-1) * sizeof(char));
-										strcpy (tmp, &yytext[1]);
-										tmp[yyleng-2] = '\0';
+//										strcpy (tmp, &yytext[1]);
+                                        unescape(tmp, &yytext[1]);
+                                        int size = strlen(tmp);
+                                        tmp = realloc(tmp, size);
+										tmp[size-1] = '\0';
 										yylval.s = (const char *) tmp;
 										return T_CONST_string;
 									}
