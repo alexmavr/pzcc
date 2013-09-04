@@ -21,6 +21,7 @@ Type currentFunctionType = NULL;		// type indicator for function return
 SymbolEntry *currentFun = NULL;			// global function indicator for parameter declaration
 int currentWrite = 0;                   // indicator for WRITE mode
 bool function_has_ret = false;          // flag for marking whether a routine body returns
+LLVMValueRef last_return = NULL;        // The last value used in a return statement. Used at routine_tail
 bool array_last = false;                // flag for the last dimension of an array variable
 bool global_scope = true;               // flag marking the scope for initializations
 
@@ -399,8 +400,8 @@ var_init_tail
 routine
 	: routine_header routine_tail
 		{
-			// Actions for when a function is closing (be it a forward declaration or a definition).
-			closeScope();
+            // Actions for when a routine is closing (be it a forward declaration or a definition).
+            closeScope();
 			currentFunctionType = NULL;
 			function_has_ret = false;
             global_scope = true;
@@ -475,13 +476,17 @@ routine_tail
     } block_tail '}' 
     {
         if ((currentFunctionType != typeVoid) && (!function_has_ret)) {
-            my_error(ERR_LV_ERR, "function without a return statement");
+            my_error(ERR_LV_ERR, "function does not have a return statement");
             YYERROR;
         }
-        
-        if ((currentFunctionType == typeVoid) && (!function_has_ret)) {
+
+        if ((currentFunctionType == typeVoid) && (!function_has_ret))
             LLVMBuildRetVoid(builder);
-        }
+
+        // remove empty labels at the routine end
+        LLVMBasicBlockRef last_block = LLVMGetInsertBlock(builder);
+        if (LLVMGetFirstInstruction(last_block) == NULL)
+            LLVMBuildRet(builder, last_return);
     }
 	;
 routine_header
@@ -1262,7 +1267,8 @@ base_stmt
                 YYERROR;
             }
 			function_has_ret = true;
-            LLVMBuildRet(builder, cast_compat(currentFunctionType, $2.type, $2.Valref));
+            last_return = cast_compat(currentFunctionType, $2.type, $2.Valref);
+            LLVMBuildRet(builder, last_return);
 		}
 	| write '(' stmt_opt_write ')' ';' 
         {

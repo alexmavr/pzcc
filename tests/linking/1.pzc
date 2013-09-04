@@ -45,4 +45,5 @@ PROGRAM prints ()
     strcat(b, a);
     WRITELN(b);
     WRITELN(strlen(b));
+    WRITELN(strcmp(a,b));
 }
