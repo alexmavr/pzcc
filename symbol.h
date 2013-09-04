@@ -42,7 +42,7 @@ typedef enum { false=0, true=1 } bool;
 typedef int           RepInteger;         /* Ακέραιες                  */
 typedef char          RepBoolean;         /* Λογικές τιμές             */
 typedef char          RepChar;            /* Χαρακτήρες                */
-typedef long double   RepReal;            /* Πραγματικές               */
+typedef double        RepReal;            /* Πραγματικές               */
 typedef const char *  RepString;          /* Συμβολοσειρές             */
 
 /* Τύποι δεδομένων και αποτελέσματος συναρτήσεων */

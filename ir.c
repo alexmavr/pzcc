@@ -229,7 +229,7 @@ LLVMTypeRef type_to_llvm(Type t) {
 			res = LLVMInt32Type();
 			break;
 		case TYPE_REAL:
-			res = LLVMX86FP80Type();
+			res = LLVMDoubleType();
 			break;
 		case TYPE_BOOLEAN:
 			res = LLVMInt1Type();
@@ -253,9 +253,9 @@ LLVMTypeRef type_to_llvm(Type t) {
 LLVMValueRef cast_compat(Type dest, Type src, LLVMValueRef src_val) {
     LLVMValueRef res;
     if ((dest == typeReal) && (src == typeInteger)) {
-         res = LLVMBuildCast(builder, LLVMSIToFP, src_val, LLVMX86FP80Type(), "casttmp");
+         res = LLVMBuildCast(builder, LLVMSIToFP, src_val, LLVMDoubleType(), "casttmp");
     } else if ((dest == typeReal) && (src == typeChar)) {
-        res = LLVMBuildCast(builder, LLVMUIToFP, src_val, LLVMX86FP80Type(), "casttmp");
+        res = LLVMBuildCast(builder, LLVMUIToFP, src_val, LLVMDoubleType(), "casttmp");
     } else if ((dest == typeChar) && (src == typeInteger)) {
         /* Take the Highest order bit (8th bit) of the integer by shifting right
          * 7 times and truncating to 1 bit.
@@ -281,7 +281,9 @@ LLVMValueRef cast_compat(Type dest, Type src, LLVMValueRef src_val) {
 
 /* Creates a ARRAY type from an IARRAY type by setting 0 as the first dimension */
 Type iarray_to_array(Type array) {
-        return typeArray(0, array->refType);
+    if (array->refType == NULL)
+        my_error(ERR_LV_INTERN, "encountered a NULL array reftype");
+    return typeArray(0, array->refType);
 }
 
 /* Generates IR for all external function prototypes and adds them to symbol table */

@@ -54,7 +54,7 @@ bool global_scope = true;               // flag marking the scope for initializa
 %union {
 	/* Constants */
 	int i;
-	long double r;
+	double r;
 	char c;
 	const char *s;
 
@@ -200,10 +200,10 @@ const_def
             LLVMValueRef res = NULL;
 			if ((currentType == typeReal) && ($6.type == typeInteger)) {
 				con->u.eConstant.value.vReal = (RepReal) $6.value.i;
-                res = LLVMConstReal(LLVMX86FP80Type(), con->u.eConstant.value.vReal);
+                res = LLVMConstReal(LLVMDoubleType(), con->u.eConstant.value.vReal);
 			} else if ((currentType == typeReal) && ($6.type == typeChar)) {
 				con->u.eConstant.value.vReal = (RepReal) $6.value.c;
-                res = LLVMConstReal(LLVMX86FP80Type(), con->u.eConstant.value.vReal);
+                res = LLVMConstReal(LLVMDoubleType(), con->u.eConstant.value.vReal);
 			} else if ((currentType == typeInteger) && ($6.type == typeChar)) {
 				con->u.eConstant.value.vInteger = (RepInteger) $6.value.c;
                 res = LLVMConstInt(LLVMInt32Type(), \
@@ -222,7 +222,7 @@ const_def
                         con->u.eConstant.value.vInteger, false);
 			} else if (currentType == typeReal) {
 				con->u.eConstant.value.vReal = $6.value.r;
-                res = LLVMConstReal(LLVMX86FP80Type(), con->u.eConstant.value.vReal);
+                res = LLVMConstReal(LLVMDoubleType(), con->u.eConstant.value.vReal);
 			} else if (currentType == typeBoolean) {
 				con->u.eConstant.value.vBoolean = $6.value.b;
                 res = LLVMConstInt(LLVMInt1Type(), \
@@ -261,10 +261,10 @@ const_def_tail
             LLVMValueRef res = NULL;
 			if ((currentType == typeReal) && ($4.type == typeInteger)) {
 				con->u.eConstant.value.vReal = (RepReal) $4.value.i;
-                res = LLVMConstReal(LLVMX86FP80Type(), con->u.eConstant.value.vReal);
+                res = LLVMConstReal(LLVMDoubleType(), con->u.eConstant.value.vReal);
 			} else if ((currentType == typeReal) && ($4.type == typeChar)) {
 				con->u.eConstant.value.vReal = (RepReal) $4.value.c;
-                res = LLVMConstReal(LLVMX86FP80Type(), con->u.eConstant.value.vReal);
+                res = LLVMConstReal(LLVMDoubleType(), con->u.eConstant.value.vReal);
 			} else if ((currentType == typeInteger) && ($4.type == typeChar)) {
 				con->u.eConstant.value.vInteger = (RepInteger) $4.value.c;
                 res = LLVMConstInt(LLVMInt32Type(), \
@@ -283,7 +283,7 @@ const_def_tail
                         con->u.eConstant.value.vInteger, false);
 			} else if (currentType == typeReal) {
 				con->u.eConstant.value.vReal = $4.value.r;
-                res = LLVMConstReal(LLVMX86FP80Type(), con->u.eConstant.value.vReal);
+                res = LLVMConstReal(LLVMDoubleType(), con->u.eConstant.value.vReal);
 			} else if (currentType == typeBoolean) {
 				con->u.eConstant.value.vBoolean = $4.value.b;
                 res = LLVMConstInt(LLVMInt1Type(), \
@@ -620,7 +620,7 @@ const_unit
 		{
 			$$.type = typeReal;
 			$$.value.r = $1;
-            $$.Valref = LLVMConstReal(LLVMX86FP80Type(), $1);
+            $$.Valref = LLVMConstReal(LLVMDoubleType(), $1);
 		}
 	| T_CONST_char
 		{
@@ -1489,7 +1489,7 @@ format
                 func_ref = LLVMGetNamedFunction(module, "WRITE_REAL");
                 args[2] = LLVMConstInt(LLVMInt32Type(), DEFAULT_REAL_PRECISION, false); 
                 LLVMBuildCall(builder, func_ref, args, 3, "");
-            } else {
+            } else if ($1.type->kind >= TYPE_ARRAY){
                 // Array Type. store the array and pass the pointer to WRITE_STRING
                 func_ref = LLVMGetNamedFunction(module, "strlen");
                 dest_type = LLVMPointerType(type_to_llvm(iarray_to_array($1.type)), 0);
@@ -1497,6 +1497,8 @@ format
                 args[1] = LLVMBuildCall(builder, func_ref, args, 1, "calltmp");
                 func_ref = LLVMGetNamedFunction(module, "WRITE_STRING");
                 LLVMBuildCall(builder, func_ref, args, 2, "");
+            } else {
+                my_error(ERR_LV_ERR, "Expression is not printable");
             }
             delete(args);
 		}

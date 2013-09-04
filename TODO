@@ -4,10 +4,8 @@ Bugs:
 
 Linking and Runtime:
     fix the way libc functions are called:
-        math functions require doubles as arguments. 
-            Change long double to double everywhere?
-            Find an alternative library?
-    (optional) change trunc and round to reals, or add dummy definitions for the casts
+        string.h functions need a different string format
+        READ_STRING needs to be hand-writen to comply to the spec
     Add a user option to generate the elf file (x86 only)
 
 
@@ -27,6 +25,7 @@ General:
 
 
 Done:
+*   Change long double to double everywhere
 *	compiler arguments and llvm backend invocation (link together?)
 *   library edited to exclude c-style names and built with $jwasm -elf -zcw /path/to/lib/            
 *	leak:	parser.y:461	->	creating name string for reference variables	=>	parser.y:467

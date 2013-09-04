@@ -279,7 +279,7 @@ SymbolEntry * newConstant (const char * name, Type type, ...) {
 				strcat(buffer, "'");
 				break;
 			case TYPE_REAL:
-				sprintf(buffer, "%Lg", value.vReal);
+				sprintf(buffer, "%g", value.vReal);
 				break;
 			case TYPE_ARRAY:
 				strcpy(buffer, "\"");

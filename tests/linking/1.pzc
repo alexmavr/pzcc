@@ -13,10 +13,22 @@ PROGRAM prints ()
     WRITELN();
     WRITESPLN(3.1, FORM(pi(),1,100));
     WRITELN();
-    puts("puts test");
+    puts("tested output");
+    WRITELN(sin(pi()));
     WRITELN(cos(5.3));
-    WRITELN(sin(41.3));
+    WRITELN(tan(5.3));
+    WRITELN(arctan(tan(5.3)));
+    WRITELN(exp(1.0));
+    WRITELN(exp(0.0));
+    WRITELN(ln(exp(1.0)));
     WRITELN();
-    WRITESPLN(10, 5, 3, "asd", "omg this finally works");
-    WRITELN("this is a very large string to check for large string sizes, which is the same as printf\'s in our implementation ");
+    WRITELN(abs(-4));
+    WRITELN(fabs(-4.3));
+    WRITELN(sqrt(100));
+    WRITELN(trunc(5.6));
+    WRITELN(round(5.6));
+    WRITELN(TRUNC(5.6));
+    WRITELN(ROUND(5.6));
+    WRITELN();
+    WRITELN("this is a very large string to check for large string sizes, which is the same as printf\'s in our implementation asddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd");
 }
