@@ -6,7 +6,7 @@ PROGRAM prints ()
     WRITELN();
     WRITE_STRING("escape \' sequences \" \0 \n", 41);
     WRITELN();
-    WRITE_STRING("random STRING 1234567890 !@#$%^&*() |}{\n", 50);
+    WRITESP("random", 3.45, FORM(5,5), 43, true, false, "STRING", "1234567890",  "!@#$%^&*()", "|}{\n");
     WRITELN();
 
    // WRITE_INT(strcmp("12345","12345"));

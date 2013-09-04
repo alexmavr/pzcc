@@ -1388,7 +1388,7 @@ stmt_opt_write_tail
         { 
             if (currentWrite >= 2){
                 /* Print space if WRITESP or WRITESPLN*/
-                build_const_str_write_call(" ", 1);
+                build_const_str_write_call("  ", 1);
             }
         } format stmt_opt_write_tail  
 	;

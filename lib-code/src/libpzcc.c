@@ -20,7 +20,7 @@ void WRITE_CHAR(char a, int w) {
 
 void WRITE_BOOL(int a, int w) {
     const char * res;
-    if (a == 0)
+    if (a == 1)
         res = "true";
     else
         res = "false";
