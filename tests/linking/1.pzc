@@ -1,4 +1,26 @@
-PROGRAM exprs ()
+PROGRAM prints ()
 {
+    WRITE_STRING("twenty two characters plus another twenty!", 0);
+    WRITELN();
+    WRITE_STRING("twenty two characters plus another twenty!", 1);
+    WRITELN();
+    WRITE_STRING("escape \' sequences \" \0 \n", 41);
+    WRITELN();
+    WRITE_STRING("random STRING 1234567890 !@#$%^&*() |}{\n", 50);
+    WRITELN();
+
+   // WRITE_INT(strcmp("12345","12345"));
+    WRITELN();
+    WRITELN(47.23 + pi());
+    WRITELN();
+    puts("puts test");
+    WRITELN();
+    WRITE_INT(10,0);
+    WRITELN();
+    WRITE_INT(10,1);
+    WRITELN();
+    WRITE_INT(10,8);
+    WRITELN();
     WRITESPLN(10, 5, 3, "asd", "omg this finally works");
+    WRITELN("this is a very large string to check for large string sizes, which is the same as printf\'s in our implementation ");
 }

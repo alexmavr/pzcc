@@ -1,5 +1,7 @@
 ./*.o
 ./tests/*/*.o
+tests/*/*.asm
+lib-code/src/*.lib
 *.swp
 *.swo
 *.bak
@@ -10,7 +12,6 @@ a.out
 parser.output
 *.imm
 *.s
-tests/*/*.asm
 ./*.asm
 *.obj
 *.dmp

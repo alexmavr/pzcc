@@ -3,7 +3,7 @@
 all: pzc.lib
 
 %.llvm : %.c
-	clang -m32 -emit-llvm -S -o $@ $<
+	clang -m32 -lm -emit-llvm -S -o $@ $<
 
 %.llb : %.llvm
 	opt --std-compile-opts -o $@ $<

@@ -1,16 +1,17 @@
 #include <stdio.h>
+#include <math.h>
 
 
 void WRITE_INT(int a, int w) {
-    printf("%d",a);
+    printf("%*d", w, a);
 }
 
-void WRITE_STRING(char * a, int w) {
-    printf("%s",a);
+void WRITE_STRING(const char *a, int w) {
+    printf("%*s", w, a);
 }
 
 void WRITE_REAL(long double a, int w, int d) {
-    printf("%Lf",a);
+    printf("%*.*Lf", w, d, a);
 }
 
 void WRITE_CHAR(char a, int w) {
@@ -24,4 +25,8 @@ void WRITE_BOOL(int a, int w) {
     else
         res = "false";
     printf("%s",res);
+}
+
+long double pi(void) {
+    return M_PI;
 }

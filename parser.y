@@ -200,10 +200,10 @@ const_def
             LLVMValueRef res = NULL;
 			if ((currentType == typeReal) && ($6.type == typeInteger)) {
 				con->u.eConstant.value.vReal = (RepReal) $6.value.i;
-                res = LLVMConstReal(LLVMDoubleType(), con->u.eConstant.value.vReal);
+                res = LLVMConstReal(LLVMX86FP80Type(), con->u.eConstant.value.vReal);
 			} else if ((currentType == typeReal) && ($6.type == typeChar)) {
 				con->u.eConstant.value.vReal = (RepReal) $6.value.c;
-                res = LLVMConstReal(LLVMDoubleType(), con->u.eConstant.value.vReal);
+                res = LLVMConstReal(LLVMX86FP80Type(), con->u.eConstant.value.vReal);
 			} else if ((currentType == typeInteger) && ($6.type == typeChar)) {
 				con->u.eConstant.value.vInteger = (RepInteger) $6.value.c;
                 res = LLVMConstInt(LLVMInt32Type(), \
@@ -222,7 +222,7 @@ const_def
                         con->u.eConstant.value.vInteger, false);
 			} else if (currentType == typeReal) {
 				con->u.eConstant.value.vReal = $6.value.r;
-                res = LLVMConstReal(LLVMDoubleType(), con->u.eConstant.value.vReal);
+                res = LLVMConstReal(LLVMX86FP80Type(), con->u.eConstant.value.vReal);
 			} else if (currentType == typeBoolean) {
 				con->u.eConstant.value.vBoolean = $6.value.b;
                 res = LLVMConstInt(LLVMInt1Type(), \
@@ -261,10 +261,10 @@ const_def_tail
             LLVMValueRef res = NULL;
 			if ((currentType == typeReal) && ($4.type == typeInteger)) {
 				con->u.eConstant.value.vReal = (RepReal) $4.value.i;
-                res = LLVMConstReal(LLVMDoubleType(), con->u.eConstant.value.vReal);
+                res = LLVMConstReal(LLVMX86FP80Type(), con->u.eConstant.value.vReal);
 			} else if ((currentType == typeReal) && ($4.type == typeChar)) {
 				con->u.eConstant.value.vReal = (RepReal) $4.value.c;
-                res = LLVMConstReal(LLVMDoubleType(), con->u.eConstant.value.vReal);
+                res = LLVMConstReal(LLVMX86FP80Type(), con->u.eConstant.value.vReal);
 			} else if ((currentType == typeInteger) && ($4.type == typeChar)) {
 				con->u.eConstant.value.vInteger = (RepInteger) $4.value.c;
                 res = LLVMConstInt(LLVMInt32Type(), \
@@ -283,7 +283,7 @@ const_def_tail
                         con->u.eConstant.value.vInteger, false);
 			} else if (currentType == typeReal) {
 				con->u.eConstant.value.vReal = $4.value.r;
-                res = LLVMConstReal(LLVMDoubleType(), con->u.eConstant.value.vReal);
+                res = LLVMConstReal(LLVMX86FP80Type(), con->u.eConstant.value.vReal);
 			} else if (currentType == typeBoolean) {
 				con->u.eConstant.value.vBoolean = $4.value.b;
                 res = LLVMConstInt(LLVMInt1Type(), \
@@ -620,7 +620,7 @@ const_unit
 		{
 			$$.type = typeReal;
 			$$.value.r = $1;
-            $$.Valref = LLVMConstReal(LLVMDoubleType(), $1);
+            $$.Valref = LLVMConstReal(LLVMX86FP80Type(), $1);
 		}
 	| T_CONST_char
 		{
@@ -1474,7 +1474,7 @@ format
             /*  According to Pascal's specification, 
                 if the width is not long enough for the data,
                 the width specification is ignored, apart from REALs.
-                TODO: Make sure this is compliant with the library */
+            */
             args[1] = LLVMConstInt(LLVMInt32Type(), 0, false); 
             if ($1.type == typeInteger) {
                 func_ref = LLVMGetNamedFunction(module, "WRITE_INT");
@@ -1487,13 +1487,10 @@ format
                 LLVMBuildCall(builder, func_ref, args, 2, "");
             } else if ($1.type == typeReal) {
                 func_ref = LLVMGetNamedFunction(module, "WRITE_REAL");
-                // Set 5 decimal digits as the default
-                // TODO: check if they appear correctly with w=0
                 args[2] = LLVMConstInt(LLVMInt32Type(), DEFAULT_REAL_PRECISION, false); 
                 LLVMBuildCall(builder, func_ref, args, 3, "");
             } else {
-                /*  Array Type. store the array and pass the pointer to WRITE_STRING
-                    TODO:  test if WRITE_STRING can print the string with w=0 to avoid strlen */
+                // Array Type. store the array and pass the pointer to WRITE_STRING
                 func_ref = LLVMGetNamedFunction(module, "strlen");
                 dest_type = LLVMPointerType(type_to_llvm(iarray_to_array($1.type)), 0);
                 args[0] = LLVMBuildPointerCast(builder, $1.Valref, dest_type, "ptrcasttmp");
