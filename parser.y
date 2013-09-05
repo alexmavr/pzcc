@@ -21,7 +21,6 @@ Type currentFunctionType = NULL;		// type indicator for function return
 SymbolEntry *currentFun = NULL;			// global function indicator for parameter declaration
 int currentWrite = 0;                   // indicator for WRITE mode
 bool function_has_ret = false;          // flag for marking whether a routine body returns
-LLVMValueRef last_return = NULL;        // The last value used in a return statement. Used at routine_tail
 bool array_last = false;                // flag for the last dimension of an array variable
 bool global_scope = true;               // flag marking the scope for initializations
 
@@ -485,8 +484,9 @@ routine_tail
 
         // remove empty labels at the routine end
         LLVMBasicBlockRef last_block = LLVMGetInsertBlock(builder);
-        if (LLVMGetFirstInstruction(last_block) == NULL)
-            LLVMBuildRet(builder, last_return);
+        if (LLVMGetFirstInstruction(last_block) == NULL) {
+            LLVMBuildRet(builder, LLVMGetUndef(type_to_llvm(currentFunctionType)));
+        }
     }
 	;
 routine_header
@@ -1267,8 +1267,7 @@ base_stmt
                 YYERROR;
             }
 			function_has_ret = true;
-            last_return = cast_compat(currentFunctionType, $2.type, $2.Valref);
-            LLVMBuildRet(builder, last_return);
+            LLVMBuildRet(builder, cast_compat(currentFunctionType, $2.type, $2.Valref));
 		}
 	| write '(' stmt_opt_write ')' ';' 
         {
