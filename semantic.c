@@ -319,22 +319,22 @@ void binop_IR(struct ast_node *left, struct ast_node *right, const char *op, str
 	if ((left->type == typeInteger) && (right->type == typeReal)) {
 		res->type = binop_type_check(op, typeReal);
         LLVMValueRef newleft = LLVMBuildCast(builder, LLVMUIToFP, left->Valref, \
-                        LLVMX86FP80Type(), "casttmp");
+                        LLVMDoubleType(), "casttmp");
         op_IR(op, newleft, right->Valref, typeReal, &(res->Valref));
 	} else if ((left->type == typeReal) && (right->type == typeInteger)) {
 		res->type = binop_type_check(op, typeReal);
         LLVMValueRef newright = LLVMBuildCast(builder, LLVMUIToFP, right->Valref, \
-                        LLVMX86FP80Type(), "casttmp");
+                        LLVMDoubleType(), "casttmp");
         op_IR(op, left->Valref, newright, typeReal, &(res->Valref));
 	} else if ((left->type == typeChar) && (right->type == typeReal)) {
 		res->type = binop_type_check(op, typeReal);
         LLVMValueRef newleft = LLVMBuildCast(builder, LLVMUIToFP, left->Valref, \
-                        LLVMX86FP80Type(), "casttmp");
+                        LLVMDoubleType(), "casttmp");
         op_IR(op, newleft, right->Valref, typeReal, &(res->Valref));
 	} else if ((left->type == typeReal) && (right->type == typeChar)) {
 		res->type = binop_type_check(op, typeReal);
         LLVMValueRef newright = LLVMBuildCast(builder, LLVMUIToFP, right->Valref, \
-                        LLVMX86FP80Type(), "casttmp");
+                        LLVMDoubleType(), "casttmp");
         op_IR(op, left->Valref, newright, typeReal, &(res->Valref));
 	} else if ((left->type == typeReal) && (right->type == typeReal)) {
 		res->type = binop_type_check(op, typeReal);
