@@ -264,9 +264,9 @@ int main (int argc, char **argv) {
 			tmp_pid = fork();
 			if (tmp_pid == 0) {
 				if (our_options.llvmclang_flags != NULL)
-					execlp("clang", "clang", our_options.tmp_filename, our_options.llvmclang_flags, "-lm", "-o", our_options.output_filename, (char *)NULL);
+					execlp("clang", "clang", our_options.tmp_filename, our_options.llvmclang_flags, "-lm", "-m32", "-o", our_options.output_filename, (char *)NULL);
 				else
-					execlp("clang", "clang", our_options.tmp_filename, "-lm", "-o", our_options.output_filename, (char *)NULL);
+					execlp("clang", "clang", our_options.tmp_filename, "-lm", "-m32", "-o", our_options.output_filename, (char *)NULL);
 			} else if (tmp_pid < 0) {
 				my_error(ERR_LV_INTERN, "fork() call failed");
 			} else {
