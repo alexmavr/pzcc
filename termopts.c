@@ -77,11 +77,18 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
 				ret = 1;
 			}
 			break;
+		//Assign flag string for propagation.
 		case 'l':
 			our_options.llvmllc_flags = arg;
 			break;
 		case 't':
 			our_options.llvmopt_flags = arg;
+			break;
+		case 'c':
+			our_options.llvmclang_flags = arg;
+			break;
+		case 'b':
+			our_options.pzc_lib_file = arg;
 			break;
 		//Capture input filename.
 		case ARGP_KEY_ARG:

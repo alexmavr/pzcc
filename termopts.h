@@ -27,6 +27,7 @@ struct options_t {
 	//Flags for propagation
 	char *llvmopt_flags;
 	char *llvmllc_flags;
+	char *llvmclang_flags;
 
 	//Optimization flag
 	bool opt_flag;

@@ -107,7 +107,7 @@ void delete (void *p) {
 char *filename = "stdin";
 extern FILE *yyin;
 
-struct options_t our_options = { .in_file = NULL, .output_type = OUT_NONE, .output_is_stdout = false, .output_filename = NULL, .llvmopt_flags = NULL, .llvmllc_flags = NULL, .opt_flag = 0 };
+struct options_t our_options = { .in_file = NULL, .output_type = OUT_NONE, .output_is_stdout = false, .output_filename = NULL, .llvmopt_flags = NULL, .llvmllc_flags = NULL, .llvmclang_flags = NULL, .opt_flag = 0, .pzc_lib_file = NULL };
 
 //LLVM IR dump method.
 static void dump_ir (char *outfile) {
@@ -228,7 +228,7 @@ int main (int argc, char **argv) {
 				while ((waitpid(tmp_pid, NULL, 0) != tmp_pid) && (guard < 100)) { guard++; }
 			}
 			break;
-		//If executable output was requested, the call sequence is llc (IR->obj) - clang (obj -> library obj -> executable).
+		//If executable output was requested, the call sequence is llvm-link (IR linking) - llc (IR->obj) - clang (obj -> library obj -> executable).
 		case OUT_EXEC:
 			//llc call : generate object from IR tempfile
 			tmp_pid = fork();
