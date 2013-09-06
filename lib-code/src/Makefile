@@ -1,20 +1,28 @@
-.default = all
+.PHONY: all clean distclean
+.DEFAULT: all
 
-all: pzc.lib clean
+all: libpzc.ll clean
 
 %.llvm : %.c
 	clang -m32 -lm -emit-llvm -S -o $@ $<
 
-%.llb : %.llvm
-	opt --std-compile-opts -o $@ $<
+%.lli : %.llvm
+	opt --std-compile-opts -S -o $@ $<
 
-pzc.lib : libpzcc.llb
-	llvm-link $< -o $@
+libpzc.ll : libpzc.lli
+	llvm-link -S $< -o $@
 
 install:
-	mkdir /usr/lib/pzcc/
-	cp pzc.lib /usr/lib/pzcc/
+	mkdir -p /usr/lib/pzcc/
+	cp libpzc.ll /usr/lib/pzcc/
+	ln -s /usr/lib/pzcc/libpzc.ll /usr/lib/libpzc.ll
+
+distclean:
+	rm libpzc.ll
+	rm /usr/lib/pzcc/libpzc.ll
+	rm -d /usr/lib/pzcc/
+	rm /usr/lib/libpzc.ll
 
 clean:
-	rm *.llb
+	rm *.lli
 	rm *.llvm
