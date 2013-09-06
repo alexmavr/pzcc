@@ -52,8 +52,8 @@ pzc.lex.c: pzc.lex
 pzc.lex:;
 
 distclean: clean
-	rm -f pzcc parser.output
+	rm -f pzcc
 
 clena celan lcean lcena: clean
 clean:
-	rm -f $(OBJ) pzc.lex.c a.out parser.c parser.h tests/*/*.imm tests/*/*.asm
+	rm -f $(OBJ) pzc.lex.c a.out parser.c parser.h tests/*/*.imm tests/*/*.asm parser.output
