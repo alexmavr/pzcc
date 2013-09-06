@@ -3,8 +3,9 @@ PROC swap ( int &x, int &y)
     int t = x;
     x = y; y = t;
 }
-/*
-PROC bsort (int n, int x[])
+
+PROC bsort (char msg[], int n, int x[])
+//PROC bsort (int n, int x[])
 {
     bool changed = true;
     while (changed) {
@@ -14,9 +15,10 @@ PROC bsort (int n, int x[])
             if (x[i] > x[i+1]) { swap(x[i], x[i+1]); changed = true; }
     }
 }
-*/
-PROC print (int n, int x[])
+
+PROC print (char msg[], int n, int x[])
 {
+    WRITE(msg);
     int i;
     FOR (i, 0 TO n-1) {
         if (i > 0) WRITE(", ");
@@ -33,7 +35,7 @@ PROGRAM bubbles ()
         seed = (seed * 137 + 221 +i) MOD 101;
         x[i] = seed;
     }
-    print(16, x);
-//    bsort(16,x);
-    print(16, x);
+//    print("Initial array: ", 16, x);
+    bsort(16,x);
+//    print("Sorted array: ", 16, x);
 }

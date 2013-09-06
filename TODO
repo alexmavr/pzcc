@@ -1,5 +1,6 @@
 Bugs:
     Strings of 23 characters have a \22 added at their llvm IR for some reason, and it breaks everything.
+	When function declaration and call types differ, compiler segfaults during compilation (tests/examples/testing_bug1.pzc).
 
 
 Cleanup:
