@@ -4,7 +4,7 @@
 all: libpzc.ll clean
 
 %.llvm : %.c
-	clang -m32 -lm -emit-llvm -S -o $@ $<
+	clang -emit-llvm -S -o $@ $<
 
 %.lli : %.llvm
 	opt --std-compile-opts -S -o $@ $<

@@ -1,7 +1,7 @@
 ./*.o
 ./tests/*/*.o
 tests/*/*.asm
-lib-code/src/*.lib
+lib-code/src/*.ll
 *.swp
 *.swo
 *.bak
