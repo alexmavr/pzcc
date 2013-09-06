@@ -71,15 +71,6 @@ void unescape(char * s, char * t) {
     s[j] = t[i];    /*  Don't forget the null character  */
 }
 
-/*
-//Report steps taken (in order for a client to debug the llvm calls in main()).
-void report_call (const char *msg, ...) {
-	va_list va;
-
-	va_start(va);
-}
-*/
-
 //Cleanup hook.
 void cleanup (void) {
 	//Removal of tempfile.

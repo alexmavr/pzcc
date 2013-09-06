@@ -6,8 +6,6 @@ Linking and Runtime:
     fix the way libc functions are called:
         string.h functions need a different string format
         READ_STRING needs to be hand-writen to comply to the spec
-	Add explanation of steps in main().
-	Add flags for clang (linker - object generation) for executable generation.		=>	CHECK
 
 
 Cleanup:
@@ -26,6 +24,8 @@ General:
 
 
 Done:
+*	Add explanation of steps in main().
+*	Add flags for clang (linker - object generation) for executable generation.		=>	CHECK	=>	CHECKED
 *	Add stat() calls for default library location and default location in ARG_END option parser when output is OUT_EXEC.	=>	Works just fine.
 *	Add library flag.																=>	CHECK	=>	CHECKED
 *	Add llvm-link in OUT_EXEC case of main.
