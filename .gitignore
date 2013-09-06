@@ -1,6 +1,7 @@
 ./*.o
 ./tests/*/*.o
 tests/*/*.asm
+tests/*/*.out
 lib-code/src/*.ll
 *.swp
 *.swo
