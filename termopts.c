@@ -29,6 +29,8 @@ static void calculate_filenames (void) {
 	} else {
 		close(fd);
 		our_options.tmp_filename = tmp_template;
+		our_options.tmp_filename_o_append = (char *)new((sizeof(tmp_template)+3) * sizeof(char));
+		snprintf(our_options.tmp_filename_o_append, sizeof(tmp_template)+3, "%s.o", our_options.tmp_filename);
 	}
 
 	//Calculate output filename.
@@ -129,6 +131,8 @@ static struct argp_option options[] = {
 	{ "optimize", 'o', 0, 0, "Enable all optimizations", 1 }, 
 	{ "opt-flags", 't', "OPT_FLAGS", 0, "Option string to be used with opt when -o option is in effect", 2 }, 
 	{ "llc-flags", 'l', "LLC_FLAGS", 0, "Option string to be used with llc when -f option is in effect", 2 }, 
+	{ "clang-flags", 'c', "CLANG_FLAGS", 0, "Option string to be used with clang when the default (executable) output option is in effect", 2 }, 
+	{ "pzclib", 'b', "PZC_LIB", 0, "Pazcal library used on linking phase when the default output option is in effect", 3 }, 
 	{ 0 }
 };
 //Non-option argument description.

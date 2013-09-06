@@ -22,6 +22,7 @@ struct options_t {
 
 	//General requirements
 	char *tmp_filename;
+	char *tmp_filename_o_append;
 
 	//Flags for propagation
 	char *llvmopt_flags;
@@ -29,6 +30,9 @@ struct options_t {
 
 	//Optimization flag
 	bool opt_flag;
+
+	//Library object file
+	char *pzc_lib_file;
 };
 
 //Option instance definition.

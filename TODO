@@ -6,7 +6,9 @@ Linking and Runtime:
     fix the way libc functions are called:
         string.h functions need a different string format
         READ_STRING needs to be hand-writen to comply to the spec
-    Add a user option to generate the elf file (x86 only)
+	Add flags for clang (linker - object generation) for executable generation.
+	Add explanation of steps in main().
+	Add library flag.
 
 
 Cleanup:
@@ -25,6 +27,7 @@ General:
 
 
 Done:
+*	Add a user option to generate the elf file (x86 only)			=> This is the default output type.
 *	Input filename always appears as stdin (just present it with an error and see output - i.e. unknown identified).
 *   Change long double to double everywhere
 *	compiler arguments and llvm backend invocation (link together?)

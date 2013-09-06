@@ -81,6 +81,11 @@ void cleanup (void) {
 			my_error(ERR_LV_INTERN, "unlink() call failed");
 		}
 	}
+	if ((our_options.tmp_filename_o_append != NULL) && (stat(our_options.tmp_filename_o_append, &_) == 0)) {
+		if (unlink(our_options.tmp_filename_o_append) != 0) {
+			my_error(ERR_LV_INTERN, "unlink() call failed");
+		}
+	}
 }
 
 void *new (size_t size) {
@@ -223,9 +228,40 @@ int main (int argc, char **argv) {
 				while ((waitpid(tmp_pid, NULL, 0) != tmp_pid) && (guard < 100)) { guard++; }
 			}
 			break;
+		//If executable output was requested, the call sequence is llc (IR->obj) - clang (obj -> library obj -> executable).
 		case OUT_EXEC:
+			//llc call : generate object from IR tempfile
+			tmp_pid = fork();
+			if (tmp_pid == 0) {
+				switch (our_options.opt_flag) {
+					case true	:
+						execlp("llc", "llc", "-filetype=obj", "-O3", "-o", our_options.tmp_filename_o_append, our_options.tmp_filename, (char *)NULL);
+						break;
+					case false	:
+						execlp("llc", "llc", "-filetype=obj", "-o", our_options.tmp_filename_o_append, our_options.tmp_filename, (char *)NULL);
+						break;
+					default		:
+						my_error(ERR_LV_INTERN, "Invalid value in boolean variable");
+						break;
+				}
+			} else if (tmp_pid < 0) {
+				my_error(ERR_LV_INTERN, "fork() call failed");
+			} else {
+				size_t guard = 0;
+				while ((waitpid(tmp_pid, NULL, 0) != tmp_pid) && (guard < 100)) { guard++; }
+			}
 			//...
-fprintf(stderr, "TODO: Must implement executable output (assembler - linker)\n");
+fprintf(stderr, "TODO: Must implement linker options\n");
+			//clang call : link with library and generate executable output file
+			tmp_pid = fork();
+			if (tmp_pid == 0) {
+				execlp("clang", "clang", our_options.tmp_filename_o_append, /*"-lm", our_options.pzc_lib_file, */"-o", our_options.output_filename, (char *)NULL);
+			} else if (tmp_pid < 0) {
+				my_error(ERR_LV_INTERN, "fork() call failed");
+			} else {
+				size_t guard = 0;
+				while ((waitpid(tmp_pid, NULL, 0) != tmp_pid) && (guard < 100)) { guard++; }
+			}
 			//...
 			break;
 		default:
