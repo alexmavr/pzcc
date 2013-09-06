@@ -8,5 +8,8 @@ FUNC int fact (int n)
 
 PROGRAM factorial ()
 {
-    WRITESPLN("The factorial of ", 10, " is ", fact(10));
+    WRITE("Please enter a number to get its factorial: ");
+    int n = READ_INT();
+    WRITELN();
+    WRITESPLN("The factorial of", n, "is", fact(n));
 }

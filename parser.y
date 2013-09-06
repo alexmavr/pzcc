@@ -399,8 +399,8 @@ var_init_tail
 routine
 	: routine_header routine_tail
 		{
-			// Actions for when a function is closing (be it a forward declaration or a definition).
-			closeScope();
+            // Actions for when a routine is closing (be it a forward declaration or a definition).
+            closeScope();
 			currentFunctionType = NULL;
 			function_has_ret = false;
             global_scope = true;
@@ -475,12 +475,17 @@ routine_tail
     } block_tail '}' 
     {
         if ((currentFunctionType != typeVoid) && (!function_has_ret)) {
-            my_error(ERR_LV_ERR, "function without a return statement");
+            my_error(ERR_LV_ERR, "function does not have a return statement");
             YYERROR;
         }
-        
-        if ((currentFunctionType == typeVoid) && (!function_has_ret)) {
+
+        if ((currentFunctionType == typeVoid) && (!function_has_ret))
             LLVMBuildRetVoid(builder);
+
+        // remove empty labels at the routine end
+        LLVMBasicBlockRef last_block = LLVMGetInsertBlock(builder);
+        if (LLVMGetFirstInstruction(last_block) == NULL) {
+            LLVMBuildRet(builder, LLVMGetUndef(type_to_llvm(currentFunctionType)));
         }
     }
 	;

@@ -1,0 +1,15 @@
+PROGRAM mean()
+{
+    WRITE("Give n: ");
+    int n = READ_INT();
+    WRITE("Give k: ");
+    int k = READ_INT();
+    int i, seed = 65;
+    REAL sum = 0.0;
+
+    FOR (i, 0 TO k-1) {
+        seed = (seed * 137 + 221 + i ) MOD n;
+        sum += seed;
+    }
+    if (k > 0) WRITESPLN("Mean:", sum/k);
+}
