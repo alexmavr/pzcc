@@ -2,13 +2,8 @@ Bugs:
     Strings of 23 characters have a \22 added at their llvm IR for some reason, and it breaks everything.
 
 
-Linking and Runtime:
-    fix the way libc functions are called:
-        string.h functions need a different string format
-        READ_STRING needs to be hand-writen to comply to the spec
-
-
 Cleanup:
+	Add -gc flag to makefile for gcc call - linking, and make all delete() calls ineffective. Check with valgrind.
 	leak:	pzc.lex:90		->	id allocation
 	leak:	symbol.c:539	->	creating new element to return		==> I think we need to assign all typeArray() calls to variables and then free them...
 	leak:	pzc.lex:130		->	creating new string token to return
@@ -24,6 +19,9 @@ General:
 
 
 Done:
+*	fix the way libc functions are called:
+*		string.h functions need a different string format
+*		READ_STRING needs to be hand-writen to comply to the spec
 *	Add explanation of steps in main().
 *	Add flags for clang (linker - object generation) for executable generation.		=>	CHECK	=>	CHECKED
 *	Add stat() calls for default library location and default location in ARG_END option parser when output is OUT_EXEC.	=>	Works just fine.
