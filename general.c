@@ -71,6 +71,14 @@ void unescape(char * s, char * t) {
     s[j] = t[i];    /*  Don't forget the null character  */
 }
 
+/*
+//Report steps taken (in order for a client to debug the llvm calls in main()).
+void report_call (const char *msg, ...) {
+	va_list va;
+
+	va_start(va);
+}
+*/
 
 //Cleanup hook.
 void cleanup (void) {
@@ -161,9 +169,9 @@ int main (int argc, char **argv) {
 		tmp_pid = fork();
 		if (tmp_pid == 0) {
 			if (our_options.llvmopt_flags == NULL) {
-				execlp("opt", "opt", "-S", "-std-compile-opts", "-o", our_options.tmp_filename, our_options.tmp_filename, (char *)NULL);
+				execlp("opt", "opt", "-std-compile-opts", "-S", "-o", our_options.tmp_filename, our_options.tmp_filename, (char *)NULL);
 			} else {
-				execlp("opt", "opt", "-S", "-std-compile-opts", our_options.llvmopt_flags, "-o", our_options.tmp_filename, our_options.tmp_filename, (char *)NULL);
+				execlp("opt", "opt", "-std-compile-opts", our_options.llvmopt_flags, "-S", "-o", our_options.tmp_filename, our_options.tmp_filename, (char *)NULL);
 			}
 		} else if (tmp_pid < 0) {
 			my_error(ERR_LV_INTERN, "fork() call failed");
@@ -233,7 +241,7 @@ int main (int argc, char **argv) {
 			//llvm-link call : link with libpzc library in IR level
 			tmp_pid = fork();
 			if (tmp_pid == 0) {
-				execlp("llvm-link", "llvm-link", our_options.tmp_filename, our_options.pzc_lib_file, "-S", "-o", our_options.tmp_filename_too, (char *)NULL);
+				execlp("llvm-link", "llvm-link", "-S", "-o", our_options.tmp_filename_too, our_options.tmp_filename, our_options.pzc_lib_file, (char *)NULL);
 			} else if (tmp_pid < 0) {
 				my_error(ERR_LV_INTERN, "fork() call failed");
 			} else {
@@ -245,10 +253,10 @@ int main (int argc, char **argv) {
 			if (tmp_pid == 0) {
 				switch (our_options.opt_flag) {
 					case true	:
-						execlp("llc", "llc", "-filetype=obj", "-O3", our_options.tmp_filename_too, "-o", our_options.tmp_filename, (char *)NULL);
+						execlp("llc", "llc", "-filetype=obj", "-O3", "-o", our_options.tmp_filename, our_options.tmp_filename_too, (char *)NULL);
 						break;
 					case false	:
-						execlp("llc", "llc", "-filetype=obj", our_options.tmp_filename_too, "-o", our_options.tmp_filename, (char *)NULL);
+						execlp("llc", "llc", "-filetype=obj", "-o", our_options.tmp_filename, our_options.tmp_filename_too, (char *)NULL);
 						break;
 					default		:
 						my_error(ERR_LV_INTERN, "Invalid value in boolean variable");
@@ -264,9 +272,9 @@ int main (int argc, char **argv) {
 			tmp_pid = fork();
 			if (tmp_pid == 0) {
 				if (our_options.llvmclang_flags != NULL)
-					execlp("clang", "clang", our_options.tmp_filename, our_options.llvmclang_flags, "-lm", "-m32", "-o", our_options.output_filename, (char *)NULL);
+					execlp("clang", "clang", our_options.llvmclang_flags, "-lm", "-o", our_options.output_filename, our_options.tmp_filename, (char *)NULL);
 				else
-					execlp("clang", "clang", our_options.tmp_filename, "-lm", "-m32", "-o", our_options.output_filename, (char *)NULL);
+					execlp("clang", "clang", "-lm", "-o", our_options.output_filename, our_options.tmp_filename, (char *)NULL);
 			} else if (tmp_pid < 0) {
 				my_error(ERR_LV_INTERN, "fork() call failed");
 			} else {
