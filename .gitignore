@@ -11,6 +11,7 @@ pzcc
 a.out
 parser.output
 *.imm
+*.llb
 *.s
 ./*.asm
 *.obj
