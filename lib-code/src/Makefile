@@ -14,7 +14,7 @@ libpzc.ll : libpzc.lli
 
 install:
 	mkdir -p /usr/lib/pzcc/
-	cp libpzc.ll /usr/lib/pzcc/
+	mv libpzc.ll /usr/lib/pzcc/
 	ln -s /usr/lib/pzcc/libpzc.ll /usr/lib/libpzc.ll
 
 distclean:

@@ -20,6 +20,17 @@ Buiding the Library
 --------------------
 * clang
 
+Installation
+============
+
+At the compiler's root directory:
+:: 
+    make
+    sudo make install
+    cd lib-code/src
+    make
+    sudo make install
+
 Features
 ========
 
@@ -27,27 +38,7 @@ Target Architecture
 -------------------
 The default target architecture is the runtime system's native architecture. 
 
-The following architectures are supported as of LLVM version 3.2:
-arm      -  ARM
-cpp      -  C++ backend
-hexagon  -  Hexagon
-mblaze   -  MBlaze
-mips     -  Mips
-mips64   -  Mips64 [experimental]
-mips64el -  Mips64el [experimental]
-mipsel   -  Mipsel
-msp430   -  MSP430 [experimental]
-nvptx    -  NVIDIA PTX 32-bit
-nvptx64  -  NVIDIA PTX 64-bit
-ppc32    -  PowerPC 32
-ppc64    -  PowerPC 64
-r600     -  AMD GPUs HD2XXX-HD6XXX
-sparc    -  Sparc
-sparcv9  -  Sparc V9
-thumb    -  Thumb
-x86      -  32-bit X86: Pentium-Pro and above
-x86-64   -  64-bit X86: EM64T and AMD64
-
+A complete list of support architectures can be viewed with llc --version
 
 Different architectures can be chosen for the final assembly dump
 with --llc-flags="-march=<arch>" where <arch> is any architecture name on the left column.
@@ -64,4 +55,4 @@ Usage
 * -b, --pzclib=PZC_LIB        Pazcal library used on linking phase when the
                               default output option is in effect
     
-If neither -f nor -i are specified, the compiler produces an executable 32-bit elf file
+If neither -f nor -i are specified, the compiler produces an executable elf file
