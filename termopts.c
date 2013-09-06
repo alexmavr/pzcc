@@ -10,11 +10,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
 #include "general.h"
 #include "error.h"
 #include "termopts.h"
 
 char output_default[] = "-";
+char pzc_lib_default_file[] = "/usr/lib/libpzc.ll";
 char tmp_template[] = "/tmp/.pzcc-XXXXXX";
 
 static void calculate_filenames (void) {
@@ -29,8 +31,8 @@ static void calculate_filenames (void) {
 	} else {
 		close(fd);
 		our_options.tmp_filename = tmp_template;
-		our_options.tmp_filename_o_append = (char *)new((sizeof(tmp_template)+3) * sizeof(char));
-		snprintf(our_options.tmp_filename_o_append, sizeof(tmp_template)+3, "%s.o", our_options.tmp_filename);
+		our_options.tmp_filename_too = (char *)new((sizeof(tmp_template)+3) * sizeof(char));
+		snprintf(our_options.tmp_filename_too, sizeof(tmp_template)+3, "%s.o", our_options.tmp_filename);
 	}
 
 	//Calculate output filename.
@@ -50,9 +52,21 @@ static void calculate_filenames (void) {
 	our_options.output_filename = temp;
 }
 
+static void locate_default_pzclib_file (void) {
+	struct stat _;
+	if (our_options.pzc_lib_file == NULL) {
+		if (stat("/usr/lib/libpzc.ll", &_) == 0) {
+			our_options.pzc_lib_file = pzc_lib_default_file;
+		} else {
+			my_error(ERR_LV_ERR, "could not locate library at default location: /usr/lib/libpzc.ll");
+		}
+	}
+}
+
 //Per-option parser.
 static error_t parse_opt (int key, char *arg, struct argp_state *state) {
 	error_t ret = 0;
+	struct stat _;
 
 	switch (key) {
 		//Set optimization flag.
@@ -88,7 +102,11 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
 			our_options.llvmclang_flags = arg;
 			break;
 		case 'b':
-			our_options.pzc_lib_file = arg;
+			if (stat(arg, &_) != 0) {
+				my_error(ERR_LV_ERR, "library file %s does not exist", arg);
+			} else {
+				our_options.pzc_lib_file = arg;
+			}
 			break;
 		//Capture input filename.
 		case ARGP_KEY_ARG:
@@ -113,8 +131,10 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
 			break;
 		//Capture option parsing end event, check input stream and open output.
 		case ARGP_KEY_END:
-			if (our_options.output_type == OUT_NONE)
+			if (our_options.output_type == OUT_NONE) {
 				our_options.output_type = OUT_EXEC;
+				locate_default_pzclib_file();
+			}
 
 			if (our_options.in_file == NULL)
 				our_options.in_file = stdin;

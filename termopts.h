@@ -22,7 +22,7 @@ struct options_t {
 
 	//General requirements
 	char *tmp_filename;
-	char *tmp_filename_o_append;
+	char *tmp_filename_too;
 
 	//Flags for propagation
 	char *llvmopt_flags;

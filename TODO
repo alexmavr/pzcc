@@ -7,11 +7,7 @@ Linking and Runtime:
         string.h functions need a different string format
         READ_STRING needs to be hand-writen to comply to the spec
 	Add explanation of steps in main().
-	Add stat() calls for default library location and default location in ARG_END option parser when output is OUT_EXEC.
-	Add llvm-link in OUT_EXEC case of main.
-	Finish clang call in OUT_EXEC case of main.
 	Add flags for clang (linker - object generation) for executable generation.		=>	CHECK
-	Add library flag.																=>	CHECK
 
 
 Cleanup:
@@ -30,6 +26,10 @@ General:
 
 
 Done:
+*	Add stat() calls for default library location and default location in ARG_END option parser when output is OUT_EXEC.	=>	Works just fine.
+*	Add library flag.																=>	CHECK	=>	CHECKED
+*	Add llvm-link in OUT_EXEC case of main.
+*	Finish clang call in OUT_EXEC case of main.
 *	Add a user option to generate the elf file (x86 only)			=> This is the default output type.
 *	Input filename always appears as stdin (just present it with an error and see output - i.e. unknown identified).
 *   Change long double to double everywhere
