@@ -1,8 +1,0 @@
-file out
-layout asm
-layout regs
-break pi
-run
-ni
-ni
-ni
