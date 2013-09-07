@@ -1,0 +1,6 @@
+--memcheck:leak-check=full
+--show-reachable=yes
+--gen-suppressions=all
+--error-limit=no
+--log-file=val_log
+--suppressions=.valgrind_suppressions.supp
