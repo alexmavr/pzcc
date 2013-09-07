@@ -119,8 +119,8 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 										char *tmp = (char *) new((yyleng-1) * sizeof(char));
 										yytext[yyleng-1] = '\0';
                                         unescape(tmp, &yytext[1]);
-                                        int size = strlen(tmp);
-                                        tmp = realloc(tmp, size);
+                                        tmp = realloc(tmp, strlen(tmp) + 1);
+                                        printf("%s\n",tmp);
 										yylval.s = (const char *) tmp;
 										return T_CONST_string;
 									}
