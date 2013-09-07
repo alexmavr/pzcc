@@ -1,4 +1,5 @@
 ./*.o
+*.o
 ./tests/*/*.o
 tests/*/*.asm
 tests/*/*.out
@@ -10,6 +11,8 @@ MY_TODO
 pzc.lex.c
 pzcc
 a.out
+parser.c
+parser.h
 parser.output
 *.imm
 *.llb

@@ -28,6 +28,9 @@ bool global_scope = true;               // flag marking the scope for initializa
 
 %code requires {
 
+#ifndef __PARSER_H_DEFS__
+#define __PARSER_H_DEFS__
+
 	typedef union {
 		RepInteger i;
 		RepBoolean b;
@@ -49,6 +52,9 @@ bool global_scope = true;               // flag marking the scope for initializa
         LLVMValueRef step;
         char direction;         // '+' if TO, '-' if DOWNTO
     };
+
+#endif /* __PARSER_H_DEFS__ */
+
 }
 
 %union {

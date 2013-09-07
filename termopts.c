@@ -31,8 +31,8 @@ static void calculate_filenames (void) {
 	} else {
 		close(fd);
 		our_options.tmp_filename = tmp_template;
-		our_options.tmp_filename_too = (char *)new((sizeof(tmp_template)+3) * sizeof(char));
-		snprintf(our_options.tmp_filename_too, sizeof(tmp_template)+3, "%s.o", our_options.tmp_filename);
+		our_options.tmp_filename_too = (char *)new((sizeof(tmp_template)+2) * sizeof(char));
+		snprintf(our_options.tmp_filename_too, sizeof(tmp_template)+2, "%s_", our_options.tmp_filename);
 	}
 
 	//Calculate output filename.

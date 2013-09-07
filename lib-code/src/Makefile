@@ -17,11 +17,13 @@ install:
 	mv libpzc.ll /usr/lib/pzcc/
 	ln -s /usr/lib/pzcc/libpzc.ll /usr/lib/libpzc.ll
 
-distclean:
-	rm libpzc.ll
+uninstall:
 	rm /usr/lib/pzcc/libpzc.ll
 	rm -d /usr/lib/pzcc/
 	rm /usr/lib/libpzc.ll
+
+distclean: clean
+	rm libpzc.ll
 
 clean:
 	rm *.lli

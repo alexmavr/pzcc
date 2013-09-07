@@ -25,6 +25,8 @@
 #include "ir.h"
 #include "termopts.h"
 
+//Warning implicit declaration of function yyparse during object creation of general.c
+extern int yyparse (void);
 
 /* Converts escape sequences of t to the actual characters in s*/
 void unescape(char * s, char * t) {
@@ -272,9 +274,9 @@ fprintf(stderr, "BREAKPOINT %u\n", _i++);
 			tmp_pid = fork();
 			if (tmp_pid == 0) {
 				if (our_options.llvmclang_flags != NULL)
-					execlp("clang", "clang", our_options.llvmclang_flags, "-lm", "-o", our_options.output_filename, our_options.tmp_filename, (char *)NULL);
+					execlp("clang", "clang", our_options.llvmclang_flags, "-o", our_options.output_filename, our_options.tmp_filename, "-lm", (char *)NULL);
 				else
-					execlp("clang", "clang", "-lm", "-o", our_options.output_filename, our_options.tmp_filename, (char *)NULL);
+					execlp("clang", "clang", "-o", our_options.output_filename, our_options.tmp_filename, "-lm", (char *)NULL);
 			} else if (tmp_pid < 0) {
 				my_error(ERR_LV_INTERN, "fork() call failed");
 			} else {
