@@ -131,6 +131,8 @@ int main (int argc, char **argv) {
 	pid_t tmp_pid;
 	int ret = 0;
 
+	GC_init();
+
 	//Parse command-line options.
 	parse_term_options(argc, argv);
 	yyin = our_options.in_file;
