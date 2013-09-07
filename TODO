@@ -1,11 +1,10 @@
 Bugs:
     Strings of 23 characters have a \22 added at their llvm IR for some reason, and it breaks everything.
-	When function declaration and call types differ, compiler segfaults during compilation (tests/examples/testing_bug1.pzc).
+	When function declaration and call types differ, compiler segfaults during compilation (tests/examples/testing_bug1.pzc).	==> Fixed for argument number, untested for argument type.
 	Fix Makefile when using files assuming they are on current folder, to use directory of Makefile as base (currently -C does not work).
 
 
 Cleanup:
-	Add -gc flag to makefile for gcc call - linking, and make all delete() calls ineffective. Check with valgrind.
 	leak:	pzc.lex:90		->	id allocation
 	leak:	symbol.c:539	->	creating new element to return		==> I think we need to assign all typeArray() calls to variables and then free them...
 	leak:	pzc.lex:130		->	creating new string token to return
@@ -21,6 +20,7 @@ General:
 
 
 Done:
+*	Add -gc flag to makefile for gcc call - linking, and make all delete() calls ineffective. Check with valgrind.
 *	fix the way libc functions are called:
 *		string.h functions need a different string format
 *		READ_STRING needs to be hand-writen to comply to the spec

@@ -19,14 +19,15 @@
   Memcheck:Value8
   fun:GC_*
 }
-{
-  <gc5>
-  Memcheck:Addr4
-  fun:memset
-  fun:GC_stopped_mark
-  fun:GC_try_to_collect_inner
-  fun:GC_init
-}
+# Subset of <gc1>
+#{
+#  <gc5>
+#  Memcheck:Addr4
+#  fun:memset
+#  fun:GC_stopped_mark
+#  fun:GC_try_to_collect_inner
+#  fun:GC_init
+#}
 # g++ new() leaks
 {
   <gplusplus_llvm_new>
@@ -34,12 +35,11 @@
   fun:_Znwj
   ...
 }
-# LLVM llvm::PassRegistry::addRegistrationListener malloc leak
+# LLVM {m,c}alloc call leaks
 {
-  <gplusplus_llvm_mutex_malloc>
+  <llvm_context>
   Memcheck:Leak
-  fun:malloc
-  fun:_ZN4llvm3sys9MutexImplC1Eb
+  fun:*alloc
   ...
 }
 # __libc_csu_init leaks
