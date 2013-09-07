@@ -809,6 +809,9 @@ l_value
 					$$.type = id->u.eConstant.type;
                     $$.value.i = 1;
 					break;
+                case ENTRY_FUNCTION:
+						my_error(ERR_LV_ERR, "Routine identifier \"%s\" cannot be used as lvalue", id->id);
+                        YYERROR;
 				default: ;
 			}
 
