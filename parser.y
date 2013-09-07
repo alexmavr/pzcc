@@ -860,8 +860,12 @@ call
 	: T_id '('
 		{
 			SymbolEntry *fun = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
-			if (fun == NULL)
+			if (fun == NULL) {
 				YYERROR;
+            } if (fun->entryType != ENTRY_FUNCTION) {
+                my_error(ERR_LV_ERR, "Attempting to call %s which is not a routine", $1);
+				YYERROR;
+            }
 
 			function_call_func_type_push(fun);
 			function_call_param_set(fun->u.eFunction.firstArgument);

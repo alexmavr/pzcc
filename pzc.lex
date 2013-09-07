@@ -87,8 +87,9 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 \\\n					{ /* C-like expression breakage on multiple lines (?) */ }
 
 [a-zA-Z][0-9a-zA-Z_]*				{
-										char *tmp = (char *) new(yyleng * sizeof(char));
+										char *tmp = (char *) new((yyleng + 1) * sizeof(char));
 										strcpy(tmp, yytext);
+                                        tmp[yyleng] = '\0';
 										yylval.s = (const char *) tmp;
 										return T_id;
 									}
