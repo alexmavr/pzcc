@@ -62,3 +62,6 @@ clean:
 
 install:
 	cp pzcc /usr/bin
+
+uninstall:
+	rm /usr/bin/pzcc

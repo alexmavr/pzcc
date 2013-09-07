@@ -12,6 +12,13 @@ all: libpzc.ll clean
 libpzc.ll : libpzc.lli
 	llvm-link -S $< -o $@
 
+distclean: clean
+	rm libpzc.ll
+
+clean:
+	rm *.lli
+	rm *.llvm
+
 install:
 	mkdir -p /usr/lib/pzcc/
 	mv libpzc.ll /usr/lib/pzcc/
@@ -21,10 +28,3 @@ uninstall:
 	rm /usr/lib/pzcc/libpzc.ll
 	rm -d /usr/lib/pzcc/
 	rm /usr/lib/libpzc.ll
-
-distclean: clean
-	rm libpzc.ll
-
-clean:
-	rm *.lli
-	rm *.llvm
