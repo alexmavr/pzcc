@@ -874,6 +874,10 @@ call
 				my_error(ERR_LV_ERR, "Definition of function %s is not visible at call site", $1);
                 YYERROR;
 			}
+            if (current_func_call_list->current_arg_i != 0) {
+				my_error(ERR_LV_ERR, "Too few parameters specified for function %s", $1);
+                YYERROR;
+            }
 
             if (fun->u.eFunction.resultType == typeVoid) {
                 $$.Valref = LLVMBuildCall(builder, fun_ref, function_call_arglist_get(), function_call_argno_get(), "");
@@ -891,6 +895,7 @@ call_opt
 		{
 			SymbolEntry *currentParam = function_call_param_get();
             Type wanted_type = currentParam->u.eParameter.type;
+
 			if (currentParam == NULL) {
 				my_error(ERR_LV_ERR, "Invalid number of parameters specified");
 				YYERROR;

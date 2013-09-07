@@ -146,23 +146,17 @@ int main (int argc, char **argv) {
 
 	yyparse();
 
-int _i = 0;
-fprintf(stderr, "BREAKPOINT %u\n", _i++);
-
     closeScope();
     destroySymbolTable();
-
-fprintf(stderr, "BREAKPOINT %u\n", _i++);
 
     if (!valid_codegen) {
         /* Dont optimize or generate final code if the IR is unusable */
         ret = 1;
         goto end;
     }
+
 	//Dump IR to intermediate file.
 	dump_ir(our_options.tmp_filename);
-
-fprintf(stderr, "BREAKPOINT %u\n", _i++);
 
 	//Optimizer pass on dumped IR.
 	if (our_options.opt_flag == true) {
@@ -180,8 +174,6 @@ fprintf(stderr, "BREAKPOINT %u\n", _i++);
 			while ((waitpid(tmp_pid, NULL, 0) != tmp_pid) && (guard < 100)) { guard++; }
 		}
 	}
-
-fprintf(stderr, "BREAKPOINT %u\n", _i++);
 
 	switch (our_options.output_type) {
 		//If IR was requested, simply copy the temp file to the output file.
