@@ -1,9 +1,9 @@
-==============
+====================
 Pazcal Compiler v1.0
-==============
+====================
 
 Package Requirements
-============
+====================
 
 Runtime System
 --------------
@@ -21,6 +21,7 @@ Buiding the Compiler
 Buiding the Library
 --------------------
 * clang
+* llvm
 
 Installation
 ============
@@ -64,17 +65,14 @@ If neither -f nor -i are specified, the compiler produces an executable elf file
 Example Usage
 -------------
 
-::
-    pzcc -o /path/to/source.pzc
+:code: pzcc -o /path/to/source.pzc
 
 This invocation will create an optimized executable at /path/to/source.pzc.out
 
-::
-    pzcc -io /path/to/source.pzc
+:code: pzcc -io /path/to/source.pzc
 
 The one will produce optimized IR at /path/to/source.pzc.imm
 
-::
-    pzcc -f --llc-flags="-march=x86_64" /path/to/source.pzc
+:code: pzcc -f --llc-flags="-march=x86_64" /path/to/source.pzc
 
 This one will produce 64-bit x86 assembly at /path/to/source.pzc.asm
