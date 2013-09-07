@@ -1,6 +1,7 @@
 Bugs:
     Strings of 23 characters have a \22 added at their llvm IR for some reason, and it breaks everything.
 	When function declaration and call types differ, compiler segfaults during compilation (tests/examples/testing_bug1.pzc).
+	Fix Makefile when using files assuming they are on current folder, to use directory of Makefile as base (currently -C does not work).
 
 
 Cleanup:

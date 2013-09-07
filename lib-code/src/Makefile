@@ -22,7 +22,7 @@ clean:
 install:
 	mkdir -p /usr/lib/pzcc/
 	mv libpzc.ll /usr/lib/pzcc/
-	ln -s /usr/lib/pzcc/libpzc.ll /usr/lib/libpzc.ll
+	ln -is /usr/lib/pzcc/libpzc.ll /usr/lib/libpzc.ll
 
 uninstall:
 	rm /usr/lib/pzcc/libpzc.ll
