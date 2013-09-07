@@ -1,8 +1,8 @@
-# Don't look into libgc
+# All libgc errors
 {
   <gc1>
   Memcheck:Addr4
-  obj:/usr/lib/libgc.so.1.0.3
+  fun:GC_*
 }
 {
   <gc2>
@@ -27,3 +27,35 @@
   fun:GC_try_to_collect_inner
   fun:GC_init
 }
+# g++ new() leaks
+{
+  <gplusplus_llvm_new>
+  Memcheck:Leak
+  fun:_Znwj
+  ...
+}
+# LLVM llvm::PassRegistry::addRegistrationListener malloc leak
+{
+  <gplusplus_llvm_mutex_malloc>
+  Memcheck:Leak
+  fun:malloc
+  fun:_ZN4llvm3sys9MutexImplC1Eb
+  ...
+}
+# __libc_csu_init leaks
+{
+  <llvm_and_libc_init>
+  Memcheck:Leak
+  ...
+  fun:__libc_csu_init
+  ...
+}
+# Subset of __libc_csu_init leaks
+#{
+#  <libc_atexit>
+#  Memcheck:Leak
+#  fun:calloc
+#  ...
+#  fun:__libc_csu_init
+#  ...
+#}
