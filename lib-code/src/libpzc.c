@@ -45,7 +45,7 @@ void WRITE_INT(int a, int w) {
     printf("%*d", w, a);
 }
 
-void WRITE_STRING(const char *a, int w) {
+void WRITE_STRING (const char *a, int w) {
     printf("%*s", w, a);
 }
 
