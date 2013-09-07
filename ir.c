@@ -37,7 +37,7 @@ void free_list(struct list_node * head) {
     struct list_node * next;
     while (current != NULL) {
        next = current->next;
-       free(current);
+	   GC_free(current);
        current = next; }
 }
 

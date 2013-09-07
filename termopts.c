@@ -48,7 +48,7 @@ static void calculate_filenames (void) {
 	}
 
 	//Free previous string in output_filename field (it was the result of strdup on the input filename) and set proper.
-	free(our_options.output_filename);
+	GC_free(our_options.output_filename);
 	our_options.output_filename = temp;
 }
 
@@ -118,7 +118,7 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
 				//Save the output file name.
 				} else {
 					filename = arg;
-					our_options.output_filename = strdup(arg);
+					our_options.output_filename = GC_strdup(arg);
 					if (our_options.output_filename == NULL) {
 						my_error(ERR_LV_WARN, "strdup() failed");
 						ret = 1;

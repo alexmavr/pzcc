@@ -90,7 +90,7 @@ void cleanup (void) {
 }
 
 void *new (size_t size) {
-	void *result = malloc(size);
+	void *result = GC_malloc(size);
 
 	if (result == NULL) {
 		my_error(ERR_LV_CRIT, "Out of memory");
@@ -100,7 +100,7 @@ void *new (size_t size) {
 
 void delete (void *p) {
 	if (p != NULL) {
-		free(p);
+		GC_free(p);
 	}
 }
 

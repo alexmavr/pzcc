@@ -13,6 +13,7 @@
 
 #include <llvm-c/Core.h>
 #include <stdbool.h>
+#include <gc/gc.h>
 
 void unescape(char *s, char *t);
 

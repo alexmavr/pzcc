@@ -19,7 +19,7 @@ int main (void) {
 	size_t i = 0;
 	while (1) {
 //		hi = (char *)malloc(4300);
-		hi = (char *)GC_MALLOC(4300);
+		hi = (char *)GC_malloc(4300);
 		if (i == 8000)
 			break;
 		i++;
