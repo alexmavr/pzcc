@@ -4,8 +4,8 @@ PROC swap ( int &x, int &y)
     x = y; y = t;
 }
 
-PROC bsort (char msg[], int n, int x[])
-//PROC bsort (int n, int x[])
+//PROC bsort (char msg[], int n, int x[])
+PROC bsort (int n, int x[])
 {
     bool changed = true;
     while (changed) {
