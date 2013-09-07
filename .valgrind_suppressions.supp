@@ -1,0 +1,29 @@
+# Don't look into libgc
+{
+  <gc1>
+  Memcheck:Addr4
+  obj:/usr/lib/libgc.so.1.0.3
+}
+{
+  <gc2>
+  Memcheck:Cond
+  fun:GC_*
+}
+{
+  <gc3>
+  Memcheck:Value4
+  fun:GC_*
+}
+{
+  <gc4>
+  Memcheck:Value8
+  fun:GC_*
+}
+{
+  <gc5>
+  Memcheck:Addr4
+  fun:memset
+  fun:GC_stopped_mark
+  fun:GC_try_to_collect_inner
+  fun:GC_init
+}
