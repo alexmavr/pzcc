@@ -5,8 +5,9 @@ CC = gcc -g
 LD = g++
 LLVMFLAGS = $(shell llvm-config --cflags)
 CFLAGS += -Wall $(LLVMFLAGS)
+#-DREDIRECT_MALLOC=GC_malloc
 #-I"/usr/include/llvm-c-3.2" -I"/usr/include/llvm-3.2"
-LDFLAGS += -lgc
+LDFLAGS += -lgc -DREDIRECT_MALLOC=GC_malloc
 #When run as previous, it throws "undefined reference to dladdr" during linking. That is because -ldl must appear before -lLLVMSupport.
 LLVM_LINK_FLAGS=$(shell llvm-config --libs core analysis native ; llvm-config --cflags --ldflags)
 OBJ += pzc.lex.o semantic.o parser.o symbol.o general.o error.o ir.o termopts.o
