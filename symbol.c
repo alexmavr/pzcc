@@ -554,6 +554,7 @@ Type typeIArray (Type refType) {
 	n->kind     = TYPE_IARRAY;
 	n->refType  = refType;
 	n->refCount = 1;
+    n->size = 0;
 
 	refType->refCount++;
 
