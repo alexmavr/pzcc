@@ -29,12 +29,12 @@ void READ_STRING(int size, char * s) {
     /* Remove excess newline */
     int len = strlen(s);
     if (s[len-1] == '\n')
-       s[len-1] = 0;
+       s[len-1] = '\0';
 }
 
 int READ_BOOL() {
-    char i[5];
-    READ_STRING(5, i);
+    char i[6];
+    READ_STRING(6, i);
     if (!strcmp(i, "true") || !strcmp(i, "1"))
         return 1;
     else
