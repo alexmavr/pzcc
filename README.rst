@@ -2,7 +2,7 @@
 Pazcal Compiler v1.0
 ==============
 
-Requirements
+Package Requirements
 ============
 
 Runtime System
@@ -16,6 +16,7 @@ Buiding the Compiler
 * flex
 * bison
 * llvm
+* libgc-dev (debian) or gc (arch linux)
 
 Buiding the Library
 --------------------
@@ -31,6 +32,8 @@ At the compiler's root directory:
     cd lib-code/src
     make
     sudo make install
+
+The install targets place the compiler executable at /usr/bin and the library at /usr/lib/pzcc/
 
 Features
 ========
@@ -63,7 +66,6 @@ Example Usage
 
 ::
     pzcc -o /path/to/source.pzc
-
 This invocation will create an optimized executable at /path/to/source.pzc.out
 
 ::

@@ -120,7 +120,6 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 										yytext[yyleng-1] = '\0';
                                         unescape(tmp, &yytext[1]);
                                         tmp = GC_realloc(tmp, strlen(tmp) + 1);
-                                        printf("%s\n",tmp);
 										yylval.s = (const char *) tmp;
 										return T_CONST_string;
 									}
