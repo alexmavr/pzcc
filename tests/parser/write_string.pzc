@@ -1,0 +1,5 @@
+PROGRAM prints ()
+{
+	WRITELN();
+	WRITE_STRING("twenty two characters plus another twenty!", 0);
+}

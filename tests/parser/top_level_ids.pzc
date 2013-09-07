@@ -1,0 +1,5 @@
+int WRITE_STRING;
+PROGRAM prog ()
+{
+	WRITE_STRING("twenty two characters plus another twenty!", 0);
+}
