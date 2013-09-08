@@ -165,7 +165,7 @@ static struct argp_option options[] = {
 //Non-option argument description.
 static char args_doc[] = "[ FILE ]";
 //Argp structure.
-static struct argp argp = { options, parse_opt, args_doc, "Pazcal compiler for Compilers course - NTUA 2013\vGNU Licence", 0, 0, 0 };
+static struct argp argp = { options, parse_opt, args_doc, "Pazcal compiler for Compilers course - NTUA 2013\vMIT Licence", 0, 0, 0 };
 
 void parse_term_options (int argc, char **argv) {
 	argp_parse(&argp, argc, argv, ARGP_IN_ORDER, 0, NULL);

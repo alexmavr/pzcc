@@ -14,4 +14,11 @@ PROGRAM array_assignments ()
     int a[5][2+1];          // 5 x [3 x i32]
     char r['a'];            // 97 x i8
     int d[b*2];             // 10 x i32
+    int B[15];
+    int A[15];
+    int C[15];
+
+    WRITELN(A[0]);
+    WRITELN(A[15]);
+    WRITELN(A[-1]);
 }
