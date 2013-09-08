@@ -1,0 +1,38 @@
+// Solution O(N*M), graded 20/20
+
+const int N = 1000, M = 50000;
+
+int matrix[N][M];
+
+PROC findAllBiggestInRowAndCol (int a[N][M])
+{
+  int max_row[N], max_col[M];
+  int i, j;
+
+  FOR (i, 0 TO N-1) {
+    max_row[i] = a[i][0];
+    FOR (j, 1 TO M-1)
+      if (a[i][j] > max_row[i]) max_row[i] = a[i][j];
+  }
+  FOR (j, 0 TO M-1) {
+    max_col[j] = a[0][j];
+    FOR (i, 1 TO N-1)
+      if (a[i][j] > max_col[j]) max_col[j] = a[i][j];
+  }
+
+  FOR (i, 0 TO N-1)
+    FOR (j, 0 TO M-1)
+      if (a[i][j] == max_col[j] and a[i][j] == max_row[i])
+        WRITELN(a[i][j]);
+}
+
+PROGRAM main() {
+    int i,acc=0, j;
+    FOR (i, 0 TO N)
+        FOR (j, 0 TO M) {
+            matrix[i][j] = acc;
+            acc += 1;
+        }
+            
+    findAllBiggestInRowAndCol(matrix);
+}

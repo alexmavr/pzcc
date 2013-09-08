@@ -34,7 +34,7 @@ At the compiler's root directory:
     make
     sudo make install
 
-The install targets place the compiler executable at /usr/bin and the library at /usr/lib/pzcc/
+The install targets place the compiler executable at /usr/bin and the library at /usr/lib/pzcc/ .
 
 Features
 ========
@@ -60,7 +60,9 @@ Usage
 * -b, --pzclib=PZC_LIB        Pazcal library used on linking phase when the
                               default output option is in effect
     
-If neither -f nor -i are specified, the compiler produces an executable elf file
+If neither -f nor -i are specified, the compiler produces an executable ELF file.
+
+IMPORTANT: Please note that unoptimized programs have troubles handling overflows which may cause segmentation faults at runtime.
 
 Example Usage
 -------------

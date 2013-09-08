@@ -1,0 +1,14 @@
+FUNC int returnFirst(int A[])
+{
+    return A[0];
+}
+
+PROGRAM test()
+{
+    int Arr[10];
+    int i, first;
+    FOR(i, 9 DOWNTO -1)
+        Arr[9-i] = i;
+    first = returnFirst(Arr);
+    WRITELN(first);
+}

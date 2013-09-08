@@ -1,0 +1,20 @@
+PROGRAM th4 ()
+{
+  int a = 7, b = 17, c = 42, d;
+  int K;
+
+  K = READ_INT();
+
+  if (K < a) WRITELN("Nothing");
+  else if (K < b) WRITELN(a);
+  else if (K < c) WRITELN(b);
+  else {
+    do {
+      d = 3*c + 2*b + a;
+      a = b;
+      b = c;
+      c = d;
+    } while (c <= K);
+    WRITELN(b);
+  }
+}

@@ -1,7 +1,8 @@
+WARNING: if unoptimized, integer overflows may throw runtime segfault - nothing we can do (poison values). 
+
 Bugs:
-    Strings of 23 characters have a \22 added at their llvm IR for some reason, and it breaks everything.
-	When function declaration and call types differ, compiler segfaults during compilation (tests/examples/testing_bug1.pzc).	==> Fixed for argument number, untested for argument type.
 	Fix Makefile when using files assuming they are on current folder, to use directory of Makefile as base (currently -C does not work).
+
 
 
 Cleanup:
@@ -15,11 +16,13 @@ Cleanup:
 
 General:
 	refactor parser.y
-	furnish code with proper deallocations (for example unlink the tmpfile, all the structures we use, ...) and put them in cleanup (and the temps in the proper places)
 	improve error messages and catch error recovery segfaults
 
 
 Done:
+*	furnish code with proper deallocations (for example unlink the tmpfile, all the structures we use, ...) and put them in cleanup (and the temps in the proper places)
+*   Strings of 23 characters have a \22 added at their llvm IR for some reason, and it breaks everything.
+*	When function declaration and call types differ, compiler segfaults during compilation (tests/examples/testing_bug1.pzc).	==> Fixed for argument number, untested for argument type.
 *	Add -gc flag to makefile for gcc call - linking, and make all delete() calls ineffective. Check with valgrind.
 *	fix the way libc functions are called:
 *		string.h functions need a different string format

@@ -925,7 +925,7 @@ call_opt
             }
 
 			function_call_param_set(currentParam->u.eParameter.next);
-            if ((wanted_type->kind >= TYPE_ARRAY) && (wanted_type->size==0)) {
+            if (wanted_type->kind >= TYPE_ARRAY) {
                 LLVMTypeRef dest_type = LLVMPointerType(type_to_llvm(iarray_to_array($1.type)),0);
                 LLVMValueRef tmp = LLVMBuildPointerCast(builder, $1.Valref, dest_type, "ptrcasttmp");
                 function_call_argval_push(tmp);
@@ -970,7 +970,7 @@ call_opt_tail
             }
 
 			function_call_param_set(currentParam->u.eParameter.next);
-            if ((wanted_type->kind >= TYPE_ARRAY) && (wanted_type->size==0)) {
+            if (wanted_type->kind >= TYPE_ARRAY) {
                 LLVMTypeRef dest_type = LLVMPointerType(type_to_llvm(iarray_to_array($2.type)),0);
                 LLVMValueRef tmp = LLVMBuildPointerCast(builder, $2.Valref, dest_type, "ptrcasttmp");
                 function_call_argval_push(tmp);
