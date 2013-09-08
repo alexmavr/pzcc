@@ -5,25 +5,22 @@ Pazcal Compiler v1.0
 Package Requirements
 ====================
 
-Clang and LLVM require a version >= 3.2
-
 Runtime System
 --------------
 * clang
-* LLVM
+* LLVM >= 3.2
 
 Buiding the Compiler
 --------------------
 * g++
 * flex
 * bison
-* LLVM
+* LLVM >= 3.2
 * libgc-dev (debian) or gc (arch linux)
 
 Buiding the Library
 --------------------
 * clang
-* LLVM
 
 Installation
 ============
