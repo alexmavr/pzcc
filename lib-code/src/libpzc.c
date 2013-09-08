@@ -1,3 +1,16 @@
+/* 
+ * .: Standard library for use when linking Pazcal programs.
+ * 
+ * ?: Alexandros Mavrogiannis "afein"
+ * @: Sun 08 Sep 2013 07:41:22 AM EEST
+ * 
+ */
+
+// Library version.
+#if !defined(__PZC_LIB__)
+#define __PZC_LIB__ 1
+#endif
+
 #include <stdio.h>
 #include <math.h>
 #include <string.h>

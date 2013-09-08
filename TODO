@@ -1,17 +1,8 @@
-WARNING: if unoptimized, integer overflows may throw runtime segfault - nothing we can do (poison values). 
+WARNING: if unoptimized, integer overflows may throw runtime segfault - nothing we can do (poison values).	=>	CHECK: Can we do nothing?
+
 
 Bugs:
 	Fix Makefile when using files assuming they are on current folder, to use directory of Makefile as base (currently -C does not work).
-
-
-
-Cleanup:
-	leak:	pzc.lex:90		->	id allocation
-	leak:	symbol.c:539	->	creating new element to return		==> I think we need to assign all typeArray() calls to variables and then free them...
-	leak:	pzc.lex:130		->	creating new string token to return
-	leak:	pzc.lex:*		->	any token with new() call
-	leak:	ir.c:*			->	anything that has to do with function call frames
-	Leak fixing MUST be marked "//BUG-SQUASHING".
 
 
 General:
@@ -20,6 +11,12 @@ General:
 
 
 Done:
+*	leak:	pzc.lex:90		->	id allocation
+*	leak:	symbol.c:539	->	creating new element to return		==> I think we need to assign all typeArray() calls to variables and then free them...
+*	leak:	pzc.lex:130		->	creating new string token to return
+*	leak:	pzc.lex:*		->	any token with new() call
+*	leak:	ir.c:*			->	anything that has to do with function call frames
+*	Leak fixing MUST be marked "//BUG-SQUASHING".
 *	furnish code with proper deallocations (for example unlink the tmpfile, all the structures we use, ...) and put them in cleanup (and the temps in the proper places)
 *   Strings of 23 characters have a \22 added at their llvm IR for some reason, and it breaks everything.
 *	When function declaration and call types differ, compiler segfaults during compilation (tests/examples/testing_bug1.pzc).	==> Fixed for argument number, untested for argument type.
