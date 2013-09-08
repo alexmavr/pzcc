@@ -1,4 +1,4 @@
-.PHONY: all clean distclean
+.PHONY: all clean distclean install uninstall
 .DEFAULT: all
 
 all: libpzc.ll clean
@@ -9,22 +9,21 @@ all: libpzc.ll clean
 %.lli : %.llvm
 	opt --std-compile-opts -S -o $@ $<
 
-libpzc.ll : libpzc.lli
+%.ll : %.lli
 	llvm-link -S $< -o $@
 
 distclean: clean
-	rm libpzc.ll
+	rm --force libpzc.ll
 
 clean:
-	rm *.lli
-	rm *.llvm
+	rm --force *.lli *.llvm
 
 install:
-	mkdir -p /usr/lib/pzcc/
+	mkdir --parents /usr/lib/pzcc/
 	mv libpzc.ll /usr/lib/pzcc/
-	ln -is /usr/lib/pzcc/libpzc.ll /usr/lib/libpzc.ll
+	ln --interactive --symbolic /usr/lib/pzcc/libpzc.ll /usr/lib/libpzc.ll
 
 uninstall:
-	rm /usr/lib/pzcc/libpzc.ll
-	rm -d /usr/lib/pzcc/
-	rm /usr/lib/libpzc.ll
+	rm --force /usr/lib/pzcc/libpzc.ll
+	rmdir --ignore-fail-on-non-empty /usr/lib/pzcc/
+	rm --force /usr/lib/libpzc.ll
