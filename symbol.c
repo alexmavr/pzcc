@@ -563,7 +563,7 @@ Type typeIArray (Type refType) {
 
 void destroyType (Type type) {
     if (type == NULL) {
-        fprintf(stderr, "Trying to destroy NULL type\n");
+        return;
     }
 	switch (type->kind) {
 		case TYPE_ARRAY:
