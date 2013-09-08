@@ -28,11 +28,17 @@
 #  fun:GC_try_to_collect_inner
 #  fun:GC_init
 #}
-# g++ new() leaks
+# g++ new() leaks (for some reason, C++ mangled name in debian is *m$ instead of *j$).
 {
   <gplusplus_llvm_new>
   Memcheck:Leak
   fun:_Znwj
+  ...
+}
+{
+  <gplusplus_llvm_new>
+  Memcheck:Leak
+  fun:_Znwm
   ...
 }
 # LLVM {m,c}alloc call leaks
