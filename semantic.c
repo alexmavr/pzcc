@@ -15,6 +15,7 @@
 #include "parser.h"
 #include "general.h"
 #include "error.h"
+#include "ir.h"
 
 extern LLVMBuilderRef builder;
 
@@ -315,27 +316,24 @@ void op_IR(const char * op, LLVMValueRef left, LLVMValueRef right, Type t, LLVMV
 
 //Expr Binops - Create IR for casting to each.
 void binop_IR(struct ast_node *left, struct ast_node *right, const char *op, struct ast_node *res) {
+    LLVMValueRef tmp;
 	res->type = typeVoid; // could be changed to NULL
 	if ((left->type == typeInteger) && (right->type == typeReal)) {
 		res->type = binop_type_check(op, typeReal);
-        LLVMValueRef newleft = LLVMBuildCast(builder, LLVMUIToFP, left->Valref, \
-                        LLVMDoubleType(), "casttmp");
-        op_IR(op, newleft, right->Valref, typeReal, &(res->Valref));
+        tmp = cast_compat(typeReal, typeInteger, left->Valref);
+        op_IR(op, tmp, right->Valref, typeReal, &(res->Valref));
 	} else if ((left->type == typeReal) && (right->type == typeInteger)) {
 		res->type = binop_type_check(op, typeReal);
-        LLVMValueRef newright = LLVMBuildCast(builder, LLVMUIToFP, right->Valref, \
-                        LLVMDoubleType(), "casttmp");
-        op_IR(op, left->Valref, newright, typeReal, &(res->Valref));
+        tmp = cast_compat(typeReal, typeInteger, right->Valref);
+        op_IR(op, left->Valref, tmp, typeReal, &(res->Valref));
 	} else if ((left->type == typeChar) && (right->type == typeReal)) {
 		res->type = binop_type_check(op, typeReal);
-        LLVMValueRef newleft = LLVMBuildCast(builder, LLVMUIToFP, left->Valref, \
-                        LLVMDoubleType(), "casttmp");
-        op_IR(op, newleft, right->Valref, typeReal, &(res->Valref));
+        tmp = cast_compat(typeReal, typeChar, left->Valref);
+        op_IR(op, tmp, right->Valref, typeReal, &(res->Valref));
 	} else if ((left->type == typeReal) && (right->type == typeChar)) {
 		res->type = binop_type_check(op, typeReal);
-        LLVMValueRef newright = LLVMBuildCast(builder, LLVMUIToFP, right->Valref, \
-                        LLVMDoubleType(), "casttmp");
-        op_IR(op, left->Valref, newright, typeReal, &(res->Valref));
+        tmp = cast_compat(typeReal, typeChar, right->Valref);
+        op_IR(op, left->Valref, tmp, typeReal, &(res->Valref));
 	} else if ((left->type == typeReal) && (right->type == typeReal)) {
 		res->type = binop_type_check(op, typeReal);
         op_IR(op, left->Valref, right->Valref, typeReal, &(res->Valref));
@@ -344,10 +342,12 @@ void binop_IR(struct ast_node *left, struct ast_node *right, const char *op, str
         op_IR(op, left->Valref, right->Valref, typeInteger, &(res->Valref));
 	} else if ((left->type == typeChar) && (right->type == typeInteger)) {
 		res->type = binop_type_check(op, typeInteger);
-        op_IR(op, left->Valref, right->Valref, typeInteger, &(res->Valref));
+        tmp = cast_compat(typeInteger, typeChar, left->Valref);
+        op_IR(op, tmp, right->Valref, typeInteger, &(res->Valref));
 	} else if ((left->type == typeInteger) && (right->type == typeChar)) {
 		res->type = binop_type_check(op, typeInteger);
-        op_IR(op, left->Valref, right->Valref, typeInteger, &(res->Valref));
+        tmp = cast_compat(typeInteger, typeChar, right->Valref);
+        op_IR(op, left->Valref, tmp, typeInteger, &(res->Valref));
 	} else if ((left->type == typeChar) && (right->type == typeChar)) {
 		res->type = binop_type_check(op, typeInteger);
         op_IR(op, left->Valref, right->Valref, typeInteger, &(res->Valref));
