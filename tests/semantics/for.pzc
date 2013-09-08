@@ -1,7 +1,48 @@
+FUNC int vector_sum(REAL array[], int size) {
+    int i;
+    REAL sum;  
+    FOR (i, 0 TO size) {
+        sum += array[i];
+    }
+    return ROUND(sum);
+}
+
 PROGRAM hi () {
-	int i, j = 6;
-	FOR (i, 0 TO 14 STEP 3) {
-		j = j + 5;
+	int i,j;
+    REAL acc[21];
+	FOR (i, 0 TO 21 STEP 3) {
+        FOR (j, 5 DOWNTO 1)
+                acc[i] += i;
+                // acc[i] = 4*3^i
 	}
-	i = 54;
+
+    WRITELN(vector_sum(acc, 21)); // 252
+    
+    int k;
+    FOR (k, 4 TO 6 STEP 0) {
+        WRITELN("in");
+        break;
+    }
+    WRITELN("out\n");
+
+    FOR (i, 5 TO 3) {
+        WRITELN("unreachable");
+    }
+    
+    FOR (i, 3 DOWNTO 4) {
+        WRITELN("unreachable");
+    }
+
+    i=5;
+    FOR (i, 0 TO i) // destination range is evaluated before the loop
+        WRITELN("ok"); 
+
+    int sum = 0;
+    FOR (i, 10 DOWNTO 1)
+        FOR (j, i TO 10)
+            FOR (k, j DOWNTO i) {
+                sum += k;
+            }
+    WRITELN(sum); // 504
+
 }

@@ -1543,29 +1543,35 @@ format
             LLVMTypeRef dest_type;
             args[0] = $3.Valref;
             args[1] = cast_compat(typeInteger, $5.type, $5.Valref);
-            if ($3.type == typeInteger) {
-                func_ref = LLVMGetNamedFunction(module, "WRITE_INT");
-                LLVMBuildCall(builder, func_ref, args, 2, "");
-            } else if ($3.type == typeBoolean) {
-                func_ref = LLVMGetNamedFunction(module, "WRITE_BOOL");
-                LLVMBuildCall(builder, func_ref, args, 2, "");
-            } else if ($3.type == typeChar) {
-                func_ref = LLVMGetNamedFunction(module, "WRITE_CHAR");
-                LLVMBuildCall(builder, func_ref, args, 2, "");
-            } else if ($3.type == typeReal) {
+
+            if ($6.value.b == true) {
+                /* If a third argument is specified, cast the formatted value to REAL */
+                args[0] = cast_compat(typeReal, $3.type, $3.Valref);
+                args[2] = cast_compat(typeInteger, $6.type, $6.Valref);
                 func_ref = LLVMGetNamedFunction(module, "WRITE_REAL");
-                if ($6.value.b == false)
-                    // Use the default precision for reals if not specified
-                    args[2] = LLVMConstInt(LLVMInt32Type(), DEFAULT_REAL_PRECISION, false); 
-                else 
-                    args[2] = cast_compat(typeInteger, $6.type, $6.Valref);
                 LLVMBuildCall(builder, func_ref, args, 3, "");
             } else {
-                /*  Array Type. store the array and pass the pointer to WRITE_STRING */
-                dest_type = LLVMPointerType(type_to_llvm(iarray_to_array($3.type)), 0);
-                func_ref = LLVMGetNamedFunction(module, "WRITE_STRING");
-                args[0] = LLVMBuildPointerCast(builder, $3.Valref, dest_type, "ptrcasttmp");
-                LLVMBuildCall(builder, func_ref, args, 2, "");
+                if ($3.type == typeInteger) {
+                    func_ref = LLVMGetNamedFunction(module, "WRITE_INT");
+                    LLVMBuildCall(builder, func_ref, args, 2, "");
+                } else if ($3.type == typeBoolean) {
+                    func_ref = LLVMGetNamedFunction(module, "WRITE_BOOL");
+                    LLVMBuildCall(builder, func_ref, args, 2, "");
+                } else if ($3.type == typeChar) {
+                    func_ref = LLVMGetNamedFunction(module, "WRITE_CHAR");
+                    LLVMBuildCall(builder, func_ref, args, 2, "");
+                } else if ($3.type == typeReal) {
+                    func_ref = LLVMGetNamedFunction(module, "WRITE_REAL");
+                    /* Use the default precision for reals if precision is not specified */
+                    args[2] = LLVMConstInt(LLVMInt32Type(), DEFAULT_REAL_PRECISION, false); 
+                    LLVMBuildCall(builder, func_ref, args, 3, "");
+                } else {
+                    /*  Array Type. pass a pointer to the array to WRITE_STRING */
+                    dest_type = LLVMPointerType(type_to_llvm(iarray_to_array($3.type)), 0);
+                    func_ref = LLVMGetNamedFunction(module, "WRITE_STRING");
+                    args[0] = LLVMBuildPointerCast(builder, $3.Valref, dest_type, "ptrcasttmp");
+                    LLVMBuildCall(builder, func_ref, args, 2, "");
+                }
             }
             delete(args);
 		}
