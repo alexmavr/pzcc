@@ -1,13 +1,30 @@
+FUNC int while_in_func() {
+    while (true) {
+        return 1;
+    }
+}
+
+FUNC int while_in_func_undef() {
+    while (true) {
+        if (false)
+            return 4;
+        break;
+    }
+}
+
 PROGRAM testwhile () {
-	int no;
+	int no = 1;
 	int k=7;
 
     while (true) {
 		break;
 	}
+    
+/* Error Messages: 
+    while (3.4)
+        WRITELN("unreachable");
+*/
 
-	while (no == 0)
-		no = 1;
 
 	while (no < 3) {
         no++;
@@ -15,4 +32,28 @@ PROGRAM testwhile () {
 		continue;
         k++;
     }
+    WRITELN(k); // 9
+
+    int counter = 0;
+    int i = 0;
+    while (true) {
+        if (counter == 1) {
+            counter++;
+            continue;
+        }
+        WRITELN("in");
+        while (i<3) {
+            while (true)
+                if (true)
+                    break;
+            i++;
+            
+        }
+        if (counter == 2)
+            break;
+        counter++;
+    }
+    WRITELN("out");                 // 2*"in" + 1*"out" messages
+    WRITELN(while_in_func());       // 1
+    WRITELN(while_in_func_undef()); // undefined. 0 if optimized
 }
