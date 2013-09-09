@@ -7,9 +7,10 @@ FUNC int vector_sum(REAL array[], int size) {
     return ROUND(sum);
 }
 
+REAL acc[21];
+
 PROGRAM hi () {
 	int i,j;
-    REAL acc[21];
 	FOR (i, 0 TO 21 STEP 3) {
         FOR (j, 5 DOWNTO 1)
                 acc[i] += i;
