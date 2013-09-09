@@ -12,6 +12,7 @@ Runtime System
 
 Buiding the Compiler
 --------------------
+* gcc
 * g++
 * flex
 * bison
@@ -29,11 +30,10 @@ At the compiler's root directory:
 :: 
     make
     sudo make install
-    cd lib-code/src
-    make
-    sudo make install
+    make -C lib-code/src
+    sudo make -C lib-code/src install
 
-The install targets place the compiler executable at /usr/bin and the library at /usr/lib/pzcc/ .
+The install targets place the compiler executable at /usr/bin/ and the library at /usr/lib/pzcc/ .
 
 Features
 ========
@@ -66,14 +66,14 @@ IMPORTANT: Please note that unoptimized programs have troubles handling overflow
 Example Usage
 -------------
 
-:code: pzcc -o /path/to/source.pzc
+:code: pzcc -o path/to/source.pzc
 
-This invocation will create an optimized executable at /path/to/source.pzc.out
+This invocation will create an optimized executable at path/to/source.pzc.out
 
-:code: pzcc -io /path/to/source.pzc
+:code: pzcc -io path/to/source.pzc
 
-The one will produce optimized IR at /path/to/source.pzc.imm
+The one will produce optimized IR at path/to/source.pzc.imm
 
-:code: pzcc -f --llc-flags="-march=x86_64" /path/to/source.pzc
+:code: pzcc -f --llc-flags="-march=x86_64" path/to/source.pzc
 
-This one will produce 64-bit x86 assembly at /path/to/source.pzc.asm
+This one will produce 64-bit x86 assembly at path/to/source.pzc.asm
