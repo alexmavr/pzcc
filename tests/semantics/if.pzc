@@ -1,15 +1,50 @@
-FUNC int hi2 () {
-	return 8;
+FUNC int hi_correct () {
+    if (true)
+        return 4;
 }
 
-PROGRAM hi () {
+FUNC int hi_undef () {
+    int i;
+    if (false)
+        return 4;
+    else
+        i = 3;
+}
+
+int hi[3];
+PROGRAM hello () {
 	int ok = 9;
 	int no = 0;
-	int hi[3];
-	if ((no == 8) && (no == 4) || (hi[2] == 0)) {
+	if ((no == 8) && (no == 4) || hi[2] == 0) {
 		no += 0;
 	} else {
 		no++;
 	}
-    no--;
+    WRITELN(no); // 0
+
+    if (round(3.2) == 3) WRITELN("casts in boolean expressions");
+
+    if (true)
+        if (false)
+            WRITELN("unreachable");
+        else
+            if (true)
+                if (false)
+                    WRITELN("unreachable");
+                else
+                    WRITELN("nesting"); 
+            else
+                WRITELN("unreachable");
+    else
+        WRITELN("unreachable");
+
+    WRITELN(hi_correct());  // 4
+    WRITELN(hi_undef());  // undefined. (0 when optimized)
+
+/*  Error Messages:
+    if (true)
+      break;    
+    if (3.2) ;
+*/
+
 }
