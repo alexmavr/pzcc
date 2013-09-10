@@ -12,10 +12,10 @@ Runtime System
 
 Buiding the Compiler
 --------------------
-* gcc
-* g++
 * flex
 * bison
+* gcc
+* g++
 * LLVM >= 3.2
 * libgc-dev (debian) or gc (arch linux)
 
