@@ -671,10 +671,10 @@ const_expr
 			if (id->entryType != ENTRY_CONSTANT) {
 				my_error(ERR_LV_ERR, "Non-constant identifier \"%s\" found in constant expression", $1);
 				YYERROR;
-			} else {
-				$$.type = id->u.eConstant.type;
-				memcpy(&($$.value), &(id->u.eConstant.value), sizeof(val_union));
-			}
+			} 
+
+            $$.type = id->u.eConstant.type;
+            memcpy(&($$.value), &(id->u.eConstant.value), sizeof(val_union));
 		}
 	| '(' const_expr ')' { $$ = $2; }
 	| const_expr binop1 const_expr %prec '*'
@@ -1374,11 +1374,13 @@ stmt_tail_tail
             }
 
             // Create case condition check for current case
+            LLVMValueRef case_const = LLVMConstInt(LLVMInt32Type(), $2.value.i, false);
 			LLVMPositionBuilderAtEnd(builder, switchcond_ref);
             LLVMValueRef switchval = conditional_scope_valget();
 			LLVMValueRef caseval = LLVMBuildICmp(builder, LLVMIntNE, switchval, \
-							$2.Valref, "case_cond_val");
+							case_const, "case_cond_val");
 			LLVMBuildCondBr(builder, caseval, new_switchcond_ref, new_switchbody_ref);
+            LLVMBuildBr(builder, switchcond_ref);
 
 			LLVMPositionBuilderAtEnd(builder, new_switchbody_ref);
 		}
