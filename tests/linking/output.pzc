@@ -12,7 +12,7 @@ PROGRAM prints ()
     WRITE_INT(strcmp("12345","12345"), 3);
     WRITELN();
     WRITESPLN(3.1, FORM(pi(),1,100));
-    WRITELN(FORM(ROUND(3), 0, 10));
+    WRITELN(FORM(ROUND(3), 0, 10));  // cast to REAL
     WRITELN(FORM('a', 0, 10));
     WRITELN();
     puts("tested output");

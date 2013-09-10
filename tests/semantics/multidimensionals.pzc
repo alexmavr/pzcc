@@ -1,0 +1,35 @@
+const int a = 6;
+const int b = 5;
+const int c = 4;
+const int d = 3;
+const int e = 2;
+const int f = 1;
+
+
+int array[a][b][c][d][e][f];
+PROGRAM multidimensionals ()
+{
+    /* Warning: compile with -o */
+    int sum = 1;
+    int i,j,k,l,m,n;
+    FOR (i, 0 TO a) 
+        FOR (j, 0 TO b) 
+            FOR (k, 0 TO c) 
+                FOR (l, 0 TO d) 
+                    FOR (m, 0 TO e) 
+                        FOR (n, 0 TO f) {
+                            array[i][j][k][l][m][n] = sum;
+                            sum++;
+                        }
+
+    FOR (i, 0 TO a) 
+        FOR (j, 0 TO b) 
+            FOR (k, 0 TO c) 
+                FOR (l, 0 TO d) 
+                    FOR (m, 0 TO e) 
+                        FOR (n, 0 TO f)
+                            WRITELN(array[i][j][k][l][m][n]);
+                            
+    // max number should be 6! = 720
+    
+}
