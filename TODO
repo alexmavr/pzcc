@@ -1,5 +1,4 @@
 Bugs:
-	libpzc.ll: libpzc.lli was at fault for always rebuilding... @alex: Do not touch base makefile. I will fix it.
 
 
 General:
@@ -8,6 +7,7 @@ General:
 
 
 Done:
+*	libpzc.ll: libpzc.lli was at fault for always rebuilding... @alex: Do not touch base makefile. I will fix it.	=>	DONE
 *	WARNING: if unoptimized, integer overflows may throw runtime segfault - nothing we can do (poison values).	=>	CHECK: Can we do nothing?	=>	opt does prevent at least some cases of segfault on overflow.
 *	Fix Makefile when using files assuming they are on current folder, to use directory of Makefile as base (currently -C does not work).	=>	Only on laptop? Desktop seems to work fine.	=>	My mistake...
 *	leak:	pzc.lex:90		->	id allocation

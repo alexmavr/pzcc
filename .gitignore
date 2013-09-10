@@ -3,7 +3,7 @@
 ./tests/*/*.o
 tests/*/*.asm
 tests/*/*.out
-lib-code/src/*.ll
+library/*.ll
 *.swp
 *.swo
 *.bak
