@@ -71,7 +71,7 @@ distclean: clean
 	rm --force pzcc
 clena celan lcean lcena: clean
 clean:
-	rm --force $(OBJ) pzc.lex.c a.out parser.c parser.h tests/*/*.imm tests/*/*.asm tests/*/*.out parser.output
+	rm --force $(OBJ) pzc.lex.c a.out parser.c parser.h parser.output
 
 # Install rules.
 install:

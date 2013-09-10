@@ -13,11 +13,14 @@ build: $(SUBDIRS)
 $(SUBDIRS):
 	$(MAKE) -C $@
 
-clean: $(CLEAN_DIRS)
+local_clean:
+	rm --force tests/*/*.imm tests/*/*.asm tests/*/*.out
+
+clean: $(CLEAN_DIRS) local_clean
 $(CLEAN_DIRS):
 	$(MAKE) -C $(@:clean-%=%) clean
 
-distclean: $(DISTCLEAN_DIRS)
+distclean: $(DISTCLEAN_DIRS) local_clean
 $(DISTCLEAN_DIRS):
 	$(MAKE) -C $(@:distclean-%=%) distclean
 
