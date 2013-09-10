@@ -28,10 +28,8 @@ Installation
 
 At the compiler's root directory:
 :: 
-    make -C source
-    sudo make -C source install
-    make -C library
-    sudo make -C library install
+    make -k
+    sudo make install
 
 The install targets place the compiler executable at /usr/bin/ and the library at /usr/lib/pzcc/ .
 
