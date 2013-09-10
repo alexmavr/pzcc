@@ -1,14 +1,16 @@
 .PHONY: all clean distclean install uninstall
-.DEFAULT: pzcc
+.DEFAULT: all
 
 CC = gcc
 LD = g++
+
 LLVMFLAGS = $(shell llvm-config --cflags)
 CFLAGS += -Wall $(LLVMFLAGS)
 #-I"/usr/include/llvm-c-3.2" -I"/usr/include/llvm-3.2"
 LDFLAGS += -lgc -DREDIRECT_MALLOC=GC_malloc
-#When run as previous, it throws "undefined reference to dladdr" during linking. That is because -ldl must appear before -lLLVMSupport.
+# @LLVM_LINK_FLAGS: When run as previous, it throws "undefined reference to dladdr" during linking. That is because -ldl must appear before -lLLVMSupport.
 LLVM_LINK_FLAGS=$(shell llvm-config --libs core analysis native ; llvm-config --cflags --ldflags)
+
 OBJ += pzc.lex.o semantic.o parser.o symbol.o general.o error.o ir.o termopts.o
 
 ifndef DEBUG
@@ -21,10 +23,10 @@ else
 	CFLAGS += -O3
 endif
 
-#all: pzcc clean
-
 pzcc: $(OBJ) 
 	$(LD) $(OBJ) $(LDFLAGS) $(LLVM_LINK_FLAGS) -o $@
+
+all: pzcc clean
 
 pzc.lex:;
 pzc.lex.c: pzc.lex
@@ -50,12 +52,12 @@ parser.o: parser.c parser.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 distclean: clean
-	rm -f pzcc
+	rm --force pzcc
 clena celan lcean lcena: clean
 clean:
-	rm -f $(OBJ) pzc.lex.c a.out parser.c parser.h tests/*/*.imm tests/*/*.asm tests/*/*.out parser.output
+	rm --force $(OBJ) pzc.lex.c a.out parser.c parser.h tests/*/*.imm tests/*/*.asm tests/*/*.out parser.output
 
 install:
-	cp pzcc /usr/bin
+	cp --interactive pzcc /usr/bin
 uninstall:
-	rm /usr/bin/pzcc
+	rm --force /usr/bin/pzcc
