@@ -14,7 +14,7 @@ $(SUBDIRS):
 	$(MAKE) -C $@
 
 local_clean:
-	rm --force tests/*/*.imm tests/*/*.asm tests/*/*.out
+	rm --force tests/*/*.imm tests/*/*.asm tests/*/*.out pzcc
 
 clean: $(CLEAN_DIRS) local_clean
 $(CLEAN_DIRS):
