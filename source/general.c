@@ -165,15 +165,34 @@ int main (int argc, char **argv) {
 		tmp_pid = fork();
 		if (tmp_pid == 0) {
 			if (our_options.llvmopt_flags == NULL) {
-				execlp("opt", "opt", "-std-compile-opts", "-S", "-o", our_options.tmp_filename, our_options.tmp_filename, (char *)NULL);
+				if (our_options.verbose_flag == true)
+					fprintf(stderr, "%s %s %s %s %s %s\n", "opt", "-std-compile-opts", "-S", "-o", our_options.tmp_filename, our_options.tmp_filename);
+				execlp("opt", "opt", "-std-compile-opts", "-S", "-o", our_options.tmp_filename_too, our_options.tmp_filename, (char *)NULL);
 			} else {
-				execlp("opt", "opt", "-std-compile-opts", our_options.llvmopt_flags, "-S", "-o", our_options.tmp_filename, our_options.tmp_filename, (char *)NULL);
+				if (our_options.verbose_flag == true)
+					fprintf(stderr, "%s %s %s %s %s %s %s\n", "opt", "-std-compile-opts", our_options.llvmopt_flags, "-S", "-o", our_options.tmp_filename, our_options.tmp_filename);
+				execlp("opt", "opt", "-std-compile-opts", our_options.llvmopt_flags, "-S", "-o", our_options.tmp_filename_too, our_options.tmp_filename, (char *)NULL);
 			}
+			my_error(ERR_LV_INTERN, "'opt' was not found in your path\n");
+			exit(EXIT_FAILURE);
 		} else if (tmp_pid < 0) {
 			my_error(ERR_LV_INTERN, "fork() call failed");
 		} else {
 			size_t guard = 0;
-			while ((waitpid(tmp_pid, NULL, 0) != tmp_pid) && (guard < 100)) { guard++; }
+			int child_status = 0;
+			while ((waitpid(tmp_pid, &child_status, 0) != tmp_pid) && (guard < 100)) { guard++; }
+			if (WIFEXITED(child_status)) {
+				int exit_status = WEXITSTATUS(child_status);
+				if (exit_status != 0) {
+					my_error(ERR_LV_INTERN, "execlp() of 'opt' exited with status %d\n", exit_status);
+					goto end;
+				}
+			}
+			//Swap filename string pointers, so that the next pass will take the output of the last pass from tmp_filename unconditionally.
+			char *_;
+			_ = our_options.tmp_filename;
+			our_options.tmp_filename = our_options.tmp_filename_too;
+			our_options.tmp_filename_too = _;
 		}
 	}
 
@@ -210,16 +229,30 @@ int main (int argc, char **argv) {
 			if (tmp_pid == 0) {
 				switch (our_options.opt_flag) {
 					case true	:
-						if (our_options.output_filename != NULL)
+						if (our_options.output_filename != NULL) {
+							if (our_options.verbose_flag == true)
+								fprintf(stderr, "%s %s %s %s %s %s\n", "llc", "-filetype=asm", "-O3", "-o", our_options.output_filename, our_options.tmp_filename);
 							execlp("llc", "llc", "-filetype=asm", "-O3", "-o", our_options.output_filename, our_options.tmp_filename, (char *)NULL);
-						else
+						} else {
+							if (our_options.verbose_flag == true)
+								fprintf(stderr, "%s %s %s %s\n", "llc", "-filetype=asm", "-O3", our_options.tmp_filename);
 							execlp("llc", "llc", "-filetype=asm", "-O3", our_options.tmp_filename, (char *)NULL);
+						}
+						my_error(ERR_LV_INTERN, "'llc' was not found in your path\n");
+						exit(EXIT_FAILURE);
 						break;
 					case false	:
-						if (our_options.output_filename != NULL)
+						if (our_options.output_filename != NULL) {
+							if (our_options.verbose_flag == true)
+								fprintf(stderr, "%s %s %s %s %s\n", "llc", "-filetype=asm", "-o", our_options.output_filename, our_options.tmp_filename);
 							execlp("llc", "llc", "-filetype=asm", "-o", our_options.output_filename, our_options.tmp_filename, (char *)NULL);
-						else
+						} else {
+							if (our_options.verbose_flag == true)
+								fprintf(stderr, "%s %s %s\n", "llc", "-filetype=asm", our_options.tmp_filename);
 							execlp("llc", "llc", "-filetype=asm", our_options.tmp_filename, (char *)NULL);
+						}
+						my_error(ERR_LV_INTERN, "'llc' was not found in your path\n");
+						exit(EXIT_FAILURE);
 						break;
 					default		:
 						my_error(ERR_LV_INTERN, "Invalid value in boolean variable");
@@ -229,7 +262,15 @@ int main (int argc, char **argv) {
 				my_error(ERR_LV_INTERN, "fork() call failed");
 			} else {
 				size_t guard = 0;
-				while ((waitpid(tmp_pid, NULL, 0) != tmp_pid) && (guard < 100)) { guard++; }
+				int child_status = 0;
+				while ((waitpid(tmp_pid, &child_status, 0) != tmp_pid) && (guard < 100)) { guard++; }
+				if (WIFEXITED(child_status)) {
+					int exit_status = WEXITSTATUS(child_status);
+					if (exit_status != 0) {
+						my_error(ERR_LV_INTERN, "execlp() of 'llc' exited with status %d\n", exit_status);
+						goto end;
+					}
+				}
 			}
 			break;
 		//If executable output was requested, the call sequence is llvm-link (IR linking) - llc (IR->obj) - clang (obj -> library obj -> executable).
@@ -237,21 +278,37 @@ int main (int argc, char **argv) {
 			//llvm-link call : link with libpzc library in IR level
 			tmp_pid = fork();
 			if (tmp_pid == 0) {
+				if (our_options.verbose_flag == true)
+					fprintf(stderr, "%s %s %s %s %s %s\n", "llvm-link", "-S", "-o", our_options.tmp_filename_too, our_options.tmp_filename, our_options.pzc_lib_file);
 				execlp("llvm-link", "llvm-link", "-S", "-o", our_options.tmp_filename_too, our_options.tmp_filename, our_options.pzc_lib_file, (char *)NULL);
+				my_error(ERR_LV_INTERN, "'llvm-link' was not found in your path\n");
+				exit(EXIT_FAILURE);
 			} else if (tmp_pid < 0) {
 				my_error(ERR_LV_INTERN, "fork() call failed");
 			} else {
 				size_t guard = 0;
-				while ((waitpid(tmp_pid, NULL, 0) != tmp_pid) && (guard < 100)) { guard++; }
+				int child_status = 0;
+				while ((waitpid(tmp_pid, &child_status, 0) != tmp_pid) && (guard < 100)) { guard++; }
+				if (WIFEXITED(child_status)) {
+					int exit_status = WEXITSTATUS(child_status);
+					if (exit_status != 0) {
+						my_error(ERR_LV_INTERN, "execlp() of 'llvm-link' exited with status %d\n", exit_status);
+						goto end;
+					}
+				}
 			}
 			//llc call : generate object from IR tempfile
 			tmp_pid = fork();
 			if (tmp_pid == 0) {
 				switch (our_options.opt_flag) {
 					case true	:
+						if (our_options.verbose_flag == true)
+							fprintf(stderr, "%s %s %s %s %s %s\n", "llc", "-filetype=obj", "-O3", "-o", our_options.tmp_filename, our_options.tmp_filename_too);
 						execlp("llc", "llc", "-filetype=obj", "-O3", "-o", our_options.tmp_filename, our_options.tmp_filename_too, (char *)NULL);
 						break;
 					case false	:
+						if (our_options.verbose_flag == true)
+							fprintf(stderr, "%s %s %s %s %s\n", "llc", "-filetype=obj", "-o", our_options.tmp_filename, our_options.tmp_filename_too);
 						execlp("llc", "llc", "-filetype=obj", "-o", our_options.tmp_filename, our_options.tmp_filename_too, (char *)NULL);
 						break;
 					default		:
@@ -262,20 +319,41 @@ int main (int argc, char **argv) {
 				my_error(ERR_LV_INTERN, "fork() call failed");
 			} else {
 				size_t guard = 0;
-				while ((waitpid(tmp_pid, NULL, 0) != tmp_pid) && (guard < 100)) { guard++; }
+				int child_status = 0;
+				while ((waitpid(tmp_pid, &child_status, 0) != tmp_pid) && (guard < 100)) { guard++; }
+				if (WIFEXITED(child_status)) {
+					int exit_status = WEXITSTATUS(child_status);
+					if (exit_status != 0) {
+						my_error(ERR_LV_INTERN, "execlp() of 'llc' exited with status %d\n", exit_status);
+						goto end;
+					}
+				}
 			}
 			//clang call : link with library and generate executable output file
 			tmp_pid = fork();
 			if (tmp_pid == 0) {
-				if (our_options.llvmclang_flags != NULL)
+				if (our_options.llvmclang_flags != NULL) {
+					if (our_options.verbose_flag == true)
+						fprintf(stderr, "%s %s %s %s %s %s\n", "clang", our_options.llvmclang_flags, "-o", our_options.output_filename, our_options.tmp_filename, "-lm");
 					execlp("clang", "clang", our_options.llvmclang_flags, "-o", our_options.output_filename, our_options.tmp_filename, "-lm", (char *)NULL);
-				else
+				} else {
+					if (our_options.verbose_flag == true)
+						fprintf(stderr, "%s %s %s %s %s\n", "clang", "-o", our_options.output_filename, our_options.tmp_filename, "-lm");
 					execlp("clang", "clang", "-o", our_options.output_filename, our_options.tmp_filename, "-lm", (char *)NULL);
+				}
 			} else if (tmp_pid < 0) {
 				my_error(ERR_LV_INTERN, "fork() call failed");
 			} else {
 				size_t guard = 0;
-				while ((waitpid(tmp_pid, NULL, 0) != tmp_pid) && (guard < 100)) { guard++; }
+				int child_status = 0;
+				while ((waitpid(tmp_pid, &child_status, 0) != tmp_pid) && (guard < 100)) { guard++; }
+				if (WIFEXITED(child_status)) {
+					int exit_status = WEXITSTATUS(child_status);
+					if (exit_status != 0) {
+						my_error(ERR_LV_INTERN, "execlp() of 'clang' exited with status %d\n", exit_status);
+						goto end;
+					}
+				}
 			}
 			break;
 		default:

@@ -48,9 +48,10 @@ with --llc-flags="-march=<arch>" where <arch> is any architecture name on the le
 Usage
 -----
 
-* -f, --emit-final            Emit final assembly code in the selected architecture
+* -v, --verbose               Verbose report of execlp calls to llvm and clang executables
+* -f, --emit-final            Emit final assembly code for the selected architecture
 * -i, --emit-intermediate     Emit LLVM intermediate code
-* -o, --optimize              Enable all optimizations
+* -O, --optimize              Enable all optimizations
 * -c, --clang-flags=C_FLAGS   Option string to be used with clang when producing an executable
 * -l, --llc-flags=LLC_FLAGS   Options to be passed to llc when -f is enabled
 * -t, --opt-flags=OPT_FLAGS   Options to be passed to opt when -f is enabled

@@ -7,6 +7,9 @@ General:
 
 
 Done:
+*	report all execlp calls
+*	catch all execlp returns
+*	as much as i saw, all exclp invocations. when they should be using tmp_filename_too, they simply use tmp_filename... fix that => FIXED
 *	libpzc.ll: libpzc.lli was at fault for always rebuilding... @alex: Do not touch base makefile. I will fix it.	=>	DONE
 *	WARNING: if unoptimized, integer overflows may throw runtime segfault - nothing we can do (poison values).	=>	CHECK: Can we do nothing?	=>	opt does prevent at least some cases of segfault on overflow.
 *	Fix Makefile when using files assuming they are on current folder, to use directory of Makefile as base (currently -C does not work).	=>	Only on laptop? Desktop seems to work fine.	=>	My mistake...
