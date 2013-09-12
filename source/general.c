@@ -30,47 +30,47 @@ extern int yyparse (void);
 
 /* Converts escape sequences of t to the actual characters in s*/
 void unescape(char * s, char * t) {
-    int i, j;
-    i = j = 0;
-    
-    while (t[i]) {
-        switch (t[i]) {
-        case '\\':
-            /*  We've found an escape sequence, so translate it  */
-            switch( t[++i] ) {
-            case 'n':
-                s[j] = '\n';
-                break;
-            case 't':
-                s[j] = '\t';
-                break;
-            case 'r':
-                s[j] = '\r';
-                break;
-            case '\\':
-                s[j] = '\\';
-                break;
-            case '\"':
-                s[j] = '\"';
-                break;
-            case '\'':
-                s[j] = '\'';
-                break;
-            default:
-                /*  We don't translate this escape
-                    sequence, so just copy it verbatim  */
-                s[j++] = '\\';
-                s[j] = t[i];
-            }
-            break;
-        default:
-            /*  Not an escape sequence, so just copy the character  */
-            s[j] = t[i];
-        }
-        ++i;
-        ++j;
-    }
-    s[j] = t[i];    /*  Don't forget the null character  */
+	int i, j;
+	i = j = 0;
+
+	while (t[i]) {
+		switch (t[i]) {
+			case '\\':
+				/*  We've found an escape sequence, so translate it  */
+				switch( t[++i] ) {
+					case 'n':
+						s[j] = '\n';
+						break;
+					case 't':
+						s[j] = '\t';
+						break;
+					case 'r':
+						s[j] = '\r';
+						break;
+					case '\\':
+						s[j] = '\\';
+						break;
+					case '\"':
+						s[j] = '\"';
+						break;
+					case '\'':
+						s[j] = '\'';
+						break;
+					default:
+						/*  We don't translate this escape
+						    sequence, so just copy it verbatim  */
+						s[j++] = '\\';
+						s[j] = t[i];
+				}
+				break;
+			default:
+				/*  Not an escape sequence, so just copy the character  */
+				s[j] = t[i];
+		}
+		++i;
+		++j;
+	}
+	s[j] = t[i];    /*  Don't forget the null character  */
 }
 
 //Cleanup hook.
@@ -148,14 +148,14 @@ int main (int argc, char **argv) {
 
 	yyparse();
 
-    closeScope();
-    destroySymbolTable();
+	closeScope();
+	destroySymbolTable();
 
-    if (!valid_codegen) {
-        /* Dont optimize or generate final code if the IR is unusable */
-        ret = 1;
-        goto end;
-    }
+	if (!valid_codegen) {
+		/* Dont optimize or generate final code if the IR is unusable */
+		ret = 1;
+		goto end;
+	}
 
 	//Dump IR to intermediate file.
 	dump_ir(our_options.tmp_filename);
@@ -165,12 +165,14 @@ int main (int argc, char **argv) {
 		tmp_pid = fork();
 		if (tmp_pid == 0) {
 			if (our_options.llvmopt_flags == NULL) {
-				if (our_options.verbose_flag == true)
+				if (our_options.verbose_flag == true) {
 					fprintf(stderr, "%s %s %s %s %s %s\n", "opt", "-std-compile-opts", "-S", "-o", our_options.tmp_filename, our_options.tmp_filename);
+				}
 				execlp("opt", "opt", "-std-compile-opts", "-S", "-o", our_options.tmp_filename_too, our_options.tmp_filename, (char *)NULL);
 			} else {
-				if (our_options.verbose_flag == true)
+				if (our_options.verbose_flag == true) {
 					fprintf(stderr, "%s %s %s %s %s %s %s\n", "opt", "-std-compile-opts", our_options.llvmopt_flags, "-S", "-o", our_options.tmp_filename, our_options.tmp_filename);
+				}
 				execlp("opt", "opt", "-std-compile-opts", our_options.llvmopt_flags, "-S", "-o", our_options.tmp_filename_too, our_options.tmp_filename, (char *)NULL);
 			}
 			my_error(ERR_LV_INTERN, "'opt' was not found in your path\n");
@@ -180,7 +182,9 @@ int main (int argc, char **argv) {
 		} else {
 			size_t guard = 0;
 			int child_status = 0;
-			while ((waitpid(tmp_pid, &child_status, 0) != tmp_pid) && (guard < 100)) { guard++; }
+			while ((waitpid(tmp_pid, &child_status, 0) != tmp_pid) && (guard < 100)) {
+				guard++;
+			}
 			if (WIFEXITED(child_status)) {
 				int exit_status = WEXITSTATUS(child_status);
 				if (exit_status != 0) {
@@ -197,7 +201,7 @@ int main (int argc, char **argv) {
 	}
 
 	switch (our_options.output_type) {
-		//If IR was requested, simply copy the temp file to the output file.
+			//If IR was requested, simply copy the temp file to the output file.
 		case OUT_IR:
 			if (strcmp(our_options.output_filename, "-") != 0) {
 				if (rename(our_options.tmp_filename, our_options.output_filename) != 0) {
@@ -208,7 +212,9 @@ int main (int argc, char **argv) {
 						my_error(ERR_LV_INTERN, "fork() call failed");
 					} else {
 						size_t guard = 0;
-						while ((waitpid(tmp_pid, NULL, 0) != tmp_pid) && (guard < 100)) { guard++; }
+						while ((waitpid(tmp_pid, NULL, 0) != tmp_pid) && (guard < 100)) {
+							guard++;
+						}
 					}
 				}
 			} else {
@@ -219,23 +225,27 @@ int main (int argc, char **argv) {
 					my_error(ERR_LV_INTERN, "fork() call failed");
 				} else {
 					size_t guard = 0;
-					while ((waitpid(tmp_pid, NULL, 0) != tmp_pid) && (guard < 100)) { guard++; }
+					while ((waitpid(tmp_pid, NULL, 0) != tmp_pid) && (guard < 100)) {
+						guard++;
+					}
 				}
 			}
 			break;
-		//If assembly output was requested, generate and dump it to the output file.
+			//If assembly output was requested, generate and dump it to the output file.
 		case OUT_ASM:
 			tmp_pid = fork();
 			if (tmp_pid == 0) {
 				switch (our_options.opt_flag) {
 					case true	:
 						if (our_options.output_filename != NULL) {
-							if (our_options.verbose_flag == true)
+							if (our_options.verbose_flag == true) {
 								fprintf(stderr, "%s %s %s %s %s %s\n", "llc", "-filetype=asm", "-O3", "-o", our_options.output_filename, our_options.tmp_filename);
+							}
 							execlp("llc", "llc", "-filetype=asm", "-O3", "-o", our_options.output_filename, our_options.tmp_filename, (char *)NULL);
 						} else {
-							if (our_options.verbose_flag == true)
+							if (our_options.verbose_flag == true) {
 								fprintf(stderr, "%s %s %s %s\n", "llc", "-filetype=asm", "-O3", our_options.tmp_filename);
+							}
 							execlp("llc", "llc", "-filetype=asm", "-O3", our_options.tmp_filename, (char *)NULL);
 						}
 						my_error(ERR_LV_INTERN, "'llc' was not found in your path\n");
@@ -243,12 +253,14 @@ int main (int argc, char **argv) {
 						break;
 					case false	:
 						if (our_options.output_filename != NULL) {
-							if (our_options.verbose_flag == true)
+							if (our_options.verbose_flag == true) {
 								fprintf(stderr, "%s %s %s %s %s\n", "llc", "-filetype=asm", "-o", our_options.output_filename, our_options.tmp_filename);
+							}
 							execlp("llc", "llc", "-filetype=asm", "-o", our_options.output_filename, our_options.tmp_filename, (char *)NULL);
 						} else {
-							if (our_options.verbose_flag == true)
+							if (our_options.verbose_flag == true) {
 								fprintf(stderr, "%s %s %s\n", "llc", "-filetype=asm", our_options.tmp_filename);
+							}
 							execlp("llc", "llc", "-filetype=asm", our_options.tmp_filename, (char *)NULL);
 						}
 						my_error(ERR_LV_INTERN, "'llc' was not found in your path\n");
@@ -263,7 +275,9 @@ int main (int argc, char **argv) {
 			} else {
 				size_t guard = 0;
 				int child_status = 0;
-				while ((waitpid(tmp_pid, &child_status, 0) != tmp_pid) && (guard < 100)) { guard++; }
+				while ((waitpid(tmp_pid, &child_status, 0) != tmp_pid) && (guard < 100)) {
+					guard++;
+				}
 				if (WIFEXITED(child_status)) {
 					int exit_status = WEXITSTATUS(child_status);
 					if (exit_status != 0) {
@@ -273,13 +287,14 @@ int main (int argc, char **argv) {
 				}
 			}
 			break;
-		//If executable output was requested, the call sequence is llvm-link (IR linking) - llc (IR->obj) - clang (obj -> library obj -> executable).
+			//If executable output was requested, the call sequence is llvm-link (IR linking) - llc (IR->obj) - clang (obj -> library obj -> executable).
 		case OUT_EXEC:
 			//llvm-link call : link with libpzc library in IR level
 			tmp_pid = fork();
 			if (tmp_pid == 0) {
-				if (our_options.verbose_flag == true)
+				if (our_options.verbose_flag == true) {
 					fprintf(stderr, "%s %s %s %s %s %s\n", "llvm-link", "-S", "-o", our_options.tmp_filename_too, our_options.tmp_filename, our_options.pzc_lib_file);
+				}
 				execlp("llvm-link", "llvm-link", "-S", "-o", our_options.tmp_filename_too, our_options.tmp_filename, our_options.pzc_lib_file, (char *)NULL);
 				my_error(ERR_LV_INTERN, "'llvm-link' was not found in your path\n");
 				exit(EXIT_FAILURE);
@@ -288,7 +303,9 @@ int main (int argc, char **argv) {
 			} else {
 				size_t guard = 0;
 				int child_status = 0;
-				while ((waitpid(tmp_pid, &child_status, 0) != tmp_pid) && (guard < 100)) { guard++; }
+				while ((waitpid(tmp_pid, &child_status, 0) != tmp_pid) && (guard < 100)) {
+					guard++;
+				}
 				if (WIFEXITED(child_status)) {
 					int exit_status = WEXITSTATUS(child_status);
 					if (exit_status != 0) {
@@ -302,13 +319,15 @@ int main (int argc, char **argv) {
 			if (tmp_pid == 0) {
 				switch (our_options.opt_flag) {
 					case true	:
-						if (our_options.verbose_flag == true)
+						if (our_options.verbose_flag == true) {
 							fprintf(stderr, "%s %s %s %s %s %s\n", "llc", "-filetype=obj", "-O3", "-o", our_options.tmp_filename, our_options.tmp_filename_too);
+						}
 						execlp("llc", "llc", "-filetype=obj", "-O3", "-o", our_options.tmp_filename, our_options.tmp_filename_too, (char *)NULL);
 						break;
 					case false	:
-						if (our_options.verbose_flag == true)
+						if (our_options.verbose_flag == true) {
 							fprintf(stderr, "%s %s %s %s %s\n", "llc", "-filetype=obj", "-o", our_options.tmp_filename, our_options.tmp_filename_too);
+						}
 						execlp("llc", "llc", "-filetype=obj", "-o", our_options.tmp_filename, our_options.tmp_filename_too, (char *)NULL);
 						break;
 					default		:
@@ -320,7 +339,9 @@ int main (int argc, char **argv) {
 			} else {
 				size_t guard = 0;
 				int child_status = 0;
-				while ((waitpid(tmp_pid, &child_status, 0) != tmp_pid) && (guard < 100)) { guard++; }
+				while ((waitpid(tmp_pid, &child_status, 0) != tmp_pid) && (guard < 100)) {
+					guard++;
+				}
 				if (WIFEXITED(child_status)) {
 					int exit_status = WEXITSTATUS(child_status);
 					if (exit_status != 0) {
@@ -333,12 +354,14 @@ int main (int argc, char **argv) {
 			tmp_pid = fork();
 			if (tmp_pid == 0) {
 				if (our_options.llvmclang_flags != NULL) {
-					if (our_options.verbose_flag == true)
+					if (our_options.verbose_flag == true) {
 						fprintf(stderr, "%s %s %s %s %s %s\n", "clang", our_options.llvmclang_flags, "-o", our_options.output_filename, our_options.tmp_filename, "-lm");
+					}
 					execlp("clang", "clang", our_options.llvmclang_flags, "-o", our_options.output_filename, our_options.tmp_filename, "-lm", (char *)NULL);
 				} else {
-					if (our_options.verbose_flag == true)
+					if (our_options.verbose_flag == true) {
 						fprintf(stderr, "%s %s %s %s %s\n", "clang", "-o", our_options.output_filename, our_options.tmp_filename, "-lm");
+					}
 					execlp("clang", "clang", "-o", our_options.output_filename, our_options.tmp_filename, "-lm", (char *)NULL);
 				}
 			} else if (tmp_pid < 0) {
@@ -346,7 +369,9 @@ int main (int argc, char **argv) {
 			} else {
 				size_t guard = 0;
 				int child_status = 0;
-				while ((waitpid(tmp_pid, &child_status, 0) != tmp_pid) && (guard < 100)) { guard++; }
+				while ((waitpid(tmp_pid, &child_status, 0) != tmp_pid) && (guard < 100)) {
+					guard++;
+				}
 				if (WIFEXITED(child_status)) {
 					int exit_status = WEXITSTATUS(child_status);
 					if (exit_status != 0) {

@@ -1,9 +1,9 @@
-/* 
+/*
  * .: Option parsing from terminal invocation.
- * 
+ *
  * ?: Aristoteles Panaras "ale1ster"
  * @: 2013-07-11T23:48:25 EEST
- * 
+ *
  */
 
 #ifndef __TERMINAL_OPTIONS_H__

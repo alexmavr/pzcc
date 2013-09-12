@@ -33,15 +33,15 @@ void my_error (error_lv level, const char *msg, ...) {
 			break;
 		case ERR_LV_ERR:
 			fprintf(stderr, "ERROR: ");
-            valid_codegen = false;
+			valid_codegen = false;
 			break;
 		case ERR_LV_CRIT:
 			fprintf(stderr, "CRITICAL: ");
-            valid_codegen = false;
+			valid_codegen = false;
 			break;
 		case ERR_LV_INTERN:
 			fprintf(stderr, "INTERNAL: ");
-            valid_codegen = false;
+			valid_codegen = false;
 			break;
 		default:
 			fprintf(stderr, "My mind just exploded\n");

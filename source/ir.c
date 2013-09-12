@@ -24,37 +24,38 @@ struct func_call *current_func_call_list;
 
 /* Adds an element to the back of a list. Creates a new list if head is NULL */
 struct list_node * add_to_list(struct list_node * head, LLVMValueRef val) {
-    struct list_node * newnode = (struct list_node *) new(sizeof(struct list_node));
+	struct list_node * newnode = (struct list_node *) new(sizeof(struct list_node));
 
-    newnode->Valref = val;
-    newnode->next = head; 
-    return newnode;
+	newnode->Valref = val;
+	newnode->next = head;
+	return newnode;
 }
 
 /* Frees a list */
 void free_list(struct list_node * head) {
-    struct list_node * current = head;
-    struct list_node * next;
-    while (current != NULL) {
-       next = current->next;
-	   GC_free(current);
-       current = next; }
+	struct list_node * current = head;
+	struct list_node * next;
+	while (current != NULL) {
+		next = current->next;
+		GC_free(current);
+		current = next;
+	}
 }
 
-/* Creates an array of ValueRefs from a given list. 
+/* Creates an array of ValueRefs from a given list.
  * The first item of the array is the constant 0, following the usage
  * of BuildGEP command */
 LLVMValueRef * array_from_list(struct list_node * head, unsigned int size) {
-    int i=1;
-    LLVMValueRef *res = new((size+1) * sizeof(LLVMValueRef));
-    res[0] = LLVMConstInt(LLVMInt32Type(), 0, false);
+	int i=1;
+	LLVMValueRef *res = new((size+1) * sizeof(LLVMValueRef));
+	res[0] = LLVMConstInt(LLVMInt32Type(), 0, false);
 
-     while (head != NULL) {
-        res[i] = head->Valref;
-        head = head->next;
-        i++;
-    }
-    return res;
+	while (head != NULL) {
+		res[i] = head->Valref;
+		head = head->next;
+		i++;
+	}
+	return res;
 }
 
 /* Creates and holds a new scope. */
@@ -91,8 +92,9 @@ void new_conditional_scope (cond_type type) {
 void delete_conditional_scope (void) {
 	struct cond_scope *temp_scope;
 
-	if (current_cond_scope_list == NULL)
+	if (current_cond_scope_list == NULL) {
 		my_error(ERR_LV_INTERN, "Conditional scope close");
+	}
 	temp_scope = current_cond_scope_list->prev;
 	delete(current_cond_scope_list);
 	current_cond_scope_list = temp_scope;
@@ -100,8 +102,9 @@ void delete_conditional_scope (void) {
 
 /* Puts the passed values in the current conditional scope. */
 void conditional_scope_save (LLVMBasicBlockRef first, LLVMBasicBlockRef second, LLVMBasicBlockRef third) {
-	if (current_cond_scope_list == NULL)
+	if (current_cond_scope_list == NULL) {
 		my_error(ERR_LV_INTERN, "Conditional scope undefined");
+	}
 	current_cond_scope_list->first = first;
 	current_cond_scope_list->second = second;
 	current_cond_scope_list->third = third;
@@ -109,15 +112,17 @@ void conditional_scope_save (LLVMBasicBlockRef first, LLVMBasicBlockRef second, 
 
 /* Inserts a value reference (needed for switch statements) in the appropriate field of the conditional scope structure. */
 void conditional_scope_valset (LLVMValueRef vr) {
-	if (current_cond_scope_list == NULL)
+	if (current_cond_scope_list == NULL) {
 		my_error(ERR_LV_INTERN, "Conditional scope undefined");
+	}
 	current_cond_scope_list->val = vr;
 }
 
 /* Simply sanity checking (unneeded, as it is guarded by the parser rules) and returns the ValueRef of the current conditional scope. */
 LLVMValueRef conditional_scope_valget (void) {
-	if (current_cond_scope_list == NULL)
+	if (current_cond_scope_list == NULL) {
 		my_error(ERR_LV_INTERN, "Conditional scope undefined");
+	}
 	return (current_cond_scope_list->val);
 }
 
@@ -142,8 +147,9 @@ Type function_call_type_pop (void) {
 	struct func_call *temp_call;
 	Type ret_type;
 
-	if (current_func_call_list == NULL)
+	if (current_func_call_list == NULL) {
 		my_error(ERR_LV_INTERN, "Function call frame undefined");
+	}
 
 	ret_type = current_func_call_list->call_type;
 
@@ -158,16 +164,18 @@ Type function_call_type_pop (void) {
 
 /* Updates the current parameter field of the currently top-of-the-stack call frame. */
 void function_call_param_set (SymbolEntry *param_ref) {
-	if (current_func_call_list == NULL)
+	if (current_func_call_list == NULL) {
 		my_error(ERR_LV_INTERN, "Function call frame undefined");
+	}
 
 	current_func_call_list->current_param = param_ref;
 }
 
 /* Returns the current parameter of <bla-bla-bla_see-above>. */
 SymbolEntry *function_call_param_get (void) {
-	if (current_func_call_list == NULL)
+	if (current_func_call_list == NULL) {
 		my_error(ERR_LV_INTERN, "Function call frame undefined");
+	}
 
 	return (current_func_call_list->current_param);
 }
@@ -177,8 +185,9 @@ void function_call_argv_init (SymbolEntry *fun) {
 	SymbolEntry *cur_arg;
 	size_t i = 0;
 
-	if (current_func_call_list == NULL)
+	if (current_func_call_list == NULL) {
 		my_error(ERR_LV_INTERN, "Function call frame undefined");
+	}
 
 	cur_arg = fun->u.eFunction.firstArgument;
 	while (cur_arg != NULL) {
@@ -195,8 +204,9 @@ void function_call_argv_init (SymbolEntry *fun) {
 
 /* 'Push' a LLVMValueRef in the current function call. */
 void function_call_argval_push (LLVMValueRef val) {
-	if (current_func_call_list == NULL)
+	if (current_func_call_list == NULL) {
 		my_error(ERR_LV_INTERN, "Function call frame undefined");
+	}
 
 	current_func_call_list->argv[(current_func_call_list->current_arg_i) - 1] = val;
 	current_func_call_list->current_arg_i--;
@@ -204,16 +214,18 @@ void function_call_argval_push (LLVMValueRef val) {
 
 /* Return the pointer to the argument LLVMValueRef array for the current function call frame. */
 LLVMValueRef *function_call_arglist_get (void) {
-	if (current_func_call_list == NULL)
+	if (current_func_call_list == NULL) {
 		my_error(ERR_LV_INTERN, "Function call frame undefined");
+	}
 
 	return current_func_call_list->argv;
 }
 
 /* Return the number of arguments for the current function frame. */
 size_t function_call_argno_get (void) {
-	if (current_func_call_list == NULL)
+	if (current_func_call_list == NULL) {
 		my_error(ERR_LV_INTERN, "Function call frame undefined");
+	}
 
 	return current_func_call_list->func_ref->u.eFunction.argno;
 }
@@ -237,10 +249,10 @@ LLVMTypeRef type_to_llvm(Type t) {
 		case TYPE_CHAR:
 			res = LLVMInt8Type();
 			break;
-        case TYPE_ARRAY:
+		case TYPE_ARRAY:
 			res = LLVMArrayType(type_to_llvm(t->refType), t->size);
 			break;
-        case TYPE_IARRAY:
+		case TYPE_IARRAY:
 			res = LLVMArrayType(type_to_llvm(t->refType), 0);
 			break;
 		default:
@@ -251,330 +263,331 @@ LLVMTypeRef type_to_llvm(Type t) {
 
 /* Cast an LLVM Value from one type to another. */
 LLVMValueRef cast_compat(Type dest, Type src, LLVMValueRef src_val) {
-    LLVMValueRef res;
-    if ((dest == typeReal) && (src == typeInteger)) {
-         res = LLVMBuildCast(builder, LLVMSIToFP, src_val, LLVMDoubleType(), "casttmp");
-    } else if ((dest == typeReal) && (src == typeChar)) {
-        res = LLVMBuildCast(builder, LLVMUIToFP, src_val, LLVMDoubleType(), "casttmp");
-    } else if ((dest == typeChar) && (src == typeInteger)) {
-        /* Take the Highest order bit (8th bit) of the integer by shifting right
-         * 7 times and truncating to 1 bit.
-         * If that bit is 1, the integer was negative and a Neg operation 
-         * is performed
-         * If it was 0, the integer was positive and no action is taken.
-         * Finally, truncate the integer to 8 bits */
+	LLVMValueRef res;
+	if ((dest == typeReal) && (src == typeInteger)) {
+		res = LLVMBuildCast(builder, LLVMSIToFP, src_val, LLVMDoubleType(), "casttmp");
+	} else if ((dest == typeReal) && (src == typeChar)) {
+		res = LLVMBuildCast(builder, LLVMUIToFP, src_val, LLVMDoubleType(), "casttmp");
+	} else if ((dest == typeChar) && (src == typeInteger)) {
+		/* Take the Highest order bit (8th bit) of the integer by shifting right
+		 * 7 times and truncating to 1 bit.
+		 * If that bit is 1, the integer was negative and a Neg operation
+		 * is performed
+		 * If it was 0, the integer was positive and no action is taken.
+		 * Finally, truncate the integer to 8 bits */
 
-        LLVMValueRef shift_amm = LLVMConstInt(LLVMInt32Type(), 7, false);
-        LLVMValueRef imv = LLVMBuildLShr(builder, src_val, shift_amm, "lshrtmp"); 
-        imv = LLVMBuildTrunc(builder, imv, LLVMInt1Type(), "trunctmp"); 
-        LLVMValueRef neg = LLVMBuildNeg(builder, src_val, "negtmp"); 
-        imv = LLVMBuildSelect(builder, imv, neg, src_val, "selecttmp");
-        res = LLVMBuildTrunc(builder, imv, LLVMInt8Type(), "trunctmp");
+		LLVMValueRef shift_amm = LLVMConstInt(LLVMInt32Type(), 7, false);
+		LLVMValueRef imv = LLVMBuildLShr(builder, src_val, shift_amm, "lshrtmp");
+		imv = LLVMBuildTrunc(builder, imv, LLVMInt1Type(), "trunctmp");
+		LLVMValueRef neg = LLVMBuildNeg(builder, src_val, "negtmp");
+		imv = LLVMBuildSelect(builder, imv, neg, src_val, "selecttmp");
+		res = LLVMBuildTrunc(builder, imv, LLVMInt8Type(), "trunctmp");
 
-    } else if ((dest == typeInteger) && (src == typeChar)) {
-        res = LLVMBuildZExt(builder, src_val, LLVMInt32Type(), "zexttmp");
-    } else {
-        res = src_val;
-    }
-    return res;
+	} else if ((dest == typeInteger) && (src == typeChar)) {
+		res = LLVMBuildZExt(builder, src_val, LLVMInt32Type(), "zexttmp");
+	} else {
+		res = src_val;
+	}
+	return res;
 }
 
 /* Creates a ARRAY type from an IARRAY type by setting 0 as the first dimension */
 Type iarray_to_array(Type array) {
-    if (array->refType == NULL)
-        my_error(ERR_LV_INTERN, "encountered a NULL array reftype");
-    return typeArray(0, array->refType);
+	if (array->refType == NULL) {
+		my_error(ERR_LV_INTERN, "encountered a NULL array reftype");
+	}
+	return typeArray(0, array->refType);
 }
 
 /* Generates IR for all external function prototypes and adds them to symbol table */
 void generate_external_definitions(void) {
-    // maximum number of arguments of the library functions
-    #define MAXARGS 3
+	// maximum number of arguments of the library functions
+#define MAXARGS 3
 
-    LLVMTypeRef *params = new(MAXARGS * sizeof(LLVMTypeRef));
-    SymbolEntry * func;
-    LLVMValueRef func_ref;
+	LLVMTypeRef *params = new(MAXARGS * sizeof(LLVMTypeRef));
+	SymbolEntry * func;
+	LLVMValueRef func_ref;
 
-    // PROC putchar(char)
-    params[0] = type_to_llvm(typeChar);
-    func_ref = LLVMAddFunction(module, "putchar", \
-                    LLVMFunctionType(type_to_llvm(typeVoid), params, 1, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("putchar");
-    newParameter("__PLACEHOLDER__", typeChar, PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeVoid);
-    
-    // PROC puts(char[])
-    params[0] = LLVMPointerType(type_to_llvm(typeArray(0, typeChar)), 0);
-    func_ref = LLVMAddFunction(module, "puts", \
-                    LLVMFunctionType(type_to_llvm(typeVoid), params, 1, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("puts");
-    newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeVoid);
+	// PROC putchar(char)
+	params[0] = type_to_llvm(typeChar);
+	func_ref = LLVMAddFunction(module, "putchar", \
+							   LLVMFunctionType(type_to_llvm(typeVoid), params, 1, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("putchar");
+	newParameter("__PLACEHOLDER__", typeChar, PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeVoid);
 
-    // PROC WRITE_INT(int, int)
-    params[0] = type_to_llvm(typeInteger);
-    params[1] = type_to_llvm(typeInteger);
-    func_ref = LLVMAddFunction(module, "WRITE_INT", \
-                    LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("WRITE_INT");
-    newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
-    newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeVoid);
-    
+	// PROC puts(char[])
+	params[0] = LLVMPointerType(type_to_llvm(typeArray(0, typeChar)), 0);
+	func_ref = LLVMAddFunction(module, "puts", \
+							   LLVMFunctionType(type_to_llvm(typeVoid), params, 1, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("puts");
+	newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeVoid);
 
-    // PROC WRITE_BOOL(bool, int)
-    params[0] = type_to_llvm(typeBoolean);
-    params[1] = type_to_llvm(typeInteger);
-    func_ref = LLVMAddFunction(module, "WRITE_BOOL", \
-                    LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("WRITE_BOOL");
-    newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
-    newParameter("__PLACEHOLDER__", typeBoolean, PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeVoid);
+	// PROC WRITE_INT(int, int)
+	params[0] = type_to_llvm(typeInteger);
+	params[1] = type_to_llvm(typeInteger);
+	func_ref = LLVMAddFunction(module, "WRITE_INT", \
+							   LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("WRITE_INT");
+	newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
+	newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeVoid);
 
-    // PROC WRITE_CHAR(char, int)
-    params[0] = type_to_llvm(typeChar);
-    params[1] = type_to_llvm(typeInteger);
-    func_ref = LLVMAddFunction(module, "WRITE_CHAR", \
-                    LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("WRITE_CHAR");
-    newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
-    newParameter("__PLACEHOLDER__", typeChar, PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeVoid);
 
-    // PROC WRITE_REAL(REAL, int, int)
-    params[0] = type_to_llvm(typeReal);
-    params[1] = type_to_llvm(typeInteger);
-    params[2] = type_to_llvm(typeInteger);
-    func_ref = LLVMAddFunction(module, "WRITE_REAL", \
-                    LLVMFunctionType(type_to_llvm(typeVoid), params, 3, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("WRITE_REAL");
-    newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
-    newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
-    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeVoid);
+	// PROC WRITE_BOOL(bool, int)
+	params[0] = type_to_llvm(typeBoolean);
+	params[1] = type_to_llvm(typeInteger);
+	func_ref = LLVMAddFunction(module, "WRITE_BOOL", \
+							   LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("WRITE_BOOL");
+	newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
+	newParameter("__PLACEHOLDER__", typeBoolean, PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeVoid);
 
-    // PROC WRITE_STRING(char[], int)
-    params[0] = LLVMPointerType(type_to_llvm(typeArray(0, typeChar)), 0);
-    params[1] = type_to_llvm(typeInteger);
-    func_ref = LLVMAddFunction(module, "WRITE_STRING", \
-                    LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("WRITE_STRING");
-    newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
-    newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeVoid);
+	// PROC WRITE_CHAR(char, int)
+	params[0] = type_to_llvm(typeChar);
+	params[1] = type_to_llvm(typeInteger);
+	func_ref = LLVMAddFunction(module, "WRITE_CHAR", \
+							   LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("WRITE_CHAR");
+	newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
+	newParameter("__PLACEHOLDER__", typeChar, PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeVoid);
 
-    // FUNC int READ_INT()
-    func_ref = LLVMAddFunction(module, "READ_INT", \
-                    LLVMFunctionType(type_to_llvm(typeInteger), params, 0, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("READ_INT");
-    endFunctionHeader(func, typeInteger);
+	// PROC WRITE_REAL(REAL, int, int)
+	params[0] = type_to_llvm(typeReal);
+	params[1] = type_to_llvm(typeInteger);
+	params[2] = type_to_llvm(typeInteger);
+	func_ref = LLVMAddFunction(module, "WRITE_REAL", \
+							   LLVMFunctionType(type_to_llvm(typeVoid), params, 3, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("WRITE_REAL");
+	newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
+	newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
+	newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeVoid);
 
-    // FUNC bool READ_BOOL()
-    func_ref = LLVMAddFunction(module, "READ_BOOL", \
-                    LLVMFunctionType(type_to_llvm(typeBoolean), params, 0, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("READ_BOOL");
-    endFunctionHeader(func, typeBoolean);
+	// PROC WRITE_STRING(char[], int)
+	params[0] = LLVMPointerType(type_to_llvm(typeArray(0, typeChar)), 0);
+	params[1] = type_to_llvm(typeInteger);
+	func_ref = LLVMAddFunction(module, "WRITE_STRING", \
+							   LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("WRITE_STRING");
+	newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
+	newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeVoid);
 
-    // FUNC int getchar()
-    func_ref = LLVMAddFunction(module, "getchar", \
-                    LLVMFunctionType(type_to_llvm(typeInteger), params, 0, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("getchar");
-    endFunctionHeader(func, typeInteger);
+	// FUNC int READ_INT()
+	func_ref = LLVMAddFunction(module, "READ_INT", \
+							   LLVMFunctionType(type_to_llvm(typeInteger), params, 0, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("READ_INT");
+	endFunctionHeader(func, typeInteger);
 
-    // FUNC REAL READ_REAL()
-    func_ref = LLVMAddFunction(module, "READ_REAL", \
-                    LLVMFunctionType(type_to_llvm(typeReal), params, 0, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("READ_REAL");
-    endFunctionHeader(func, typeReal);
+	// FUNC bool READ_BOOL()
+	func_ref = LLVMAddFunction(module, "READ_BOOL", \
+							   LLVMFunctionType(type_to_llvm(typeBoolean), params, 0, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("READ_BOOL");
+	endFunctionHeader(func, typeBoolean);
 
-    // PROC READ_STRING(int, char[])
-    params[0] = type_to_llvm(typeInteger);
-    params[1] = LLVMPointerType(type_to_llvm(typeArray(0, typeChar)), 0);
-    func_ref = LLVMAddFunction(module, "READ_STRING", \
-                    LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("READ_STRING");
-    newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
-    newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeVoid);
+	// FUNC int getchar()
+	func_ref = LLVMAddFunction(module, "getchar", \
+							   LLVMFunctionType(type_to_llvm(typeInteger), params, 0, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("getchar");
+	endFunctionHeader(func, typeInteger);
 
-    // FUNC int abs(int)
-    params[0] = type_to_llvm(typeInteger);
-    func_ref = LLVMAddFunction(module, "abs", \
-                    LLVMFunctionType(type_to_llvm(typeInteger), params, 1, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("abs");
-    newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeInteger);
+	// FUNC REAL READ_REAL()
+	func_ref = LLVMAddFunction(module, "READ_REAL", \
+							   LLVMFunctionType(type_to_llvm(typeReal), params, 0, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("READ_REAL");
+	endFunctionHeader(func, typeReal);
 
-    // FUNC REAL fabs(REAL)
-    params[0] = type_to_llvm(typeReal);
-    func_ref = LLVMAddFunction(module, "fabs", \
-                    LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("fabs");
-    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeReal);
+	// PROC READ_STRING(int, char[])
+	params[0] = type_to_llvm(typeInteger);
+	params[1] = LLVMPointerType(type_to_llvm(typeArray(0, typeChar)), 0);
+	func_ref = LLVMAddFunction(module, "READ_STRING", \
+							   LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("READ_STRING");
+	newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
+	newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeVoid);
 
-        // FUNC REAL sqrt(REAL)
-    func_ref = LLVMAddFunction(module, "sqrt", \
-                    LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("sqrt");
-    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeReal);
+	// FUNC int abs(int)
+	params[0] = type_to_llvm(typeInteger);
+	func_ref = LLVMAddFunction(module, "abs", \
+							   LLVMFunctionType(type_to_llvm(typeInteger), params, 1, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("abs");
+	newParameter("__PLACEHOLDER__", typeInteger, PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeInteger);
 
-    // FUNC REAL sin(REAL)
-    func_ref = LLVMAddFunction(module, "sin", \
-                    LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("sin");
-    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeReal);
+	// FUNC REAL fabs(REAL)
+	params[0] = type_to_llvm(typeReal);
+	func_ref = LLVMAddFunction(module, "fabs", \
+							   LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("fabs");
+	newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeReal);
 
-    // FUNC REAL cos(REAL)
-    func_ref = LLVMAddFunction(module, "cos", \
-                    LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("cos");
-    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeReal);
+	// FUNC REAL sqrt(REAL)
+	func_ref = LLVMAddFunction(module, "sqrt", \
+							   LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("sqrt");
+	newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeReal);
 
-    // FUNC REAL tan(REAL)
-    func_ref = LLVMAddFunction(module, "tan", \
-                    LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("tan");
-    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeReal);
+	// FUNC REAL sin(REAL)
+	func_ref = LLVMAddFunction(module, "sin", \
+							   LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("sin");
+	newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeReal);
 
-    // FUNC REAL arctan(REAL)
-    func_ref = LLVMAddFunction(module, "arctan", \
-                    LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("arctan");
-    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeReal);
+	// FUNC REAL cos(REAL)
+	func_ref = LLVMAddFunction(module, "cos", \
+							   LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("cos");
+	newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeReal);
 
-    // FUNC REAL exp(REAL)
-    func_ref = LLVMAddFunction(module, "exp", \
-                    LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("exp");
-    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeReal);
+	// FUNC REAL tan(REAL)
+	func_ref = LLVMAddFunction(module, "tan", \
+							   LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("tan");
+	newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeReal);
 
-    // FUNC REAL ln(REAL)
-    func_ref = LLVMAddFunction(module, "ln", \
-                    LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("ln");
-    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeReal);
+	// FUNC REAL arctan(REAL)
+	func_ref = LLVMAddFunction(module, "arctan", \
+							   LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("arctan");
+	newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeReal);
 
-    // FUNC REAL trunc(REAL)
-    func_ref = LLVMAddFunction(module, "trunc", \
-                    LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("trunc");
-    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeReal);
+	// FUNC REAL exp(REAL)
+	func_ref = LLVMAddFunction(module, "exp", \
+							   LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("exp");
+	newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeReal);
 
-    // FUNC REAL round(REAL)
-    func_ref = LLVMAddFunction(module, "round", \
-                    LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("round");
-    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeReal);
+	// FUNC REAL ln(REAL)
+	func_ref = LLVMAddFunction(module, "ln", \
+							   LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("ln");
+	newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeReal);
 
-    // FUNC REAL pi()
-    func_ref = LLVMAddFunction(module, "pi", \
-                    LLVMFunctionType(type_to_llvm(typeReal), params, 0, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("pi");
-    endFunctionHeader(func, typeReal);
+	// FUNC REAL trunc(REAL)
+	func_ref = LLVMAddFunction(module, "trunc", \
+							   LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("trunc");
+	newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeReal);
 
-    // FUNC INT ROUND(REAL)
-    func_ref = LLVMAddFunction(module, "ROUND", \
-                    LLVMFunctionType(type_to_llvm(typeInteger), params, 1, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("ROUND");
-    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeInteger);
+	// FUNC REAL round(REAL)
+	func_ref = LLVMAddFunction(module, "round", \
+							   LLVMFunctionType(type_to_llvm(typeReal), params, 1, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("round");
+	newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeReal);
 
-    // FUNC INT TRUNC(REAL)
-    func_ref = LLVMAddFunction(module, "TRUNC", \
-                    LLVMFunctionType(type_to_llvm(typeInteger), params, 1, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("TRUNC");
-    newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeInteger);
+	// FUNC REAL pi()
+	func_ref = LLVMAddFunction(module, "pi", \
+							   LLVMFunctionType(type_to_llvm(typeReal), params, 0, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("pi");
+	endFunctionHeader(func, typeReal);
 
-    // FUNC INT strlen(char[])
-    params[0] = LLVMPointerType(type_to_llvm(typeArray(0, typeChar)), 0);
-    func_ref = LLVMAddFunction(module, "strlen", \
-                    LLVMFunctionType(type_to_llvm(typeInteger), params, 1, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("strlen");
-    newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeInteger);
+	// FUNC INT ROUND(REAL)
+	func_ref = LLVMAddFunction(module, "ROUND", \
+							   LLVMFunctionType(type_to_llvm(typeInteger), params, 1, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("ROUND");
+	newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeInteger);
 
-    // FUNC INT strcmp(char[], char[])
-    params[1] = LLVMPointerType(type_to_llvm(typeArray(0, typeChar)), 0);
-    func_ref = LLVMAddFunction(module, "strcmp", \
-                    LLVMFunctionType(type_to_llvm(typeInteger), params, 2, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("strcmp");
-    newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
-    newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeInteger);
+	// FUNC INT TRUNC(REAL)
+	func_ref = LLVMAddFunction(module, "TRUNC", \
+							   LLVMFunctionType(type_to_llvm(typeInteger), params, 1, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("TRUNC");
+	newParameter("__PLACEHOLDER__", typeReal, PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeInteger);
 
-    // PROC strcpy(char[], char[])
-    func_ref = LLVMAddFunction(module, "strcpy", \
-                    LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("strcpy");
-    newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
-    newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeVoid);
+	// FUNC INT strlen(char[])
+	params[0] = LLVMPointerType(type_to_llvm(typeArray(0, typeChar)), 0);
+	func_ref = LLVMAddFunction(module, "strlen", \
+							   LLVMFunctionType(type_to_llvm(typeInteger), params, 1, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("strlen");
+	newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeInteger);
 
-    // PROC strcat(char[], char[])
-    func_ref = LLVMAddFunction(module, "strcat", \
-                    LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
-    LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-    func = newFunction("strcat");
-    newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
-    newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
-    endFunctionHeader(func, typeVoid);
+	// FUNC INT strcmp(char[], char[])
+	params[1] = LLVMPointerType(type_to_llvm(typeArray(0, typeChar)), 0);
+	func_ref = LLVMAddFunction(module, "strcmp", \
+							   LLVMFunctionType(type_to_llvm(typeInteger), params, 2, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("strcmp");
+	newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
+	newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeInteger);
+
+	// PROC strcpy(char[], char[])
+	func_ref = LLVMAddFunction(module, "strcpy", \
+							   LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("strcpy");
+	newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
+	newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeVoid);
+
+	// PROC strcat(char[], char[])
+	func_ref = LLVMAddFunction(module, "strcat", \
+							   LLVMFunctionType(type_to_llvm(typeVoid), params, 2, false));
+	LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+	func = newFunction("strcat");
+	newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
+	newParameter("__PLACEHOLDER__", typeIArray(typeChar), PASS_BY_VALUE, func);
+	endFunctionHeader(func, typeVoid);
 
 }
 
 /* Builds the IR for calling WRITE_STRING with a constant string */
 void build_const_str_write_call(const char * string, int size) {
-    LLVMValueRef str = LLVMConstString(string, size, false);
-    LLVMValueRef tmp = LLVMBuildAlloca(builder, \
-            type_to_llvm(typeArray(size+1, typeChar)), "strtmp");
-    LLVMBuildStore(builder, str, tmp);
+	LLVMValueRef str = LLVMConstString(string, size, false);
+	LLVMValueRef tmp = LLVMBuildAlloca(builder, \
+									   type_to_llvm(typeArray(size+1, typeChar)), "strtmp");
+	LLVMBuildStore(builder, str, tmp);
 
-    LLVMValueRef * args = new(2 * sizeof(LLVMValueRef));
-    args[0] = tmp;
-    args[1] = LLVMConstInt(LLVMInt32Type(), (size), false);
-    LLVMValueRef func_ref = LLVMGetNamedFunction(module, "WRITE_STRING");
-    LLVMTypeRef dest_type = LLVMPointerType(type_to_llvm(iarray_to_array(typeArray((size+1), typeChar))), 0);
-    args[0] = LLVMBuildPointerCast(builder, tmp, dest_type, "ptrcasttmp");
-    LLVMBuildCall(builder, func_ref, args, 2, "");
-    delete(args);
+	LLVMValueRef * args = new(2 * sizeof(LLVMValueRef));
+	args[0] = tmp;
+	args[1] = LLVMConstInt(LLVMInt32Type(), (size), false);
+	LLVMValueRef func_ref = LLVMGetNamedFunction(module, "WRITE_STRING");
+	LLVMTypeRef dest_type = LLVMPointerType(type_to_llvm(iarray_to_array(typeArray((size+1), typeChar))), 0);
+	args[0] = LLVMBuildPointerCast(builder, tmp, dest_type, "ptrcasttmp");
+	LLVMBuildCall(builder, func_ref, args, 2, "");
+	delete(args);
 }

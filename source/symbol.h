@@ -92,7 +92,7 @@ struct SymbolEntry_tag {
 	unsigned int   hashValue;          /* Τιμή κατακερματισμού          */
 	SymbolEntry  * nextHash;           /* Επόμενη εγγραφή στον Π.Κ.     */
 	SymbolEntry  * nextInScope;        /* Επόμενη εγγραφή στην εμβέλεια */
-    LLVMValueRef   Valref;             /* The allocated space */
+	LLVMValueRef   Valref;             /* The allocated space */
 
 	union {                            /* Ανάλογα με τον τύπο εγγραφής: */
 

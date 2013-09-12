@@ -177,13 +177,13 @@ void unop_IR(struct ast_node *operand, const char *op, struct ast_node *res) {
 	if (!strcmp(op, "+")) {
 		if (operand->type == typeInteger) {
 			res->type = typeInteger;
-            res->Valref = operand->Valref;
+			res->Valref = operand->Valref;
 		} else if (operand->type == typeReal) {
 			res->type = typeReal;
-            res->Valref = operand->Valref;
+			res->Valref = operand->Valref;
 		} else if (operand->type == typeChar) {
 			res->type = typeInteger;
-            res->Valref = LLVMBuildZExt(builder, operand->Valref, LLVMInt32Type(), "zexttmp");
+			res->Valref = LLVMBuildZExt(builder, operand->Valref, LLVMInt32Type(), "zexttmp");
 		} else {
 			my_error(ERR_LV_ERR, "Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
 		}
@@ -196,8 +196,8 @@ void unop_IR(struct ast_node *operand, const char *op, struct ast_node *res) {
 			res->Valref = LLVMBuildFNeg(builder, operand->Valref, "negtmp");
 		} else if (operand->type == typeChar) {
 			res->type = typeInteger;
-            LLVMValueRef tmp = LLVMBuildZExt(builder, operand->Valref, \
-                            LLVMInt32Type(), "zexttmp");
+			LLVMValueRef tmp = LLVMBuildZExt(builder, operand->Valref, \
+											 LLVMInt32Type(), "zexttmp");
 			res->Valref = LLVMBuildNUWNeg(builder, tmp, "negtmp");
 		} else {
 			my_error(ERR_LV_ERR, "Cannot perform \"%s\" on %s", op, verbose_type(operand->type));
@@ -256,104 +256,108 @@ void eval_const_binop(struct ast_node *left, struct ast_node *right, const char 
 
 // Produces IR for a binary operation on a specific type of pair operands
 void op_IR(const char * op, LLVMValueRef left, LLVMValueRef right, Type t, LLVMValueRef * res) {
-    /* TODO: signed operations? */
+	/* TODO: signed operations? */
 	if (t == typeReal) {
-        if (!strcmp(op, "+"))
-            *res = LLVMBuildFAdd(builder, left, right, "addtmp");
-        else if (!strcmp(op, "-"))
-            *res = LLVMBuildFSub(builder, left, right, "subtmp");
-        else if (!strcmp(op, "*"))
-            *res = LLVMBuildFMul(builder, left, right, "multmp");
-        else if (!strcmp(op, "/"))
-            *res = LLVMBuildFDiv(builder, left, right, "divtmp");
-        else if (!strcmp(op, "<")) 
-            *res = LLVMBuildFCmp(builder, LLVMRealOLT, left, right, "lesstmp");
-        else if (!strcmp(op, "<=")) 
-            *res = LLVMBuildFCmp(builder, LLVMRealOLE, left, right, "leqtmp");
-        else if (!strcmp(op, ">")) 
-            *res = LLVMBuildFCmp(builder, LLVMRealOGT, left, right, "greatmp");
-        else if (!strcmp(op, ">=")) 
-            *res = LLVMBuildFCmp(builder, LLVMRealOGT, left, right, "greqtmp");
-        else if (!strcmp(op, "==")) 
-            *res = LLVMBuildFCmp(builder, LLVMRealOEQ, left, right, "eqtmp");
-        else if (!strcmp(op, "!=")) 
-            *res = LLVMBuildFCmp(builder, LLVMRealONE, left, right, "difftmp");
-    } else if (t == typeInteger) {
-        if (!strcmp(op, "+"))
-            *res = LLVMBuildNSWAdd(builder, left, right, "addtmp");
-        else if (!strcmp(op, "-"))
-            *res = LLVMBuildNSWSub(builder, left, right, "subtmp");
-        else if (!strcmp(op, "*"))
-            *res = LLVMBuildMul(builder, left, right, "multmp");
-        else if (!strcmp(op, "/"))
-            *res = LLVMBuildSDiv(builder, left, right, "divtmp"); 
-        else if ((!strcmp(op, "%")) || (!strcmp(op, "MOD")))
-            *res = LLVMBuildSRem(builder, left, right, "modtmp");
-        else if (!strcmp(op, "<")) 
-            *res = LLVMBuildICmp(builder, LLVMIntSLT, left, right, "lesstmp");
-        else if (!strcmp(op, "<=")) 
-            *res = LLVMBuildICmp(builder, LLVMIntSLE, left, right, "leqtmp");
-        else if (!strcmp(op, ">")) 
-            *res = LLVMBuildICmp(builder, LLVMIntSGT, left, right, "greatmp");
-        else if (!strcmp(op, ">=")) 
-            *res = LLVMBuildICmp(builder, LLVMIntSGE, left, right, "greqtmp");
-        else if (!strcmp(op, "==")) 
-            *res = LLVMBuildICmp(builder, LLVMIntEQ, left, right, "eqtmp");
-        else if (!strcmp(op, "!=")) 
-            *res = LLVMBuildICmp(builder, LLVMIntNE, left, right, "difftmp");
-    } else if (t == typeBoolean) {
-        if (!strcmp(op, "==")) 
-            *res = LLVMBuildICmp(builder, LLVMIntEQ, left, right, "eqtmp");
-        else if (!strcmp(op, "!=")) 
-            *res = LLVMBuildICmp(builder, LLVMIntNE, left, right, "difftmp");
-        else if ((!strcmp(op, "&&")) || (!strcmp(op, "and")))
-            *res = LLVMBuildAnd(builder, left, right, "andtmp");
-        else if ((!strcmp(op, "||")) || (!strcmp(op, "or")))
-            *res = LLVMBuildOr(builder, left, right, "ortmp");
-    } else 
+		if (!strcmp(op, "+")) {
+			*res = LLVMBuildFAdd(builder, left, right, "addtmp");
+		} else if (!strcmp(op, "-")) {
+			*res = LLVMBuildFSub(builder, left, right, "subtmp");
+		} else if (!strcmp(op, "*")) {
+			*res = LLVMBuildFMul(builder, left, right, "multmp");
+		} else if (!strcmp(op, "/")) {
+			*res = LLVMBuildFDiv(builder, left, right, "divtmp");
+		} else if (!strcmp(op, "<")) {
+			*res = LLVMBuildFCmp(builder, LLVMRealOLT, left, right, "lesstmp");
+		} else if (!strcmp(op, "<=")) {
+			*res = LLVMBuildFCmp(builder, LLVMRealOLE, left, right, "leqtmp");
+		} else if (!strcmp(op, ">")) {
+			*res = LLVMBuildFCmp(builder, LLVMRealOGT, left, right, "greatmp");
+		} else if (!strcmp(op, ">=")) {
+			*res = LLVMBuildFCmp(builder, LLVMRealOGT, left, right, "greqtmp");
+		} else if (!strcmp(op, "==")) {
+			*res = LLVMBuildFCmp(builder, LLVMRealOEQ, left, right, "eqtmp");
+		} else if (!strcmp(op, "!=")) {
+			*res = LLVMBuildFCmp(builder, LLVMRealONE, left, right, "difftmp");
+		}
+	} else if (t == typeInteger) {
+		if (!strcmp(op, "+")) {
+			*res = LLVMBuildNSWAdd(builder, left, right, "addtmp");
+		} else if (!strcmp(op, "-")) {
+			*res = LLVMBuildNSWSub(builder, left, right, "subtmp");
+		} else if (!strcmp(op, "*")) {
+			*res = LLVMBuildMul(builder, left, right, "multmp");
+		} else if (!strcmp(op, "/")) {
+			*res = LLVMBuildSDiv(builder, left, right, "divtmp");
+		} else if ((!strcmp(op, "%")) || (!strcmp(op, "MOD"))) {
+			*res = LLVMBuildSRem(builder, left, right, "modtmp");
+		} else if (!strcmp(op, "<")) {
+			*res = LLVMBuildICmp(builder, LLVMIntSLT, left, right, "lesstmp");
+		} else if (!strcmp(op, "<=")) {
+			*res = LLVMBuildICmp(builder, LLVMIntSLE, left, right, "leqtmp");
+		} else if (!strcmp(op, ">")) {
+			*res = LLVMBuildICmp(builder, LLVMIntSGT, left, right, "greatmp");
+		} else if (!strcmp(op, ">=")) {
+			*res = LLVMBuildICmp(builder, LLVMIntSGE, left, right, "greqtmp");
+		} else if (!strcmp(op, "==")) {
+			*res = LLVMBuildICmp(builder, LLVMIntEQ, left, right, "eqtmp");
+		} else if (!strcmp(op, "!=")) {
+			*res = LLVMBuildICmp(builder, LLVMIntNE, left, right, "difftmp");
+		}
+	} else if (t == typeBoolean) {
+		if (!strcmp(op, "==")) {
+			*res = LLVMBuildICmp(builder, LLVMIntEQ, left, right, "eqtmp");
+		} else if (!strcmp(op, "!=")) {
+			*res = LLVMBuildICmp(builder, LLVMIntNE, left, right, "difftmp");
+		} else if ((!strcmp(op, "&&")) || (!strcmp(op, "and"))) {
+			*res = LLVMBuildAnd(builder, left, right, "andtmp");
+		} else if ((!strcmp(op, "||")) || (!strcmp(op, "or"))) {
+			*res = LLVMBuildOr(builder, left, right, "ortmp");
+		}
+	} else {
 		my_error(ERR_LV_CRIT, "Internal error: invalid common operand type during binop IR");
+	}
 }
 
 //Expr Binops - Create IR for casting to each.
 void binop_IR(struct ast_node *left, struct ast_node *right, const char *op, struct ast_node *res) {
-    LLVMValueRef tmp;
+	LLVMValueRef tmp;
 	res->type = typeVoid; // could be changed to NULL
 	if ((left->type == typeInteger) && (right->type == typeReal)) {
 		res->type = binop_type_check(op, typeReal);
-        tmp = cast_compat(typeReal, typeInteger, left->Valref);
-        op_IR(op, tmp, right->Valref, typeReal, &(res->Valref));
+		tmp = cast_compat(typeReal, typeInteger, left->Valref);
+		op_IR(op, tmp, right->Valref, typeReal, &(res->Valref));
 	} else if ((left->type == typeReal) && (right->type == typeInteger)) {
 		res->type = binop_type_check(op, typeReal);
-        tmp = cast_compat(typeReal, typeInteger, right->Valref);
-        op_IR(op, left->Valref, tmp, typeReal, &(res->Valref));
+		tmp = cast_compat(typeReal, typeInteger, right->Valref);
+		op_IR(op, left->Valref, tmp, typeReal, &(res->Valref));
 	} else if ((left->type == typeChar) && (right->type == typeReal)) {
 		res->type = binop_type_check(op, typeReal);
-        tmp = cast_compat(typeReal, typeChar, left->Valref);
-        op_IR(op, tmp, right->Valref, typeReal, &(res->Valref));
+		tmp = cast_compat(typeReal, typeChar, left->Valref);
+		op_IR(op, tmp, right->Valref, typeReal, &(res->Valref));
 	} else if ((left->type == typeReal) && (right->type == typeChar)) {
 		res->type = binop_type_check(op, typeReal);
-        tmp = cast_compat(typeReal, typeChar, right->Valref);
-        op_IR(op, left->Valref, tmp, typeReal, &(res->Valref));
+		tmp = cast_compat(typeReal, typeChar, right->Valref);
+		op_IR(op, left->Valref, tmp, typeReal, &(res->Valref));
 	} else if ((left->type == typeReal) && (right->type == typeReal)) {
 		res->type = binop_type_check(op, typeReal);
-        op_IR(op, left->Valref, right->Valref, typeReal, &(res->Valref));
+		op_IR(op, left->Valref, right->Valref, typeReal, &(res->Valref));
 	} else if ((left->type == typeInteger) && (right->type == typeInteger)) {
 		res->type = binop_type_check(op, typeInteger);
-        op_IR(op, left->Valref, right->Valref, typeInteger, &(res->Valref));
+		op_IR(op, left->Valref, right->Valref, typeInteger, &(res->Valref));
 	} else if ((left->type == typeChar) && (right->type == typeInteger)) {
 		res->type = binop_type_check(op, typeInteger);
-        tmp = cast_compat(typeInteger, typeChar, left->Valref);
-        op_IR(op, tmp, right->Valref, typeInteger, &(res->Valref));
+		tmp = cast_compat(typeInteger, typeChar, left->Valref);
+		op_IR(op, tmp, right->Valref, typeInteger, &(res->Valref));
 	} else if ((left->type == typeInteger) && (right->type == typeChar)) {
 		res->type = binop_type_check(op, typeInteger);
-        tmp = cast_compat(typeInteger, typeChar, right->Valref);
-        op_IR(op, left->Valref, tmp, typeInteger, &(res->Valref));
+		tmp = cast_compat(typeInteger, typeChar, right->Valref);
+		op_IR(op, left->Valref, tmp, typeInteger, &(res->Valref));
 	} else if ((left->type == typeChar) && (right->type == typeChar)) {
 		res->type = binop_type_check(op, typeInteger);
-        op_IR(op, left->Valref, right->Valref, typeInteger, &(res->Valref));
+		op_IR(op, left->Valref, right->Valref, typeInteger, &(res->Valref));
 	} else if ((left->type == typeBoolean) && (right->type == typeBoolean)) {
 		res->type = binop_type_check(op, typeBoolean);
-        op_IR(op, left->Valref, right->Valref, typeBoolean, &(res->Valref));
+		op_IR(op, left->Valref, right->Valref, typeBoolean, &(res->Valref));
 	} else {
 		my_error(ERR_LV_ERR, "Type mismatch on \"%s\" operator between %s and %s", \
 				 op, verbose_type(left->type), verbose_type(right->type));
@@ -370,7 +374,7 @@ Type binop_type_check(const char *op, Type t) {
 			res = typeReal;
 		} else if ((!strcmp(op, "<")) || (!strcmp(op, ">")) || (!strcmp(op, ">=")) \
 				   || (!strcmp(op, "<=")) || (!strcmp(op, "==")) \
-                   || (!strcmp(op, "!="))) {
+				   || (!strcmp(op, "!="))) {
 			res = typeBoolean;
 		} else {
 			my_error(ERR_LV_ERR, "Cannot perform \"%s\" between Reals", op);
@@ -381,7 +385,7 @@ Type binop_type_check(const char *op, Type t) {
 			res = typeInteger;
 		} else if ((!strcmp(op, "<")) || (!strcmp(op, ">")) || (!strcmp(op, "<="))
 				   || (!strcmp(op, ">=")) || (!strcmp(op, "==")) \
-                   || (!strcmp(op, "!="))) {
+				   || (!strcmp(op, "!="))) {
 			res = typeBoolean;
 		} else {
 			my_error(ERR_LV_ERR, "Cannot perform \"%s\" between Integers", op);
@@ -404,8 +408,9 @@ Type binop_type_check(const char *op, Type t) {
 //Checks if an ast node can be used as an array index.
 int array_index_check(struct ast_node *_) {
 	int ret = 0;
-    if  (_->type == typeChar)
-        _->value.i = (RepInteger) _->value.c;  // cast the node from char to int
+	if  (_->type == typeChar) {
+		_->value.i = (RepInteger) _->value.c;    // cast the node from char to int
+	}
 
 	if (!compat_types(typeInteger, _->type)) {
 		my_error(ERR_LV_ERR, "Array index cannot be %s" , verbose_type(_->type));
@@ -416,7 +421,7 @@ int array_index_check(struct ast_node *_) {
 	} else if (_->value.i == 0) {
 		my_error(ERR_LV_ERR, "Array index cannot be zero");
 		ret = 1;
-    }
+	}
 	return ret;
 }
 

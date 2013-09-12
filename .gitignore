@@ -20,3 +20,4 @@ parser.output
 ./*.asm
 *.obj
 *.dmp
+*.orig

@@ -362,8 +362,9 @@ SymbolEntry * newParameter (const char * name, Type type,
 				e->u.eParameter.next = NULL;
 				//Increment the argument no, and avoid overflows. Not fully safe tho.
 				// That is, if we can have SIZE_MAX parameters on a function.
-				if (f->u.eFunction.argno < (SIZE_MAX-1))
+				if (f->u.eFunction.argno < (SIZE_MAX-1)) {
 					f->u.eFunction.argno++;
+				}
 			}
 			if (f->u.eFunction.lastArgument == NULL) {
 				f->u.eFunction.firstArgument = f->u.eFunction.lastArgument = e;
@@ -554,7 +555,7 @@ Type typeIArray (Type refType) {
 	n->kind     = TYPE_IARRAY;
 	n->refType  = refType;
 	n->refCount = 1;
-    n->size = 0;
+	n->size = 0;
 
 	refType->refCount++;
 
@@ -562,9 +563,9 @@ Type typeIArray (Type refType) {
 }
 
 void destroyType (Type type) {
-    if (type == NULL) {
-        return;
-    }
+	if (type == NULL) {
+		return;
+	}
 	switch (type->kind) {
 		case TYPE_ARRAY:
 		case TYPE_IARRAY:
