@@ -23,6 +23,7 @@ int currentWrite = 0;                   // indicator for WRITE mode
 bool function_has_ret = false;          // flag for marking whether a routine body returns
 bool array_last = false;                // flag for the last dimension of an array variable
 bool global_scope = true;               // flag marking the scope for initializations
+bool switch_default_case = false;       // true if the default case of switch is being parsed
 
 %}
 
@@ -1030,6 +1031,21 @@ base_stmt
                     binop_IR(&tmp, &$3, "%", &res);   
             }
 
+            if ($3.type->kind >= TYPE_ARRAY) {
+                Type curr_expr = $3.type;
+                Type curr_lvalue = $1.type;
+                while (curr_expr->kind >= TYPE_ARRAY) {
+                    if (curr_expr->size != curr_lvalue->size) {
+                        my_error(ERR_LV_ERR, "Array dimension sizes %d and %d are incompatible for assignment",\
+                                            curr_lvalue->size, curr_expr->size);
+                        YYERROR;
+                    }
+                    curr_expr = curr_expr->refType;
+                    curr_lvalue = curr_lvalue->refType;
+                }
+                res.Valref = LLVMBuildLoad(builder, res.Valref, "loadtmp");
+            }
+
             res.Valref = cast_compat($1.type, res.type, res.Valref);
 			LLVMBuildStore(builder, res.Valref, $1.Valref);
 		}
@@ -1397,7 +1413,11 @@ stmt_opt_switch
         {
 			LLVMBasicBlockRef switchlast_ref = conditional_scope_get(first);
             LLVMPositionBuilderAtEnd(builder, switchlast_ref);
+            switch_default_case = true;
         } clause
+        {
+            switch_default_case = false;
+        }
 	;
 stmt_opt_ret
 	: /* Nothing */	{ $$.type = typeVoid; }
@@ -1475,7 +1495,13 @@ clause_choice
             LLVMPositionBuilderAtEnd(builder, endswitch_ref);
         }
 	| T_next ';' 
-        { /* No action */ }
+        {
+            if (switch_default_case) {
+                LLVMBasicBlockRef endswitch_ref = conditional_scope_get(third);
+                LLVMBuildBr(builder, endswitch_ref);
+                LLVMPositionBuilderAtEnd(builder, endswitch_ref);
+            }
+        }
 	;
 write
 	: T_write  { currentWrite = 0; }

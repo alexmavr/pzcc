@@ -1,6 +1,6 @@
 PROGRAM type_cast ()
 {
-    // Shouldn't fail
+    // Should fail
     int y = 5 + 3.0; 
     int r = 5 ; 
     int z;
