@@ -1,12 +1,12 @@
 Bugs:
-
+	Fill bugs here...
 
 General:
 	refactor parser.y
-	improve error messages and catch error recovery segfaults
-
+	improve error messages
 
 Done:
+*	catch error recovery segfaults	=>	No segfaults for a long time now...
 *	report all execlp calls
 *	catch all execlp returns
 *	as much as i saw, all exclp invocations. when they should be using tmp_filename_too, they simply use tmp_filename... fix that => FIXED

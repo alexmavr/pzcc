@@ -28,10 +28,13 @@ Installation
 
 At the compiler's root directory:
 :: 
-    make -k
+    make [ -j ]
     sudo make install
 
 The install targets place the compiler executable at /usr/bin/ and the library at /usr/lib/pzcc/ .
+If you want to build the compiler itself for debugging purposes, use the below invocation of make:
+:: 
+   make [ -j ] DEBUG=y
 
 Features
 ========
