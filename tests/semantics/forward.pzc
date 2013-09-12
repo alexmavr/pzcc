@@ -13,8 +13,7 @@ PROGRAM exprs ()
     bool d = false || true;
     int i = 's'; 
     
-    i = tocall(3);
-    
+    WRITELN(tocall(3)); // 1
 }
 
 FUNC int tocall(int hi) {

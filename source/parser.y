@@ -404,7 +404,45 @@ var_init_tail
 		}
 	;
 routine
-	: routine_header routine_tail
+	: routine_header 
+        {
+            LLVMValueRef func_ref = LLVMGetNamedFunction(module, currentFun->id);
+        
+            if (func_ref != NULL) {
+                if (LLVMCountParams(func_ref) != currentFun->u.eFunction.argno) {
+                    my_error(ERR_LV_ERR, "Function %s is already declared with a different parameter count", currentFun->id);
+                    YYERROR;
+                }
+
+            } else {
+                size_t argno = currentFun->u.eFunction.argno;    
+                SymbolEntry *curr_param = currentFun->u.eFunction.firstArgument;
+                LLVMTypeRef *params = new(sizeof(LLVMTypeRef) * argno);
+                int i;
+
+                // Create param list
+                for(i=argno-1; i>=0; i--, curr_param=curr_param->u.eParameter.next) {
+                    if (curr_param->u.eParameter.type->kind >= TYPE_ARRAY)
+                        params[i] = LLVMPointerType(type_to_llvm( \
+                            iarray_to_array(curr_param->u.eParameter.type)), 0);
+                    else if (curr_param->u.eParameter.mode == PASS_BY_REFERENCE)
+                        params[i] = LLVMPointerType(type_to_llvm( \
+                            curr_param->u.eParameter.type), 0);
+                    else
+                        params[i] = type_to_llvm(curr_param->u.eParameter.type);
+                }
+                
+                // Create function type
+                LLVMTypeRef funcType = LLVMFunctionType( \
+                    type_to_llvm(currentFun->u.eFunction.resultType), \
+                        params, argno, false);
+
+                // Create function 
+                func_ref = LLVMAddFunction(module, currentFun->id, funcType);
+                LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+            }
+
+        } routine_tail
 		{
             // Actions for when a routine is closing (be it a forward declaration or a definition).
             closeScope();
@@ -417,66 +455,36 @@ routine_tail
 	: ';' { forwardFunction(currentFun); }
 	| '{' {
         LLVMValueRef func_ref = LLVMGetNamedFunction(module, currentFun->id);
-        
-        if (func_ref != NULL) {
-            if (LLVMCountParams(func_ref) != currentFun->u.eFunction.argno) {
-                my_error(ERR_LV_ERR, "Function %s is already declared with a different parameter count", currentFun->id);
-                YYERROR;
-            }
-            if (LLVMCountBasicBlocks(func_ref) != 0) {
-                my_error(ERR_LV_ERR, "Function %s is already fully defined");
-                YYERROR;
-            }
-        } else {
-            size_t argno = currentFun->u.eFunction.argno;    
-            SymbolEntry *curr_param = currentFun->u.eFunction.firstArgument;
-            LLVMTypeRef *params = new(sizeof(LLVMTypeRef) * argno);
-            int i;
+        if (LLVMCountBasicBlocks(func_ref) != 0) {
+            my_error(ERR_LV_ERR, "Function %s is already fully defined");
+            YYERROR;
+        }
+        // position builder at start/end of function body
+        LLVMBasicBlockRef block = LLVMAppendBasicBlock(func_ref, "entry");
+        LLVMPositionBuilderAtEnd(builder, block);
 
-            // Create param list
-            for(i=argno-1; i>=0; i--, curr_param=curr_param->u.eParameter.next) {
-                if (curr_param->u.eParameter.type->kind >= TYPE_ARRAY)
-                    params[i] = LLVMPointerType(type_to_llvm( \
-                        iarray_to_array(curr_param->u.eParameter.type)), 0);
-                else if (curr_param->u.eParameter.mode == PASS_BY_REFERENCE)
-                    params[i] = LLVMPointerType(type_to_llvm( \
-                        curr_param->u.eParameter.type), 0);
-                else
-                    params[i] = type_to_llvm(curr_param->u.eParameter.type);
-            }
-            
-            // Create function type
-            LLVMTypeRef funcType = LLVMFunctionType( \
-                type_to_llvm(currentFun->u.eFunction.resultType), \
-                    params, argno, false);
+        size_t argno = currentFun->u.eFunction.argno;    
+        SymbolEntry *curr_param = currentFun->u.eFunction.firstArgument;
+        int i;
 
-            // Create function 
-            func_ref = LLVMAddFunction(module, currentFun->id, funcType);
-            LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-
-            // position builder at start/end of function body
-            LLVMBasicBlockRef block = LLVMAppendBasicBlock(func_ref, "entry");
-            LLVMPositionBuilderAtEnd(builder, block);
-
-            // Store parameters in new local variables if passed by value
-            curr_param = currentFun->u.eFunction.firstArgument;
-            char * new_str; // IR parameters are <name>_ref
-            for(i=argno-1; i>=0; i--, curr_param=curr_param->u.eParameter.next) {
-                LLVMValueRef param = LLVMGetParam(func_ref, i);
-                if (curr_param->u.eParameter.mode == PASS_BY_VALUE) {
-                    curr_param->Valref = LLVMBuildAlloca(builder, \
-                        type_to_llvm(curr_param->u.eParameter.type), curr_param->id);
-                    new_str = new(strlen(curr_param->id)+strlen("_ref")+1);
-                    new_str[0] = '\0';
-                    strcat(new_str, curr_param->id);
-                    strcat(new_str, "_ref");
-                    LLVMBuildStore(builder, param, curr_param->Valref);
-                    LLVMSetValueName(param, new_str);
-					delete(new_str);	//BUG-SQUASHING
-                } else {
-                    LLVMSetValueName(param, curr_param->id);
-                    curr_param->Valref = param;
-                }
+        // Store parameters in new local variables if passed by value
+        curr_param = currentFun->u.eFunction.firstArgument;
+        char * new_str; // IR parameters are <name>_ref
+        for(i=argno-1; i>=0; i--, curr_param=curr_param->u.eParameter.next) {
+            LLVMValueRef param = LLVMGetParam(func_ref, i);
+            if (curr_param->u.eParameter.mode == PASS_BY_VALUE) {
+                curr_param->Valref = LLVMBuildAlloca(builder, \
+                    type_to_llvm(curr_param->u.eParameter.type), curr_param->id);
+                new_str = new(strlen(curr_param->id)+strlen("_ref")+1);
+                new_str[0] = '\0';
+                strcat(new_str, curr_param->id);
+                strcat(new_str, "_ref");
+                LLVMBuildStore(builder, param, curr_param->Valref);
+                LLVMSetValueName(param, new_str);
+                delete(new_str);	//BUG-SQUASHING
+            } else {
+                LLVMSetValueName(param, curr_param->id);
+                curr_param->Valref = param;
             }
         }
     } block_tail '}' 
