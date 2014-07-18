@@ -1,0 +1,43 @@
+// function starLine
+// prints a row of 'ch' characters 'size' times.
+PROC starLine (char ch, int size)
+{
+  int i;
+  FOR (i, 1 TO size)
+    WRITE(ch);
+}
+
+// function starChar
+// prints a 'phrase' with 'ch' between each two consequent characters.
+PROC starChar (char phrase[], char ch, int size)
+{
+  int i;
+  FOR (i, 0 TO size-1)
+    WRITE(ch, ' ', phrase[i], ' ');
+  WRITE(ch);
+}
+
+// prettyStyle created by Clark
+PROGRAM prettyStyle ()
+{
+  int size;
+  char sym[20];
+
+  WRITE("Give me a word: ");
+  READ_STRING(20, sym);
+  size = strlen(sym);
+
+  WRITELN("Let\'s print this nice...\n");
+  starLine('*', 4 * size + 1); WRITELN();
+  starChar(sym, '*', size);    WRITELN();
+  starLine('*', 4 * size + 1); WRITELN();
+
+  // or...
+  WRITELN();
+
+  starLine('#', 4 * size + 1); WRITELN();
+  starChar(sym, '-', size);    WRITELN();
+  starLine('#', 4 * size + 1); WRITELN();
+}
+
+//TODO: Last repetition is ignored...

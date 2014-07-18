@@ -1,0 +1,18 @@
+int x;
+
+FUNC int f (int n)
+{
+  int s = 0, i;
+  FOR (i, 1 TO n)
+    s = s + i;
+  return s;
+}
+   
+PROGRAM main ()
+{
+   x = 6;
+   x = f(x) + f(f(3));
+   WRITELN(x);
+}
+
+//TODO: f(3) = 6 and f(6) = 21

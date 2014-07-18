@@ -1,0 +1,7 @@
+PROC aaa (int &a) { WRITELN(a); }
+
+PROGRAM main ()
+{
+  int i = 3;
+  aaa(i+5);
+}

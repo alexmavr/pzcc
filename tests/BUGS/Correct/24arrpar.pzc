@@ -1,0 +1,16 @@
+PROC reverse (char s[], char r[], char c)
+{
+   if (true) WRITE(c);
+   else if (false) WRITE(s[0]);
+   else WRITE(r[0]);
+}
+
+PROGRAM main ()
+{
+   char p[20], s[20];
+   reverse(s, p, '4');
+   reverse("Hello", p, '2');
+   reverse(p, "Hello", '\n');
+}
+
+//TODO: Doesn't recognize '\n' as a character

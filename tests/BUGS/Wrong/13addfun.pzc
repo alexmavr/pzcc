@@ -1,0 +1,8 @@
+FUNC int f () { return 0; }
+FUNC int g () { return 0; }
+
+PROGRAM main ()
+{
+  WRITELN(f+g);
+  WRITELN("This program is wrong!");
+}

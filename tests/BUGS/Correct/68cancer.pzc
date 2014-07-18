@@ -1,0 +1,28 @@
+FUNC bool is_it (int n, char source[])
+{
+  int i;
+  FOR (i, 0 TO n/2-1)
+    if (source[i] != source[n-i-1])
+      return false;
+  return true;
+}
+
+PROGRAM cancer ()
+{
+  int n;
+  char source[31];
+  
+  WRITE("Give a string with maximum length 30: ");
+  READ_STRING(30, source);
+  n=0;
+  while (source[n] != '\0')
+    n=n+1;
+  WRITE("Length is ");
+  WRITELN(n);
+  if (is_it(n, source))
+    WRITE("\nIs cancer...\n");
+  else
+    WRITE("\nIs not cancer...\n");
+}
+
+//TODO: Length again...

@@ -1,0 +1,62 @@
+PROC swap (int &a, int &b)
+{
+  int t = a;
+  a = b;
+  b = t;
+}
+
+PROC qsort_auxil (int a[], int lower, int upper)
+{
+  int x, i, j;
+
+  if (lower < upper) {
+    x = a[(lower + upper) / 2];
+    i = lower;
+    j = upper;
+    while (i <= j) {
+      while (a[i] < x) i = i+1;
+      while (a[j] > x) j = j-1;
+      if (i <= j) { 
+        swap(a[i], a[j]);
+        i = i+1;
+        j = j-1;
+      }
+    }
+    qsort_auxil(a, lower, j);
+    qsort_auxil(a, i, upper);
+  }
+}
+
+PROC qsort (int n, int a[])
+{
+  qsort_auxil(a, 0, n-1);
+}
+
+PROC writeArray (char msg[], int n, int x[])
+{
+  int i;
+
+  WRITE(msg);
+  FOR (i, 0 TO n-1) {
+    if (i > 0) WRITE(", ");
+    WRITE(x[i]);
+  }
+  WRITELN();
+}
+
+PROGRAM main ()
+{
+  int seed, x[16], i;
+
+  WRITE("Seed :\t");
+  seed = READ_INT();
+  FOR (i, 0 TO 15) {
+    seed = (seed * 137 + 220 + i) % 101;
+    x[i] = seed;
+  }
+  writeArray("Initial array; ", 16, x);
+  qsort(16, x);
+  writeArray("Sorted array: ", 16, x);
+}
+
+//TODO: Something wicked this way comes...

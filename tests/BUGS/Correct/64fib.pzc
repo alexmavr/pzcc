@@ -1,0 +1,25 @@
+PROGRAM main ()
+{
+  int n;        // The number of fibonacci numbers we will print
+  int i;        // The index of fibonacci number to be printed next
+  int current;  // The value of the (i)th fibonacci number
+  int next;     // The value of the (i+1)th fibonacci number
+  int twoaway;  // The value of the (i+2)th fibonacci number
+
+  WRITE("How many Fibonacci numbers do you want to compute? ");
+  n = READ_INT();
+  if (n <= 0) WRITELN("The number should be positive.");
+  else {
+    WRITE("\n\n\tI \t Fibonacci(I) \n\t=====================\n");
+    next = 1;
+    current = 1;
+    FOR (i, 1 TO n) {
+      WRITELN("\t", i, " \t   ", current);
+      twoaway = current + next;
+      current = next;
+      next    = twoaway;
+    }
+  }
+}
+
+//TODO: The last loop is not computed...
