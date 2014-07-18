@@ -6,3 +6,5 @@ PROGRAM main ()
   WRITELN(f+g);
   WRITELN("This program is wrong!");
 }
+
+//Binop between 2 functions is prohibited...

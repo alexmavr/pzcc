@@ -5,3 +5,5 @@ PROGRAM main ()
   int i = 3;
   aaa(i+5);
 }
+
+//This should be a type error, because the function expects a pointer to integer and an integer is given...

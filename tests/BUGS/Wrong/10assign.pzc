@@ -6,3 +6,5 @@ PROGRAM main ()
   f = g;
   WRITE("\nThis program is wrong!\n");
 }
+
+//Assignment of function type should be wrong... (Do we even have a function type?)
