@@ -14,3 +14,4 @@ PROGRAM main ()
 }
 
 //TODO: Doesn't recognize '\n' as a character
+//	==>	Now it does :o

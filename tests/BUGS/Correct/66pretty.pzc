@@ -41,3 +41,4 @@ PROGRAM prettyStyle ()
 }
 
 //TODO: Last repetition is ignored...
+//	==> Not anymore!

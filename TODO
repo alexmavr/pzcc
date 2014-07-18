@@ -1,12 +1,12 @@
 Bugs:
 	Fill bugs here...
-	Last repetition of a loop is not executed (or something like that ;))...
 
 General:
 	refactor parser.y
 	improve error messages
 
 Done:
+*	Last repetition of a loop is not executed (or something like that ;))...	==> LLVMIntSGE instead of LLVMIntSGT.
 *	character escapes do not get escaped in char and string literals.
 *	catch error recovery segfaults	=>	No segfaults for a long time now...
 *	report all execlp calls

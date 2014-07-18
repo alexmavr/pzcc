@@ -3,8 +3,23 @@ char r[32];
 PROC reverse (char s[])
 {
   int l = strlen(s), i;
-  FOR (i, 0 TO l-1)
+
+  FOR (i, 0 TO l-1) {
+//	WRITELN(i);
+//	WRITELN(l-i-1);
     r[i] = s[l-i-1];
+  }
+
+/*
+  i = 0;
+  while (s[i] != '\0') {
+	WRITELN(i);
+	WRITELN(l-i-1);
+    r[i] = s[l-i-1];
+	i++;
+  }
+*/
+
   r[l] = '\0';
 }
 
@@ -15,3 +30,4 @@ PROGRAM main ()
 }
 
 //TODO: Last character is not printed
+//	==>	Now it is ...

@@ -1175,10 +1175,10 @@ base_stmt
 
             LLVMValueRef cond;
             if ($5.direction == '+')
-                cond = LLVMBuildICmp(builder, LLVMIntSGE, ival, \
+                cond = LLVMBuildICmp(builder, LLVMIntSGT, ival, \
                             $5.to, "forcond");
             else 
-                cond = LLVMBuildICmp(builder, LLVMIntSLE, ival, \
+                cond = LLVMBuildICmp(builder, LLVMIntSLT, ival, \
                             $5.to, "forcond");
 
             LLVMBuildCondBr(builder, cond, endfor_ref, forbody_ref);
