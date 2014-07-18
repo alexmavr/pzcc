@@ -6,6 +6,7 @@ General:
 	improve error messages
 
 Done:
+*	functions used in assignments or modified were silently failing...
 *	Last repetition of a loop is not executed (or something like that ;))...	==> LLVMIntSGE instead of LLVMIntSGT.
 *	character escapes do not get escaped in char and string literals.
 *	catch error recovery segfaults	=>	No segfaults for a long time now...

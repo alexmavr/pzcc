@@ -771,9 +771,9 @@ l_value
 			SymbolEntry * id = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
 			if (id == NULL)
 				YYERROR;
-			if (id->Valref == NULL)
+			if (id->Valref == NULL && id->entryType != ENTRY_FUNCTION)
 				YYERROR;
-            
+
 			$$.value.i = 0; // if 1, then the l_value is constant
 
             /* Type Checking for array dimensions */
@@ -819,7 +819,7 @@ l_value
                     $$.value.i = 1;
 					break;
                 case ENTRY_FUNCTION:
-						my_error(ERR_LV_ERR, "Routine identifier \"%s\" cannot be used as lvalue", id->id);
+						my_error(ERR_LV_ERR, "Routine identifier \"%s\" cannot be modified or used as lvalue", id->id);
                         YYERROR;
 				default: ;
 			}
