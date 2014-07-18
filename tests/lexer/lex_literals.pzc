@@ -1,0 +1,15 @@
+PROGRAM hi() {
+	char a = '\n';
+	a = '\r';
+	a = '\r';
+	a = '\"';
+	a = '\'';
+	a = '\\';
+	a = '\0';
+	a = '0';
+	a = 'z';
+	a = '^';
+
+	char r[14];
+	r = "\n!dlroW olleH";
+}

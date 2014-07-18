@@ -47,6 +47,9 @@ void unescape(char * s, char * t) {
 					case 'r':
 						s[j] = '\r';
 						break;
+					case '0':
+						s[j] = '\0';
+						break;
 					case '\\':
 						s[j] = '\\';
 						break;

@@ -105,8 +105,13 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 									}
 
 '{CHAR}'							{
-										yylval.c = yytext[1];
-										return T_CONST_char;	
+			fprintf(stderr, "YYText on char is \'%s\' and what we put in is \'%c\'\n", yytext, yytext[1]);
+										char *tmp = (char *) new(2 * sizeof(char));
+										yytext[3] = '\0';
+										unescape(tmp, &yytext[1]);
+			fprintf(stderr, "But now it is corrected as \'%c\'\n", tmp[0]);
+										yylval.c = tmp[0];
+										return T_CONST_char;
 									}
 
 '{WARN_CHAR}'						{
@@ -115,11 +120,13 @@ WARN_CHAR	({WARN_SEQ}|[^\'\"\\\n])
 									}
 
 \"{CHAR}*\"							{
+			fprintf(stderr, "YYText on char is \'%s\'", yytext);
 										/* copy the string without the surrounding " chars */
 										char *tmp = (char *) new((yyleng-1) * sizeof(char));
 										yytext[yyleng-1] = '\0';
                                         unescape(tmp, &yytext[1]);
                                         tmp = GC_realloc(tmp, strlen(tmp) + 1);
+			fprintf(stderr, "Escaped string is \"%s\"\n", tmp);
 										yylval.s = (const char *) tmp;
 										return T_CONST_string;
 									}
