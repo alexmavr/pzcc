@@ -1,17 +1,18 @@
-WARNING: if unoptimized, integer overflows may throw runtime segfault - nothing we can do (poison values).	=>	CHECK: Can we do nothing?
-
-
 Bugs:
-	Fix Makefile when using files assuming they are on current folder, to use directory of Makefile as base (currently -C does not work).	=>	Only on laptop? Desktop seems to work fine.
-	libpzc.ll: libpzc.lli was at fault for always rebuilding... @alex: Do not touch base makefile. I will fix it.
-
+	Fill bugs here...
 
 General:
 	refactor parser.y
-	improve error messages and catch error recovery segfaults
-
+	improve error messages
 
 Done:
+*	catch error recovery segfaults	=>	No segfaults for a long time now...
+*	report all execlp calls
+*	catch all execlp returns
+*	as much as i saw, all exclp invocations. when they should be using tmp_filename_too, they simply use tmp_filename... fix that => FIXED
+*	libpzc.ll: libpzc.lli was at fault for always rebuilding... @alex: Do not touch base makefile. I will fix it.	=>	DONE
+*	WARNING: if unoptimized, integer overflows may throw runtime segfault - nothing we can do (poison values).	=>	CHECK: Can we do nothing?	=>	opt does prevent at least some cases of segfault on overflow.
+*	Fix Makefile when using files assuming they are on current folder, to use directory of Makefile as base (currently -C does not work).	=>	Only on laptop? Desktop seems to work fine.	=>	My mistake...
 *	leak:	pzc.lex:90		->	id allocation
 *	leak:	symbol.c:539	->	creating new element to return		==> I think we need to assign all typeArray() calls to variables and then free them...
 *	leak:	pzc.lex:130		->	creating new string token to return

@@ -8,33 +8,33 @@ Package Requirements
 Runtime System
 --------------
 * clang
-* llvm
+* LLVM >= 3.2
 
 Buiding the Compiler
 --------------------
-* g++
 * flex
 * bison
-* llvm
+* gcc
+* g++
+* LLVM >= 3.2
 * libgc-dev (debian) or gc (arch linux)
 
 Buiding the Library
 --------------------
 * clang
-* llvm
 
 Installation
 ============
 
 At the compiler's root directory:
 :: 
-    make
-    sudo make install
-    cd lib-code/src
-    make
+    make [ -j ]
     sudo make install
 
-The install targets place the compiler executable at /usr/bin and the library at /usr/lib/pzcc/ .
+The install targets place the compiler executable at /usr/bin/ and the library at /usr/lib/pzcc/ .
+If you want to build the compiler itself for debugging purposes, use the below invocation of make:
+:: 
+   make [ -j ] DEBUG=y
 
 Features
 ========
@@ -51,9 +51,10 @@ with --llc-flags="-march=<arch>" where <arch> is any architecture name on the le
 Usage
 -----
 
-* -f, --emit-final            Emit final assembly code in the selected architecture
+* -v, --verbose               Verbose report of execlp calls to llvm and clang executables
+* -f, --emit-final            Emit final assembly code for the selected architecture
 * -i, --emit-intermediate     Emit LLVM intermediate code
-* -o, --optimize              Enable all optimizations
+* -O, --optimize              Enable all optimizations
 * -c, --clang-flags=C_FLAGS   Option string to be used with clang when producing an executable
 * -l, --llc-flags=LLC_FLAGS   Options to be passed to llc when -f is enabled
 * -t, --opt-flags=OPT_FLAGS   Options to be passed to opt when -f is enabled
@@ -67,14 +68,14 @@ IMPORTANT: Please note that unoptimized programs have troubles handling overflow
 Example Usage
 -------------
 
-:code: pzcc -o /path/to/source.pzc
+:code: pzcc -o path/to/source.pzc
 
-This invocation will create an optimized executable at /path/to/source.pzc.out
+This invocation will create an optimized executable at path/to/source.pzc.out
 
-:code: pzcc -io /path/to/source.pzc
+:code: pzcc -io path/to/source.pzc
 
-The one will produce optimized IR at /path/to/source.pzc.imm
+The one will produce optimized IR at path/to/source.pzc.imm
 
-:code: pzcc -f --llc-flags="-march=x86_64" /path/to/source.pzc
+:code: pzcc -f --llc-flags="-march=x86_64" path/to/source.pzc
 
-This one will produce 64-bit x86 assembly at /path/to/source.pzc.asm
+This one will produce 64-bit x86 assembly at path/to/source.pzc.asm

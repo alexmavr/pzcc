@@ -1,68 +1,33 @@
-.PHONY: all pzcc clean
-.DEFAULT: all
+# A recursive makefile for all subdirectories of the project.
 
-CC = gcc -g 
-LD = g++
-LLVMFLAGS = $(shell llvm-config --cflags)
-CFLAGS += -Wall $(LLVMFLAGS)
-#-DREDIRECT_MALLOC=GC_malloc
-#-I"/usr/include/llvm-c-3.2" -I"/usr/include/llvm-3.2"
-LDFLAGS += -lgc -DREDIRECT_MALLOC=GC_malloc
-#When run as previous, it throws "undefined reference to dladdr" during linking. That is because -ldl must appear before -lLLVMSupport.
-LLVM_LINK_FLAGS=$(shell llvm-config --libs core analysis native ; llvm-config --cflags --ldflags)
-OBJ += pzc.lex.o semantic.o parser.o symbol.o general.o error.o ir.o termopts.o
-DEPENDS += 
+SUBDIRS = source library
+CLEAN_DIRS = $(SUBDIRS:%=clean-%)
+DISTCLEAN_DIRS = $(SUBDIRS:%=distclean-%)
+INSTALL_DIRS = $(SUBDIRS:%=install-%)
+UNINSTALL_DIRS = $(SUBDIRS:%=uninstall-%)
 
-ifndef DEBUG
-       DEBUG = n
-endif
+.PHONY: build clean distclean install uninstall
+.PHONY: $(SUBDIRS) $(CLEAN_DIRS) $(DISTCLEAN_DIRS) $(INSTALL_DIRS) $(UNINSTALL_DIRS)
 
-ifeq ($(DEBUG),y)
-	CFLAGS += -O0 -g
-	BSN_DBG += -t
-else
-	CFLAGS += -O3
-endif
+build: $(SUBDIRS)
+$(SUBDIRS):
+	$(MAKE) -C $@
 
-all: pzcc clean
+local_clean:
+	rm --force tests/*/*.imm tests/*/*.asm tests/*/*.out pzcc
 
-pzcc: $(OBJ) 
-	$(LD) $(OBJ) $(LDFLAGS) $(LLVM_LINK_FLAGS) -o $@
+clean: $(CLEAN_DIRS) local_clean
+$(CLEAN_DIRS):
+	$(MAKE) -C $(@:clean-%=%) clean
 
-termopts.o: termopts.c termopts.h
-	$(CC) $(CFLAGS) -c $< -o $@
-general.o: general.c general.h
-	$(CC) $(CFLAGS) -c $< -o $@
-semantic.o: semantic.c semantic.h
-	$(CC) $(CFLAGS) -c $< -o $@
-error.o: error.c error.h
-	$(CC) $(CFLAGS) -c $< -o $@
-symbol.o: symbol.c symbol.h general.h
-	$(CC) $(CFLAGS) -c $< -o $@
-parser.o: parser.c parser.h 
-	$(CC) $(CFLAGS) -c $< -o $@
+distclean: $(DISTCLEAN_DIRS) local_clean
+$(DISTCLEAN_DIRS):
+	$(MAKE) -C $(@:distclean-%=%) distclean
 
-parser.h: parser.c 
+install: $(INSTALL_DIRS)
+$(INSTALL_DIRS):
+	$(MAKE) -C $(@:install-%=%) install
 
-parser.c: parser.y semantic.h
-		bison ${BSN_DBG} -v -d -o $@ $<
-
-pzc.lex.o: pzc.lex.c semantic.h parser.h symbol.h
-	$(CC) $(CFLAGS) -c -lfl $< -o $@
-
-pzc.lex.c: pzc.lex
-	flex -s -o $@ $< 
-pzc.lex:;
-
-distclean: clean
-	rm -f pzcc
-
-clena celan lcean lcena: clean
-clean:
-	rm -f $(OBJ) pzc.lex.c a.out parser.c parser.h tests/*/*.imm tests/*/*.asm tests/*/*.out parser.output
-
-install:
-	cp pzcc /usr/bin
-
-uninstall:
-	rm /usr/bin/pzcc
+uninstall: $(UNINSTALL_DIRS)
+$(UNINSTALL_DIRS):
+	$(MAKE) -C $(@:uninstall-%=%) uninstall

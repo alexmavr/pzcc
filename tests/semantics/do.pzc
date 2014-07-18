@@ -1,18 +1,60 @@
-PROGRAM testdo () {
-	int k=7;
+FUNC int do_in_func() {
+    do {
+        return 3;
+    } while(true);
+}
 
-//*
-	do
-		continue;
-//		break;
-	while (false);
-//*/
+FUNC int do_in_func_undef() {
+    do {
+        break;
+        return 3;
+    } while(true);
+}
+
+PROGRAM testdo () {
+	int k=0;
+
+
+/* Error messages:
+    do {
+        k++;
+    } while(3.2);
+*/
 
 	do {
-		continue;
-		k = k + 1;
-//		break;
-	} while (k == 7);
+		k++;
+		break;
+	} while (true);
+    WRITELN(k);  // 1
 
-	k = 8;
+    do {
+        k++;
+    } while (k < 3);
+    WRITELN(k);  // 3
+
+    do {
+        k++;
+        if (k == 5)
+            continue;
+    } while (k < 5);
+    WRITELN(k);  // 6
+
+    int i = 0;
+    do {
+        k = 0;
+        do {
+            k++;
+            do {
+                k++;
+            } while (k<10);
+        } while (false);
+        i += k;
+        if (i == 40)
+            break;
+    } while (i < 50);
+    WRITELN(i); // 40
+
+    WRITELN(do_in_func()); // 3
+    WRITELN(do_in_func_undef()); // undefined
+
 }

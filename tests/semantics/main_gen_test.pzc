@@ -5,7 +5,6 @@ FUNC int tocall(int hi) {
 }
 
 FUNC int tocall2(int my_name2) {
-//FUNC int tocall2(int my_name) {
 	return 32;
 }
 
@@ -13,6 +12,7 @@ PROGRAM exprs ()
 {
     // var_inits
     int z[10];
+    char zoo[10];
     int y[10][n], kk[n];
     int y2[10][10];
     int l = n;
@@ -20,10 +20,13 @@ PROGRAM exprs ()
     char c = 5; 
     bool d = false || true;
     int i = 's'; 
-    z = y2[10];
+    // z = y2[9];
+
+    zoo = "012345678";
+    WRITELN(zoo);
     
     i = (3 + 4) * 2 + 5 / 5;  // 15
     d = (d == d) and true == false or true;  // true
-//    i = tocall(3);
+    i = tocall(3);
     
 }

@@ -28,21 +28,15 @@ PROGRAM hi () {
 	while (true)
 		continue;
 
-///*
 	while (true) {
-//		continue;
 		switch (no) {
 			case 1:
-				
-//				break;
 				NEXT;
 			default:
-//				continue;
 				NEXT;
 		}
 		no = 1;
 	}
-//*/
 
 	no = hi[0];
 }

@@ -1,9 +1,9 @@
-/* 
+/*
  * .: >> termopts.h
- * 
+ *
  * ?: Aristoteles Panaras "ale1ster"
  * @: 2013-07-11T23:48:42 EEST
- * 
+ *
  */
 
 #include <stdio.h>
@@ -69,11 +69,15 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
 	struct stat _;
 
 	switch (key) {
-		//Set optimization flag.
-		case 'o':
+			//Set verbose option.
+		case 'v':
+			our_options.verbose_flag = true;
+			break;
+			//Set optimization flag.
+		case 'O':
 			our_options.opt_flag = true;
 			break;
-		//Set output to IR.
+			//Set output to IR.
 		case 'i':
 			if (our_options.output_type == OUT_NONE) {
 				our_options.output_type = OUT_IR;
@@ -82,7 +86,7 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
 				ret = 1;
 			}
 			break;
-		//Set output to assembly.
+			//Set output to assembly.
 		case 'f':
 			if (our_options.output_type == OUT_NONE) {
 				our_options.output_type = OUT_ASM;
@@ -91,7 +95,7 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
 				ret = 1;
 			}
 			break;
-		//Assign flag string for propagation.
+			//Assign flag string for propagation.
 		case 'l':
 			our_options.llvmllc_flags = arg;
 			break;
@@ -108,19 +112,19 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
 				our_options.pzc_lib_file = arg;
 			}
 			break;
-		//Capture input filename.
+			//Capture input filename.
 		case ARGP_KEY_ARG:
 			if (our_options.in_file == NULL) {
 				our_options.in_file = fopen(arg, "r");
 				if (our_options.in_file == NULL) {
 					my_error(ERR_LV_WARN, "Input file %s not found", arg);
 					ret = 1;
-				//Save the output file name.
+					//Save the output file name.
 				} else {
 					filename = arg;
 					our_options.output_filename = GC_strdup(arg);
 					if (our_options.output_filename == NULL) {
-						my_error(ERR_LV_WARN, "strdup() failed");
+						my_error(ERR_LV_INTERN, "strdup() failed");
 						ret = 1;
 					}
 				}
@@ -129,17 +133,19 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state) {
 				ret = 1;
 			}
 			break;
-		//Capture option parsing end event, check input stream and open output.
+			//Capture option parsing end event, check input stream and open output.
 		case ARGP_KEY_END:
 			if (our_options.output_type == OUT_NONE) {
 				our_options.output_type = OUT_EXEC;
 				locate_default_pzclib_file();
 			}
 
-			if (our_options.in_file == NULL)
+			if (our_options.in_file == NULL) {
 				our_options.in_file = stdin;
-			if (our_options.in_file == stdin)
+			}
+			if (our_options.in_file == stdin) {
 				our_options.output_is_stdout = true;
+			}
 			calculate_filenames();
 
 			break;
@@ -153,19 +159,20 @@ const char *argp_program_version = "Pazcal 0.1a";
 const char *argp_program_bug_address = "<spiritual.dragon.of.ra@gmail.com>";
 //Argp option structure.
 static struct argp_option options[] = {
-	{ "emit-intermediate", 'i', 0, 0, "Emit LLVM intermediate code", 0 }, 
-	{ "emit-final", 'f', 0, 0, "Emit final assembly code", 0 }, 
-	{ "optimize", 'o', 0, 0, "Enable all optimizations", 1 }, 
-	{ "opt-flags", 't', "OPT_FLAGS", 0, "Option string to be used with opt when -o option is in effect", 2 }, 
-	{ "llc-flags", 'l', "LLC_FLAGS", 0, "Option string to be used with llc when -f option is in effect", 2 }, 
-	{ "clang-flags", 'c', "CLANG_FLAGS", 0, "Option string to be used with clang when the default (executable) output option is in effect", 2 }, 
-	{ "pzclib", 'b', "PZC_LIB", 0, "Pazcal library used on linking phase when the default output option is in effect", 3 }, 
+	{ "emit-intermediate", 'i', 0, 0, "Emit LLVM intermediate code", 0 },
+	{ "emit-final", 'f', 0, 0, "Emit final assembly code", 0 },
+	{ "optimize", 'O', 0, 0, "Enable all optimizations", 1 },
+	{ "opt-flags", 't', "OPT_FLAGS", 0, "Option string to be used with opt when -o option is in effect", 2 },
+	{ "llc-flags", 'l', "LLC_FLAGS", 0, "Option string to be used with llc when -f option is in effect", 2 },
+	{ "clang-flags", 'c', "CLANG_FLAGS", 0, "Option string to be used with clang when the default (executable) output option is in effect", 2 },
+	{ "pzclib", 'b', "PZC_LIB", 0, "Pazcal library used on linking phase when the default output option is in effect", 3 },
+	{ "verbose", 'v', 0, 0, "Verbose output (reports all execlp calls to clang and llvm tools)", 4 },
 	{ 0 }
 };
 //Non-option argument description.
 static char args_doc[] = "[ FILE ]";
 //Argp structure.
-static struct argp argp = { options, parse_opt, args_doc, "Pazcal compiler for Compilers course - NTUA 2013\vGNU Licence", 0, 0, 0 };
+static struct argp argp = { options, parse_opt, args_doc, "Pazcal compiler for Compilers course - NTUA 2013\vMIT Licence", 0, 0, 0 };
 
 void parse_term_options (int argc, char **argv) {
 	argp_parse(&argp, argc, argv, ARGP_IN_ORDER, 0, NULL);

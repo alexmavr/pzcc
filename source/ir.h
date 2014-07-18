@@ -7,7 +7,7 @@
  *
  */
 
-#ifndef __IR_H__ 
+#ifndef __IR_H__
 #define __IR_H__
 
 #include <llvm-c/Core.h>
@@ -22,8 +22,8 @@ extern LLVMModuleRef module;
 
 /* Structure : General LLVMValueRef LL */
 struct list_node {
-    LLVMValueRef Valref;
-    struct list_node * next;
+	LLVMValueRef Valref;
+	struct list_node * next;
 };
 
 #define list_move_to_next(_) ({_ = _->next;})

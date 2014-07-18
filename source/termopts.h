@@ -1,9 +1,9 @@
-/* 
+/*
  * .: Option parsing from terminal invocation.
- * 
+ *
  * ?: Aristoteles Panaras "ale1ster"
  * @: 2013-07-11T23:48:25 EEST
- * 
+ *
  */
 
 #ifndef __TERMINAL_OPTIONS_H__
@@ -14,6 +14,9 @@
 
 //Structure for option parsing. We use it to store the parsed information.
 struct options_t {
+	//Verbose flag
+	bool verbose_flag;
+
 	//Input/Output files
 	FILE *in_file;
 	bool output_is_stdout;

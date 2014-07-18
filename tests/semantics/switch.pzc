@@ -1,19 +1,87 @@
-PROGRAM testswitch () {
-	int k=7;
+FUNC int switch_in_func_undef() {
+    switch(1) {
+        case 1:
+            break;
+        case 2:
+            return 15;
+            NEXT;
+        case 3:
+            WRITELN("unreachable");
+            break;
+        default:
+            break;
+    }
+}
+FUNC int switch_in_func() {
+    switch(1) {
+        case 1:
+            NEXT;
+        case 2:
+            return 15;
+            NEXT;
+        case 3:
+            WRITELN("unreachable");
+            break;
+        default:
+            break;
+    }
+}
 
+PROGRAM testswitch () {
+
+/* Error Messages: 
+    switch (3.4) {
+        default:
+			WRITELN("unreachable");
+    }
+
+    while (true) {
+        switch (1) {
+            default:
+                if (true)
+                    break;
+        }
+    }
+*/
+
+	int k=7;
 	switch (k) {
 		case 3:
-			k = 33;
+			WRITELN("unreachable");
 			break;
 		case 7:
 			k = 77;
 			NEXT;
 		case 54:
-			NEXT;
+            k++;
+			break;
 		default:
-            if (true)
-                break;
             k = 1;
 			break;
 	}
+    WRITELN(k);                         // 78
+
+    k = -5;
+	switch (k) {
+		case -5:
+            switch (1) {
+                case 1:
+                    NEXT;
+                case 2:
+                    k--;
+                    break;
+                default:
+                    WRITELN("unreachable");
+                    break;
+            }
+			break;
+		default:
+            WRITELN("unreachable");
+			break;
+	}
+    WRITELN(k);                         // -6
+
+
+    WRITELN(switch_in_func());          // 15
+    WRITELN(switch_in_func_undef());    // undefined
 }

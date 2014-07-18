@@ -6,9 +6,18 @@ char jjjl;
 bool jjjp;
 bool jjje[5][13];
 
+/* OUTPUT:
+    true
+    a b c b a 97 -97
+    true
+    9
+    64.641592653589797
+    true
+*/
+
 PROGRAM ops ()
 {
-    /* Constant expression evaluations */
+    /* Constant expressions and expressions with constants */
 
     const char kk = 54;    
     const bool jk = ('4' + '6') == 'j' ;
@@ -18,31 +27,39 @@ PROGRAM ops ()
     const bool asdasd = !false;
     const bool asdasd2 = !true or true;
     const bool g = boon || boo;
+    WRITELN(g && false || (true && jk)); // true
 
     // lookups
-    bool ndk = jj or boo and boon ; // true
-    ndk = ndk; // true
+    bool ndk = jj or boo and boon ; 
+    ndk = ndk; 
     jjjj = jjjj +1;
     jjjj = jjjj ;
 
-    char n = 'a';                   // 97
-    char p = -'a';                  // 97
-    char pp = -(-'a');              // 97
-    char ppp = -(-(-'a'));          // 97
-    char pppp = -(-(-(-'a')));      // 97
+    char n = 'a';                   
+    char p = -'a';                  
+    char pp = -(-'a');              
+    char ppp = -(-(-'a'));          
+    char pppp = -(-(-(-'a')));      
+    WRITESPLN('a', 'b', 'c', "b", pppp, +pppp, -pppp);
+    // a b c b a 97 -97
     
-    bool a = !false;                // true
-    bool pk = not not true;         // true
-    bool pkk = not ! not true;      // false
-    bool b = not (false and true or (false or true) and false or true); // false
+    bool a = !false;                
+    bool pk = not not true;         
+    bool pkk = not ! not true;      
+    bool b = not (false and true or (false or true) and false or true); 
+    WRITELN(not ! not b); // true
+
+    int jak = lk - pppp;
+    WRITELN(jak); // 9
 
     // signed binops and casts
-    REAL k = -3 + 2;                // -1
-    REAL k0 = 3 - (-2);             // 5
-    REAL ka = -3 * 2;               // -6
-    REAL kb = 4 * 3 / -2 ;          // -6
-    REAL kc = 44 + (-2);            // 42
-    REAL d = 13.0 + 1 * 'a' / 2.0 ; // 61.5
+    REAL k = -3 + 2;               
+    REAL k0 = 3 - (-2);            
+    REAL ka = -3 * 2;              
+    REAL kb = 4 * 3 / -2 ;         
+    REAL kc = 44 + (-2);           
+    REAL d = 13.0 + 1 * 'a' / 2.0 ;
+    WRITELN(FORM(d + fabs(-pi()), 0, 15)); // 61.64159
 
     bool ddk = -2 < 15;             // true
     bool ddj = -152 < -151;         // true
@@ -56,9 +73,9 @@ PROGRAM ops ()
 
     // Boolean operations with lookups
     
-    ddx = ddj and ddr and ddk and ddl or ddz; // true
+    ddx = ddj and ddr and ddk and ddl and (ddz or ddo and ddp);
+    WRITELN(!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!ddx); //true
     
     char c = 's';
     char s[10];
-  //  s  = "stringy";
 }

@@ -3,6 +3,7 @@
 components=$@
 
 make
+cp source/pzcc .
 
 for component in $components;
 do
@@ -11,7 +12,7 @@ do
 
     for testcase in tests/$component/*.pzc;
     do echo "========== $testcase ============"
-        ./pzcc -i $testcase
+        ./pzcc $testcase
     done
 done
 

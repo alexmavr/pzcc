@@ -23,6 +23,7 @@ int currentWrite = 0;                   // indicator for WRITE mode
 bool function_has_ret = false;          // flag for marking whether a routine body returns
 bool array_last = false;                // flag for the last dimension of an array variable
 bool global_scope = true;               // flag marking the scope for initializations
+bool switch_default_case = false;       // true if the default case of switch is being parsed
 
 %}
 
@@ -403,7 +404,45 @@ var_init_tail
 		}
 	;
 routine
-	: routine_header routine_tail
+	: routine_header 
+        {
+            LLVMValueRef func_ref = LLVMGetNamedFunction(module, currentFun->id);
+        
+            if (func_ref != NULL) {
+                if (LLVMCountParams(func_ref) != currentFun->u.eFunction.argno) {
+                    my_error(ERR_LV_ERR, "Function %s is already declared with a different parameter count", currentFun->id);
+                    YYERROR;
+                }
+
+            } else {
+                size_t argno = currentFun->u.eFunction.argno;    
+                SymbolEntry *curr_param = currentFun->u.eFunction.firstArgument;
+                LLVMTypeRef *params = new(sizeof(LLVMTypeRef) * argno);
+                int i;
+
+                // Create param list
+                for(i=argno-1; i>=0; i--, curr_param=curr_param->u.eParameter.next) {
+                    if (curr_param->u.eParameter.type->kind >= TYPE_ARRAY)
+                        params[i] = LLVMPointerType(type_to_llvm( \
+                            iarray_to_array(curr_param->u.eParameter.type)), 0);
+                    else if (curr_param->u.eParameter.mode == PASS_BY_REFERENCE)
+                        params[i] = LLVMPointerType(type_to_llvm( \
+                            curr_param->u.eParameter.type), 0);
+                    else
+                        params[i] = type_to_llvm(curr_param->u.eParameter.type);
+                }
+                
+                // Create function type
+                LLVMTypeRef funcType = LLVMFunctionType( \
+                    type_to_llvm(currentFun->u.eFunction.resultType), \
+                        params, argno, false);
+
+                // Create function 
+                func_ref = LLVMAddFunction(module, currentFun->id, funcType);
+                LLVMSetLinkage(func_ref, LLVMExternalLinkage);
+            }
+
+        } routine_tail
 		{
             // Actions for when a routine is closing (be it a forward declaration or a definition).
             closeScope();
@@ -416,66 +455,36 @@ routine_tail
 	: ';' { forwardFunction(currentFun); }
 	| '{' {
         LLVMValueRef func_ref = LLVMGetNamedFunction(module, currentFun->id);
-        
-        if (func_ref != NULL) {
-            if (LLVMCountParams(func_ref) != currentFun->u.eFunction.argno) {
-                my_error(ERR_LV_ERR, "Function %s is already declared with a different parameter count", currentFun->id);
-                YYERROR;
-            }
-            if (LLVMCountBasicBlocks(func_ref) != 0) {
-                my_error(ERR_LV_ERR, "Function %s is already fully defined");
-                YYERROR;
-            }
-        } else {
-            size_t argno = currentFun->u.eFunction.argno;    
-            SymbolEntry *curr_param = currentFun->u.eFunction.firstArgument;
-            LLVMTypeRef *params = new(sizeof(LLVMTypeRef) * argno);
-            int i;
+        if (LLVMCountBasicBlocks(func_ref) != 0) {
+            my_error(ERR_LV_ERR, "Function %s is already fully defined");
+            YYERROR;
+        }
+        // position builder at start/end of function body
+        LLVMBasicBlockRef block = LLVMAppendBasicBlock(func_ref, "entry");
+        LLVMPositionBuilderAtEnd(builder, block);
 
-            // Create param list
-            for(i=argno-1; i>=0; i--, curr_param=curr_param->u.eParameter.next) {
-                if (curr_param->u.eParameter.type->kind >= TYPE_ARRAY)
-                    params[i] = LLVMPointerType(type_to_llvm( \
-                        iarray_to_array(curr_param->u.eParameter.type)), 0);
-                else if (curr_param->u.eParameter.mode == PASS_BY_REFERENCE)
-                    params[i] = LLVMPointerType(type_to_llvm( \
-                        curr_param->u.eParameter.type), 0);
-                else
-                    params[i] = type_to_llvm(curr_param->u.eParameter.type);
-            }
-            
-            // Create function type
-            LLVMTypeRef funcType = LLVMFunctionType( \
-                type_to_llvm(currentFun->u.eFunction.resultType), \
-                    params, argno, false);
+        size_t argno = currentFun->u.eFunction.argno;    
+        SymbolEntry *curr_param = currentFun->u.eFunction.firstArgument;
+        int i;
 
-            // Create function 
-            func_ref = LLVMAddFunction(module, currentFun->id, funcType);
-            LLVMSetLinkage(func_ref, LLVMExternalLinkage);
-
-            // position builder at start/end of function body
-            LLVMBasicBlockRef block = LLVMAppendBasicBlock(func_ref, "entry");
-            LLVMPositionBuilderAtEnd(builder, block);
-
-            // Store parameters in new local variables if passed by value
-            curr_param = currentFun->u.eFunction.firstArgument;
-            char * new_str; // IR parameters are <name>_ref
-            for(i=argno-1; i>=0; i--, curr_param=curr_param->u.eParameter.next) {
-                LLVMValueRef param = LLVMGetParam(func_ref, i);
-                if (curr_param->u.eParameter.mode == PASS_BY_VALUE) {
-                    curr_param->Valref = LLVMBuildAlloca(builder, \
-                        type_to_llvm(curr_param->u.eParameter.type), curr_param->id);
-                    new_str = new(strlen(curr_param->id)+strlen("_ref")+1);
-                    new_str[0] = '\0';
-                    strcat(new_str, curr_param->id);
-                    strcat(new_str, "_ref");
-                    LLVMBuildStore(builder, param, curr_param->Valref);
-                    LLVMSetValueName(param, new_str);
-					delete(new_str);	//BUG-SQUASHING
-                } else {
-                    LLVMSetValueName(param, curr_param->id);
-                    curr_param->Valref = param;
-                }
+        // Store parameters in new local variables if passed by value
+        curr_param = currentFun->u.eFunction.firstArgument;
+        char * new_str; // IR parameters are <name>_ref
+        for(i=argno-1; i>=0; i--, curr_param=curr_param->u.eParameter.next) {
+            LLVMValueRef param = LLVMGetParam(func_ref, i);
+            if (curr_param->u.eParameter.mode == PASS_BY_VALUE) {
+                curr_param->Valref = LLVMBuildAlloca(builder, \
+                    type_to_llvm(curr_param->u.eParameter.type), curr_param->id);
+                new_str = new(strlen(curr_param->id)+strlen("_ref")+1);
+                new_str[0] = '\0';
+                strcat(new_str, curr_param->id);
+                strcat(new_str, "_ref");
+                LLVMBuildStore(builder, param, curr_param->Valref);
+                LLVMSetValueName(param, new_str);
+                delete(new_str);	//BUG-SQUASHING
+            } else {
+                LLVMSetValueName(param, curr_param->id);
+                curr_param->Valref = param;
             }
         }
     } block_tail '}' 
@@ -671,10 +680,10 @@ const_expr
 			if (id->entryType != ENTRY_CONSTANT) {
 				my_error(ERR_LV_ERR, "Non-constant identifier \"%s\" found in constant expression", $1);
 				YYERROR;
-			} else {
-				$$.type = id->u.eConstant.type;
-				memcpy(&($$.value), &(id->u.eConstant.value), sizeof(val_union));
-			}
+			} 
+
+            $$.type = id->u.eConstant.type;
+            memcpy(&($$.value), &(id->u.eConstant.value), sizeof(val_union));
 		}
 	| '(' const_expr ')' { $$ = $2; }
 	| const_expr binop1 const_expr %prec '*'
@@ -1030,6 +1039,21 @@ base_stmt
                     binop_IR(&tmp, &$3, "%", &res);   
             }
 
+            if ($3.type->kind >= TYPE_ARRAY) {
+                Type curr_expr = $3.type;
+                Type curr_lvalue = $1.type;
+                while (curr_expr->kind >= TYPE_ARRAY) {
+                    if (curr_expr->size != curr_lvalue->size) {
+                        my_error(ERR_LV_ERR, "Array dimension sizes %d and %d are incompatible for assignment",\
+                                            curr_lvalue->size, curr_expr->size);
+                        YYERROR;
+                    }
+                    curr_expr = curr_expr->refType;
+                    curr_lvalue = curr_lvalue->refType;
+                }
+                res.Valref = LLVMBuildLoad(builder, res.Valref, "loadtmp");
+            }
+
             res.Valref = cast_compat($1.type, res.type, res.Valref);
 			LLVMBuildStore(builder, res.Valref, $1.Valref);
 		}
@@ -1374,11 +1398,13 @@ stmt_tail_tail
             }
 
             // Create case condition check for current case
+            LLVMValueRef case_const = LLVMConstInt(LLVMInt32Type(), $2.value.i, false);
 			LLVMPositionBuilderAtEnd(builder, switchcond_ref);
             LLVMValueRef switchval = conditional_scope_valget();
 			LLVMValueRef caseval = LLVMBuildICmp(builder, LLVMIntNE, switchval, \
-							$2.Valref, "case_cond_val");
+							case_const, "case_cond_val");
 			LLVMBuildCondBr(builder, caseval, new_switchcond_ref, new_switchbody_ref);
+            LLVMBuildBr(builder, switchcond_ref);
 
 			LLVMPositionBuilderAtEnd(builder, new_switchbody_ref);
 		}
@@ -1395,7 +1421,11 @@ stmt_opt_switch
         {
 			LLVMBasicBlockRef switchlast_ref = conditional_scope_get(first);
             LLVMPositionBuilderAtEnd(builder, switchlast_ref);
+            switch_default_case = true;
         } clause
+        {
+            switch_default_case = false;
+        }
 	;
 stmt_opt_ret
 	: /* Nothing */	{ $$.type = typeVoid; }
@@ -1473,7 +1503,13 @@ clause_choice
             LLVMPositionBuilderAtEnd(builder, endswitch_ref);
         }
 	| T_next ';' 
-        { /* No action */ }
+        {
+            if (switch_default_case) {
+                LLVMBasicBlockRef endswitch_ref = conditional_scope_get(third);
+                LLVMBuildBr(builder, endswitch_ref);
+                LLVMPositionBuilderAtEnd(builder, endswitch_ref);
+            }
+        }
 	;
 write
 	: T_write  { currentWrite = 0; }
@@ -1543,29 +1579,35 @@ format
             LLVMTypeRef dest_type;
             args[0] = $3.Valref;
             args[1] = cast_compat(typeInteger, $5.type, $5.Valref);
-            if ($3.type == typeInteger) {
-                func_ref = LLVMGetNamedFunction(module, "WRITE_INT");
-                LLVMBuildCall(builder, func_ref, args, 2, "");
-            } else if ($3.type == typeBoolean) {
-                func_ref = LLVMGetNamedFunction(module, "WRITE_BOOL");
-                LLVMBuildCall(builder, func_ref, args, 2, "");
-            } else if ($3.type == typeChar) {
-                func_ref = LLVMGetNamedFunction(module, "WRITE_CHAR");
-                LLVMBuildCall(builder, func_ref, args, 2, "");
-            } else if ($3.type == typeReal) {
+
+            if ($6.value.b == true) {
+                /* If a third argument is specified, cast the formatted value to REAL */
+                args[0] = cast_compat(typeReal, $3.type, $3.Valref);
+                args[2] = cast_compat(typeInteger, $6.type, $6.Valref);
                 func_ref = LLVMGetNamedFunction(module, "WRITE_REAL");
-                if ($6.value.b == false)
-                    // Use the default precision for reals if not specified
-                    args[2] = LLVMConstInt(LLVMInt32Type(), DEFAULT_REAL_PRECISION, false); 
-                else 
-                    args[2] = cast_compat(typeInteger, $6.type, $6.Valref);
                 LLVMBuildCall(builder, func_ref, args, 3, "");
             } else {
-                /*  Array Type. store the array and pass the pointer to WRITE_STRING */
-                dest_type = LLVMPointerType(type_to_llvm(iarray_to_array($3.type)), 0);
-                func_ref = LLVMGetNamedFunction(module, "WRITE_STRING");
-                args[0] = LLVMBuildPointerCast(builder, $3.Valref, dest_type, "ptrcasttmp");
-                LLVMBuildCall(builder, func_ref, args, 2, "");
+                if ($3.type == typeInteger) {
+                    func_ref = LLVMGetNamedFunction(module, "WRITE_INT");
+                    LLVMBuildCall(builder, func_ref, args, 2, "");
+                } else if ($3.type == typeBoolean) {
+                    func_ref = LLVMGetNamedFunction(module, "WRITE_BOOL");
+                    LLVMBuildCall(builder, func_ref, args, 2, "");
+                } else if ($3.type == typeChar) {
+                    func_ref = LLVMGetNamedFunction(module, "WRITE_CHAR");
+                    LLVMBuildCall(builder, func_ref, args, 2, "");
+                } else if ($3.type == typeReal) {
+                    func_ref = LLVMGetNamedFunction(module, "WRITE_REAL");
+                    /* Use the default precision for reals if precision is not specified */
+                    args[2] = LLVMConstInt(LLVMInt32Type(), DEFAULT_REAL_PRECISION, false); 
+                    LLVMBuildCall(builder, func_ref, args, 3, "");
+                } else {
+                    /*  Array Type. pass a pointer to the array to WRITE_STRING */
+                    dest_type = LLVMPointerType(type_to_llvm(iarray_to_array($3.type)), 0);
+                    func_ref = LLVMGetNamedFunction(module, "WRITE_STRING");
+                    args[0] = LLVMBuildPointerCast(builder, $3.Valref, dest_type, "ptrcasttmp");
+                    LLVMBuildCall(builder, func_ref, args, 2, "");
+                }
             }
             delete(args);
 		}

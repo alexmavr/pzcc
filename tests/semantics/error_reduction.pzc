@@ -1,0 +1,8 @@
+PROGRAM hi () {
+	int oops;
+	FOR (oops, 4 TO 9) {
+		WRITE_STRING("Mi name is not here!", 4);
+		WRITELN()
+	}
+	WRITE_INT(5);
+}
