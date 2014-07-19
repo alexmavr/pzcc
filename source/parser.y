@@ -44,6 +44,7 @@ bool switch_default_case = false;       // true if the default case of switch is
 		val_union value;
 		Type type;
         LLVMValueRef Valref;
+		bool is_lvalue;
         struct list_node * v_list; // general-purpose ValueRef list
 	};
     
@@ -717,7 +718,11 @@ const_expr
 
 	;
 expr
-	:  const_unit { $$.type = $1.type; }
+	:  const_unit
+		{
+			$$.is_lvalue = false;
+			$$.type = $1.type;
+		}
 	| '(' expr ')'
 		{
 			$$ = $2;
@@ -725,6 +730,7 @@ expr
 	| '(' error ')' { $$.type = typeVoid; }
 	| l_value
 		{
+			$$.is_lvalue = true;
 			$$.type = $1.type;
             if ($1.type->kind < TYPE_ARRAY) {
                 $$.Valref = LLVMBuildLoad(builder, $1.Valref, "loadtmp");
@@ -734,34 +740,45 @@ expr
             } else
                 $$.Valref = $1.Valref;
 		}
-	| call { $$ = $1; }
+	| call
+		{
+			$$ = $1;
+			$$.is_lvalue = false;
+		}
 	| expr binop1 expr %prec '*'
 		{
 			binop_IR(&($1), &($3), $2, &($$));
+			$$.is_lvalue = false;
 		}
 	| expr binop2 expr %prec '+'
 		{
 			binop_IR(&($1), &($3), $2, &($$));
+			$$.is_lvalue = false;
 		}
 	| expr binop3 expr %prec '<'
 		{
 			binop_IR(&($1), &($3), $2, &($$));
+			$$.is_lvalue = false;
 		}
 	| expr binop4 expr %prec T_eq
 		{
 			binop_IR(&($1), &($3), $2, &($$));
+			$$.is_lvalue = false;
 		}
 	| expr binop5 expr %prec T_and
 		{
 			binop_IR(&($1), &($3), $2, &($$));
+			$$.is_lvalue = false;
 		}
 	| expr binop6 expr %prec T_or
 		{
 			binop_IR(&($1), &($3), $2, &($$));
+			$$.is_lvalue = false;
 		}
 	| unop expr %prec UN
 		{
 			unop_IR(&($2), $1, &($$));
+			$$.is_lvalue = false;
 		}
 	;
 l_value
@@ -940,12 +957,12 @@ call_opt
                 function_call_argval_push(tmp);
             } else {
                 if (currentParam->u.eParameter.mode == PASS_BY_REFERENCE) {
-                    if ($1.v_list == NULL) {
+                    if ($1.v_list == NULL || !$1.is_lvalue) {
                         my_error(ERR_LV_ERR, "Only variables can be passed by reference");
                         YYERROR;
                     }
                     function_call_argval_push($1.v_list->Valref);
-                } else 
+                } else
                     function_call_argval_push(cast_compat(wanted_type, $1.type, $1.Valref));
             }
 		}
@@ -985,7 +1002,7 @@ call_opt_tail
                 function_call_argval_push(tmp);
             } else {
                 if (currentParam->u.eParameter.mode == PASS_BY_REFERENCE) {
-                    if ($2.v_list == NULL) {
+                    if ($2.v_list == NULL || !$2.is_lvalue) {
                         my_error(ERR_LV_ERR, "Cannot pass non-variable arguments by reference");
                         YYERROR;
                     }

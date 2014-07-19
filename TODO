@@ -6,6 +6,7 @@ General:
 	improve error messages
 
 Done:
+*	function/procedure arguments that should be passed by reference are now correctly identified and handled. I just hope no bugs were introduced :S
 *	functions used in assignments or modified were silently failing...
 *	Last repetition of a loop is not executed (or something like that ;))...	==> LLVMIntSGE instead of LLVMIntSGT.
 *	character escapes do not get escaped in char and string literals.

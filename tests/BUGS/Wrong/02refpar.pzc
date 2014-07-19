@@ -1,9 +1,15 @@
 PROC aaa (int &a) { WRITELN(a); }
 
+PROC bb (int b, int &a) { a = b+36; }
+
 PROGRAM main ()
 {
   int i = 3;
+  int h[3];
   aaa(i+5);
+  bb(i+3, h[2]);
+  WRITELN(h[2]);
 }
 
 //This should be a type error, because the function expects a pointer to integer and an integer is given...
+//	==>	Done. Now when aaa() call is not commented out, it throws an error, but when it is the behavior is correct.

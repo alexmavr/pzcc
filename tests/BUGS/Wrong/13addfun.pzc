@@ -8,3 +8,4 @@ PROGRAM main ()
 }
 
 //Binop between 2 functions is prohibited...
+//	==>	And again, assignment or modification of variables that are registered as functions is disallowed.

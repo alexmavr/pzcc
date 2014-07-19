@@ -8,3 +8,4 @@ PROGRAM main ()
 }
 
 //Assignment of function type should be wrong... (Do we even have a function type?)
+//	==>	Now assignment or modification of variables that are registered as functions is disallowed.
