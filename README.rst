@@ -7,14 +7,14 @@ Static compiler for the Pazcal Language (Papaspyrou-Zachos C-like Algorithmic La
 **Pazcal** is an educational subset of the C programming language.
 It is intended for teaching 
 `Introduction to Computer Programming
-<http://courses.softlab.ntua.gr/progintro>`_.
+<http://courses.softlab.ntua.gr/progintro>`_ 
 to first-year students of the
 `School of Electrical and Computer Engineering
-<http://www.ece.ntua.gr/>`_.
-at the
+<http://www.ece.ntua.gr/>`_ at the
 `National Technical University of Athens
 <http://www.ntua.gr/>`_.
 
+Optimization and final code generation is performed by the LLVM backend.
 
 Requirements
 ====================
@@ -34,7 +34,7 @@ At the compiler's root directory:
     make
     sudo make install
 
-The compiler executable is placed at /usr/bin/ and the library at /usr/lib/pzcc/ .
+The install target places the compiler executable at /usr/bin/ and the library at /usr/lib/pzcc/ .
 Internal compiler messages can be enabled with the following invocation of make:
 :: 
    make DEBUG=y
