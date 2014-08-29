@@ -2,46 +2,47 @@
 Pazcal Compiler v1.0
 ====================
 
-Package Requirements
+Static compiler for the Pazcal Language (Papaspyrou-Zachos C-like Algorithmic Language)
+
+**Pazcal** is an educational subset of the C programming language.
+It is intended for teaching 
+[Introduction to Computer Programming]
+(http://courses.softlab.ntua.gr/progintro/)
+to first-year students of the
+[School of Electrical and Computer Engineering](http://www.ece.ntua.gr/)
+at the
+[National Technical University of Athens](http://www.ntua.gr/).
+
+
+Requirements
 ====================
 
-Runtime System
---------------
-* clang
-* LLVM >= 3.2
-
-Buiding the Compiler
---------------------
 * flex
 * bison
 * gcc
 * g++
 * LLVM >= 3.2
-* libgc-dev (debian) or gc (arch linux)
-
-Buiding the Library
---------------------
-* clang
+* libgc-dev (debian linux) or gc (arch linux)
 
 Installation
 ============
 
 At the compiler's root directory:
 :: 
-    make [ -j ]
+    make
     sudo make install
 
-The install targets place the compiler executable at /usr/bin/ and the library at /usr/lib/pzcc/ .
-If you want to build the compiler itself for debugging purposes, use the below invocation of make:
+The compiler executable is placed at /usr/bin/ and the library at /usr/lib/pzcc/ .
+Internal compiler messages can be enabled with the following invocation of make:
 :: 
-   make [ -j ] DEBUG=y
+   make DEBUG=y
 
 Features
 ========
 
 Target Architecture
 -------------------
-The default target architecture is the runtime system's native architecture. 
+The default target architecture is the native architecture of the runtime system. 
 
 A complete list of support architectures can be viewed with llc --version
 
@@ -63,19 +64,19 @@ Usage
     
 If neither -f nor -i are specified, the compiler produces an executable ELF file.
 
-IMPORTANT: Please note that unoptimized programs have troubles handling overflows which may cause segmentation faults at runtime.
+IMPORTANT: Please note that unoptimized LLVM-IR programs have troubles handling overflows which may lead to segmentation faults.
 
 Example Usage
 -------------
 
 :code: pzcc -o path/to/source.pzc
 
-This invocation will create an optimized executable at path/to/source.pzc.out
+An optimized executable is created at path/to/source.pzc.out
 
 :code: pzcc -io path/to/source.pzc
 
-The one will produce optimized IR at path/to/source.pzc.imm
+An optimized LLVM-IR is created at path/to/source.pzc.imm
 
 :code: pzcc -f --llc-flags="-march=x86_64" path/to/source.pzc
 
-This one will produce 64-bit x86 assembly at path/to/source.pzc.asm
+An unoptimized 64-bit x86 assembly file is created at path/to/source.pzc.asm
