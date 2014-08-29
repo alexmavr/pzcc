@@ -6,12 +6,14 @@ Static compiler for the Pazcal Language (Papaspyrou-Zachos C-like Algorithmic La
 
 **Pazcal** is an educational subset of the C programming language.
 It is intended for teaching 
-[Introduction to Computer Programming]
-(http://courses.softlab.ntua.gr/progintro/)
+`Introduction to Computer Programming
+<http://courses.softlab.ntua.gr/progintro>`_.
 to first-year students of the
-[School of Electrical and Computer Engineering](http://www.ece.ntua.gr/)
+`School of Electrical and Computer Engineering
+<http://www.ece.ntua.gr/>`_.
 at the
-[National Technical University of Athens](http://www.ntua.gr/).
+`National Technical University of Athens
+<http://www.ntua.gr/>`_.
 
 
 Requirements
